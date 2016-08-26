@@ -53,7 +53,7 @@ public class Authenticator extends AbstractAccountAuthenticator {
 
         // If the caller requested an authToken type we don't support, then
         // return an error
-        if (!authTokenType.equals(AuthenticatorConstant.AUTHTOKEN_TYPE)) {
+        if (!authTokenType.equals(AuthenticatorConstant.FACEBOOK_AUTHTOKEN_TYPE)) {
             final Bundle result = new Bundle();
             result.putString(AccountManager.KEY_ERROR_MESSAGE, "invalid authTokenType");
             return result;

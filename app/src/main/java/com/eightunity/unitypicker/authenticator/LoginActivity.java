@@ -10,10 +10,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.eightunity.unitypicker.R;
@@ -150,10 +148,10 @@ public class LoginActivity extends AccountAuthenticatorActivity {
 
                     Account account;
                     if (mRequestNewAccount) {
-                        account = new Account(username, AuthenticatorConstant.ACCOUNT_TYPE);
+                        account = new Account(username, AuthenticatorConstant.FACEBOOK_ACCOUNTYTPE);
                         mAccountManager.addAccountExplicitly(account, accessToken, null);
                     } else {
-                        account = new Account(mUsername, AuthenticatorConstant.ACCOUNT_TYPE);
+                        account = new Account(mUsername, AuthenticatorConstant.FACEBOOK_ACCOUNTYTPE);
                         mAccountManager.setPassword(account, accessToken);
                     }
                     final String finalUsername = username;
@@ -165,7 +163,7 @@ public class LoginActivity extends AccountAuthenticatorActivity {
                             }
                             final Intent intent = new Intent();
                             intent.putExtra(AccountManager.KEY_ACCOUNT_NAME, finalUsername);
-                            intent.putExtra(AccountManager.KEY_ACCOUNT_TYPE, AuthenticatorConstant.ACCOUNT_TYPE);
+                            intent.putExtra(AccountManager.KEY_ACCOUNT_TYPE, AuthenticatorConstant.FACEBOOK_ACCOUNTYTPE);
                             intent.putExtra(AccountManager.KEY_AUTHTOKEN, accessToken);
                             setAccountAuthenticatorResult(intent.getExtras());
                             setResult(1, intent);
