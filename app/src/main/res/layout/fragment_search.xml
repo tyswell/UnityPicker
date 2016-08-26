@@ -4,12 +4,18 @@
     android:layout_height="match_parent">
 
     <EditText
+        android:id="@+id/searchText"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/editText" />
+        android:layout_height="wrap_content"/>
 
     <Spinner
-        android:id="@+id/spinner2"
+        android:id="@+id/searchTypeSpinner"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
+
+    <Button
+        android:id="@+id/searchBtn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/search_button" />
 </LinearLayout>

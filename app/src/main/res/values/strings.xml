@@ -6,4 +6,10 @@
     <string name="profile_footer">Profile</string>
     <string name="notification_footer">Notification</string>
     <string name="watch_footer">Watch</string>
+
+    <string name="search_button">Search</string>
+
+    <string-array name="search_type">
+        <item>Bicycle</item>
+    </string-array>
 </resources>

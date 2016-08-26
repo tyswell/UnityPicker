@@ -30,4 +30,5 @@ dependencies {
     compile 'com.android.support:multidex-instrumentation:1.0.1'
     compile 'com.facebook.android:facebook-android-sdk:4.10.0'
     compile 'com.android.support:design:23.1.1'
+
 }
