@@ -5,25 +5,16 @@ package com.eightunity.unitypicker.model;
  */
 public class User {
 
-    private String nativeUserId;
-    private String facebookUserId;
-    private Boolean isFacebookLogin;
+    private String username;
     private String token;
+    private String tokenType;
 
-    public String getNativeUserId() {
-        return nativeUserId;
+    public String getUsername() {
+        return username;
     }
 
-    public void setNativeUserId(String nativeUserId) {
-        this.nativeUserId = nativeUserId;
-    }
-
-    public String getFacebookUserId() {
-        return facebookUserId;
-    }
-
-    public void setFacebookUserId(String facebookUserId) {
-        this.facebookUserId = facebookUserId;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public String getToken() {
@@ -34,11 +25,11 @@ public class User {
         this.token = token;
     }
 
-    public Boolean getFacebookLogin() {
-        return isFacebookLogin;
+    public String getTokenType() {
+        return tokenType;
     }
 
-    public void setFacebookLogin(Boolean facebookLogin) {
-        isFacebookLogin = facebookLogin;
+    public void setTokenType(String tokenType) {
+        this.tokenType = tokenType;
     }
 }

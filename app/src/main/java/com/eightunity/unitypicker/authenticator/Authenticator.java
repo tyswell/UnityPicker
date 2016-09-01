@@ -53,7 +53,7 @@ public class Authenticator extends AbstractAccountAuthenticator {
 
         // If the caller requested an authToken type we don't support, then
         // return an error
-        if (!authTokenType.equals(AuthenticatorConstant.FACEBOOK_AUTHTOKEN_TYPE)) {
+        if (!authTokenType.equals(AuthenticatorConstant.UNITY_PICKER_AUTHTOKEN_TYPE)) {
             final Bundle result = new Bundle();
             result.putString(AccountManager.KEY_ERROR_MESSAGE, "invalid authTokenType");
             return result;
@@ -64,18 +64,11 @@ public class Authenticator extends AbstractAccountAuthenticator {
         final AccountManager am = AccountManager.get(mContext);
         final String authToken = am.getPassword(account);
         if (authToken != null) {
-            FacebookUtility nu = new FacebookUtility(authToken, mContext);
-
-            if (nu.checkAccessToken()) {
-                Log.v(TAG, "getAuthToken() GOOD");
-                final Bundle result = new Bundle();
-                result.putString(AccountManager.KEY_ACCOUNT_NAME, account.name);
-                result.putString(AccountManager.KEY_ACCOUNT_TYPE, account.type);
-                result.putString(AccountManager.KEY_AUTHTOKEN, authToken);
-                return result;
-            } else {
-                Log.v(TAG, "getAuthToken() BAD");
-            }
+            final Bundle result = new Bundle();
+            result.putString(AccountManager.KEY_ACCOUNT_NAME, account.name);
+            result.putString(AccountManager.KEY_ACCOUNT_TYPE, account.type);
+            result.putString(AccountManager.KEY_AUTHTOKEN, authToken);
+            return result;
         }
 
         // If we get here, then we couldn't access the user's password - so we

@@ -5,7 +5,11 @@ package com.eightunity.unitypicker.authenticator.Constant;
  */
 public class AuthenticatorConstant {
 
-    public static final String FACEBOOK_ACCOUNTYTPE = "com.eightunity.unitypicker";
+    public static final String FACEBOOK_ACCOUNTYTPE = "FACEBOOK_TYPE";
 
-    public static final String FACEBOOK_AUTHTOKEN_TYPE = "com.eightunity.unitypicker";
+    public static final String GOOGLE_ACCOUNTYTPE = "GOOGLE_TYPE";
+
+    public static final String UNITY_PICKER_ACCOUNTYTPE = "com.eightunity.unitypicker";
+
+    public static final String UNITY_PICKER_AUTHTOKEN_TYPE = "com.eightunity.unitypicker";
 }

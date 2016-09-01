@@ -66,7 +66,7 @@ public class AuthenticaterActivity extends AppCompatActivity {
 
     public Account getAccount() {
         AccountManager am = AccountManager.get(this);
-        Account [] accounts = am.getAccountsByType(AuthenticatorConstant.FACEBOOK_ACCOUNTYTPE);
+        Account [] accounts = am.getAccountsByType(AuthenticatorConstant.UNITY_PICKER_ACCOUNTYTPE);
 
         if (accounts.length > 0) {
             return accounts[0];

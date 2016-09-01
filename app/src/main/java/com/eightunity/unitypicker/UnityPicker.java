@@ -14,7 +14,6 @@ import com.eightunity.unitypicker.authenticator.Constant.AuthenticatorConstant;
 import com.eightunity.unitypicker.authenticator.LoginActivity;
 import com.eightunity.unitypicker.model.User;
 import com.eightunity.unitypicker.ui.Application;
-import com.eightunity.unitypicker.ui.AuthenticaterActivity;
 
 import java.io.IOException;
 
@@ -39,7 +38,7 @@ public class UnityPicker extends AppCompatActivity {
         AccountManager am = AccountManager.get(this);
 
         am.getAuthToken(getCurrentAccount(),
-                AuthenticatorConstant.FACEBOOK_AUTHTOKEN_TYPE,
+                AuthenticatorConstant.UNITY_PICKER_AUTHTOKEN_TYPE,
                 null,
                 true,
                 new AccountManagerCallback<Bundle>() {
@@ -61,29 +60,23 @@ public class UnityPicker extends AppCompatActivity {
                         Boolean isFacebookLogin = true;
                         String username = getCurrentAccount().name;
 
-                        user.setFacebookLogin(isFacebookLogin);
-                        if (isFacebookLogin) {
-                            user.setFacebookUserId(username);
-                        } else {
-                            user.setNativeUserId(username);
-                        }
-
                         user.setToken(authToken);
 
                         Intent intent = new Intent(getBaseContext(), MainActivity.class);
 
                         ((Application) getApplicationContext()).user = user;
 
-                        startActivityForResult(intent, 0);
+                        startActivityForResult(intent, 1);
                     }
                 }, null);
     }
 
     private Account getCurrentAccount() {
-        Account[] fbAccounts = accountManager.getAccountsByType(AuthenticatorConstant.FACEBOOK_ACCOUNTYTPE);
+        Account[] fbAccounts = accountManager.getAccountsByType(AuthenticatorConstant.UNITY_PICKER_ACCOUNTYTPE);
         if (fbAccounts.length > 0) {
             return fbAccounts[0];
         }
+
         return null;
     }
 
@@ -99,7 +92,7 @@ public class UnityPicker extends AppCompatActivity {
 
     private Account getAccount() {
         AccountManager am = AccountManager.get(this);
-        Account [] accounts = am.getAccountsByType(AuthenticatorConstant.FACEBOOK_ACCOUNTYTPE);
+        Account [] accounts = am.getAccountsByType(AuthenticatorConstant.UNITY_PICKER_ACCOUNTYTPE);
 
         if (accounts.length > 0) {
             return accounts[0];
