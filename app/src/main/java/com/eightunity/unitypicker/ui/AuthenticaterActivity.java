@@ -28,13 +28,66 @@ public class AuthenticaterActivity extends AppCompatActivity {
         accountManager = AccountManager.get(this);
     }
 
-    public void performLogout() {
+    public void logout() {
+        Account[] accounts = accountManager.getAccountsByType(AuthenticatorConstant.UNITY_PICKER_ACCOUNTYTPE);
+        if (accounts.length != 0) {
+            for (int i = 0; i < accounts.length; i++) {
+                accountManager.clearPassword(accounts[i]);
+                accountManager.invalidateAuthToken(AuthenticatorConstant.UNITY_PICKER_ACCOUNTYTPE,
+                        accountManager.getAuthToken(accounts[i],
+                                AuthenticatorConstant.UNITY_PICKER_AUTHTOKEN_TYPE,
+                                null,
+                                true,
+                                new AccountManagerCallback<Bundle>() {
+                                    @Override
+                                    public void run(AccountManagerFuture<Bundle> future) {
+                                        try {
+                                            Log.d("invalidateAuthToken", future.getResult().toString());
+                                        } catch (Exception e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                }, null).toString());
+
+                if (Build.VERSION.SDK_INT < 23) { // use deprecated method
+                    accountManager.removeAccount(accounts[i], new AccountManagerCallback<Boolean>() {
+                        @Override
+                        public void run(AccountManagerFuture<Boolean> future) {
+                            try {
+                                if (future.getResult()) {
+                                    Log.d("ACCOUNT REMOVAL23", "ACCOUNT  REMOVED");
+                                    checkAuthen();
+                                }
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+
+                        }
+                    }, null);
+                } else {
+                    accountManager.removeAccount(accounts[i], this, new AccountManagerCallback<Bundle>() {
+                        @Override
+                        public void run(AccountManagerFuture<Bundle> future) {
+                            try {
+                                if (future.getResult() != null) {
+                                    Log.d("ACCOUNT REMOVAL", "ACCOUNT REMOVED");
+                                    checkAuthen();
+                                }
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }, null);
+                }
+            }
+
+        }
 
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
+    protected void onResume() {
+        super.onResume();
         checkAuthen();
     }
 

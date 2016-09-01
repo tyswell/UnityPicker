@@ -57,9 +57,9 @@ public class UnityPicker extends AppCompatActivity {
                         User user = new User();
 
                         String authToken = authTokenBundle.get(AccountManager.KEY_AUTHTOKEN).toString();
-                        Boolean isFacebookLogin = true;
                         String username = getCurrentAccount().name;
 
+                        user.setUsername(username);
                         user.setToken(authToken);
 
                         Intent intent = new Intent(getBaseContext(), MainActivity.class);

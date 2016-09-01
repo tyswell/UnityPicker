@@ -8,4 +8,10 @@
         android:layout_height="wrap_content"
         android:id="@+id/editText2"
         android:text="profile page"/>
+
+    <Button
+        android:id="@+id/logoutBtn"
+        android:text="LOGOUT"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
 </LinearLayout>

@@ -14,6 +14,7 @@ import android.widget.Spinner;
 
 import com.eightunity.unitypicker.R;
 import com.eightunity.unitypicker.model.search.Search;
+import com.eightunity.unitypicker.ui.BaseActivity;
 
 import java.util.Arrays;
 
