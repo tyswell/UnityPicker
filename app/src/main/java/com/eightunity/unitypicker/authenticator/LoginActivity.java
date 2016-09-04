@@ -17,8 +17,7 @@ import android.widget.TextView;
 
 import com.eightunity.unitypicker.R;
 import com.eightunity.unitypicker.authenticator.Constant.AuthenticatorConstant;
-import com.eightunity.unitypicker.model.User;
-import com.eightunity.unitypicker.model.service.ModelService;
+import com.eightunity.unitypicker.model.account.User;
 import com.eightunity.unitypicker.model.service.ResponseService;
 import com.eightunity.unitypicker.service.ApiService;
 import com.facebook.AccessToken;
@@ -31,7 +30,6 @@ import com.facebook.GraphResponse;
 import com.facebook.HttpMethod;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.auth.api.Auth;
@@ -44,16 +42,11 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
 import java.util.Arrays;
 
-import okhttp3.Interceptor;
-import okhttp3.OkHttpClient;
-import okhttp3.Response;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.converter.jackson.JacksonConverterFactory;
 
 /**

@@ -12,8 +12,10 @@ import android.support.v7.app.AppCompatActivity;
 
 import com.eightunity.unitypicker.authenticator.Constant.AuthenticatorConstant;
 import com.eightunity.unitypicker.authenticator.LoginActivity;
-import com.eightunity.unitypicker.model.User;
+import com.eightunity.unitypicker.model.account.User;
 import com.eightunity.unitypicker.ui.Application;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
 
 import java.io.IOException;
 
@@ -24,14 +26,33 @@ public class UnityPicker extends AppCompatActivity {
 
     private AccountManager accountManager;
 
+    public static final int REQUEST_GOOGLE_PLAY_SERVICES = 2404;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         accountManager = AccountManager.get(this);
-        if (isAuthen()) {
-            initData();
+        if (checkGooglePlayService()) {
+            if (isAuthen()) {
+                initData();
+            }
         }
+    }
+
+    private boolean checkGooglePlayService() {
+        GoogleApiAvailability googleAPI = GoogleApiAvailability.getInstance();
+        int result = googleAPI.isGooglePlayServicesAvailable(this);
+        if(result != ConnectionResult.SUCCESS) {
+            if(googleAPI.isUserResolvableError(result)) {
+                googleAPI.getErrorDialog(this, result,
+                        REQUEST_GOOGLE_PLAY_SERVICES).show();
+            }
+
+            return false;
+        }
+
+        return true;
     }
 
     private void initData() {

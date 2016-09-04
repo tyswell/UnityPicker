@@ -1,7 +1,9 @@
 {
   "project_info": {
     "project_number": "124874219817",
-    "project_id": "unity-picker"
+    "firebase_url": "https://unity-picker.firebaseio.com",
+    "project_id": "unity-picker",
+    "storage_bucket": "unity-picker.appspot.com"
   },
   "client": [
     {
@@ -21,6 +23,10 @@
           }
         },
         {
+          "client_id": "124874219817-j247i0ql8bjamiel7tcpudonrbg5rsqn.apps.googleusercontent.com",
+          "client_type": 3
+        },
+        {
           "client_id": "124874219817-6c41juoe7aerqljrfava34teprvle9ka.apps.googleusercontent.com",
           "client_type": 3
         }
@@ -35,11 +41,16 @@
           "status": 1
         },
         "appinvite_service": {
-          "status": 1,
-          "other_platform_oauth_client": []
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "124874219817-j247i0ql8bjamiel7tcpudonrbg5rsqn.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         },
         "ads_service": {
-          "status": 1
+          "status": 2
         }
       }
     }

@@ -2,7 +2,7 @@ package com.eightunity.unitypicker.ui;
 
 import android.os.Bundle;
 
-import com.eightunity.unitypicker.model.User;
+import com.eightunity.unitypicker.model.account.User;
 
 
 /**
