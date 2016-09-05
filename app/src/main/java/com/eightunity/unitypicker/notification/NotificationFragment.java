@@ -40,6 +40,13 @@ public class NotificationFragment extends Fragment {
         return rootView;
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        callWSMytask();
+    }
+
     private void initView(View rootView) {
         notificationRecycler = (RecyclerView) rootView.findViewById(R.id.notificationRecycler);
         notificationAdapter = new NotificationAdapter(rootView.getContext(), notifications);
@@ -64,6 +71,8 @@ public class NotificationFragment extends Fragment {
     };
 
     private void callWSMytask() {
-
+        notifications.clear();
+        notifications.addAll(TempNotification.getModel());
+        notificationAdapter.notifyDataSetChanged();
     }
 }

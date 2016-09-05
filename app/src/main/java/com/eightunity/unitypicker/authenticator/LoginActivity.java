@@ -359,6 +359,7 @@ public class LoginActivity extends AccountAuthenticatorActivity {
     }
 
     private void loginService(final User user) {
+        /*
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(getString(R.string.base_service_url))
                 .addConverterFactory(JacksonConverterFactory.create())
@@ -383,6 +384,9 @@ public class LoginActivity extends AccountAuthenticatorActivity {
                 Log.d(TAG, "ERROR" + t.getMessage());
             }
         });
+        */
+
+        setAuthenticator(user.getUsername(), user.getToken(), user.getTokenType());
     }
 
 
