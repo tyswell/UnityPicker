@@ -13,6 +13,8 @@ import android.widget.EditText;
 import android.widget.Spinner;
 
 import com.eightunity.unitypicker.R;
+import com.eightunity.unitypicker.database.ESearchWordDAO;
+import com.eightunity.unitypicker.model.dao.ESearchWord;
 import com.eightunity.unitypicker.model.search.Search;
 import com.eightunity.unitypicker.ui.BaseActivity;
 
@@ -27,6 +29,7 @@ public class SearchFragment extends Fragment {
     private Spinner searchTypeSpinner;
     private Button searchButton;
     private SearchTypeAdapter searchTypeAdapter;
+    private ESearchWordDAO dao;
 
     @Nullable
     @Override
@@ -43,6 +46,8 @@ public class SearchFragment extends Fragment {
         configSpinner(searchTypeSpinner);
         searchButton = (Button) view.findViewById(R.id.searchBtn);
         searchButton.setOnClickListener(searchOnClickListener ());
+
+        dao = new ESearchWordDAO();
     }
 
     private void configSpinner(Spinner searchTypeSpinner) {
@@ -56,8 +61,16 @@ public class SearchFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 Search search = getContent();
+                dao.add(getDBData(search));
             }
         };
+    }
+
+    private ESearchWord getDBData(Search search) {
+        ESearchWord data = new ESearchWord();
+        data.setDescription(search.getSearchWord());
+        data.setSearch_type(SearchUtility.descToCode(search.getSearchType()));
+        return data;
     }
 
     private Search getContent() {

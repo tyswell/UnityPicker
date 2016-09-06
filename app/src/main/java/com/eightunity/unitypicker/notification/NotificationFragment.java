@@ -11,7 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.eightunity.unitypicker.R;
-import com.eightunity.unitypicker.model.Notificaiton.Notification;
+import com.eightunity.unitypicker.model.notificaiton.Notification;
 import com.eightunity.unitypicker.ui.LinearLayoutManager;
 import com.eightunity.unitypicker.ui.recyclerview.DividerItemDecoration;
 import com.eightunity.unitypicker.ui.recyclerview.RecycleClickListener;

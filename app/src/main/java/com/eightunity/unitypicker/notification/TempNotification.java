@@ -1,6 +1,6 @@
 package com.eightunity.unitypicker.notification;
 
-import com.eightunity.unitypicker.model.Notificaiton.Notification;
+import com.eightunity.unitypicker.model.notificaiton.Notification;
 
 import java.util.ArrayList;
 import java.util.List;

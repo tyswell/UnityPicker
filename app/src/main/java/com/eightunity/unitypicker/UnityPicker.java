@@ -6,12 +6,15 @@ import android.accounts.AccountManagerCallback;
 import android.accounts.AccountManagerFuture;
 import android.accounts.AuthenticatorException;
 import android.accounts.OperationCanceledException;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
 import com.eightunity.unitypicker.authenticator.Constant.AuthenticatorConstant;
 import com.eightunity.unitypicker.authenticator.LoginActivity;
+import com.eightunity.unitypicker.database.DatabaseManager;
+import com.eightunity.unitypicker.database.UnityPickerDB;
 import com.eightunity.unitypicker.model.account.User;
 import com.eightunity.unitypicker.ui.Application;
 import com.google.android.gms.common.ConnectionResult;
@@ -26,6 +29,8 @@ public class UnityPicker extends AppCompatActivity {
 
     private AccountManager accountManager;
 
+    private static UnityPicker app = null;
+
     public static final int REQUEST_GOOGLE_PLAY_SERVICES = 2404;
 
     @Override
@@ -33,6 +38,8 @@ public class UnityPicker extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         accountManager = AccountManager.get(this);
+        app = this;
+
         if (checkGooglePlayService()) {
             if (isAuthen()) {
                 initData();
@@ -65,6 +72,7 @@ public class UnityPicker extends AppCompatActivity {
                 new AccountManagerCallback<Bundle>() {
                     @Override
                     public void run(AccountManagerFuture<Bundle> future) {
+                        // SET AUTHENTICATOR
                         Bundle authTokenBundle = null;
                         try {
                             authTokenBundle = future.getResult();
@@ -83,6 +91,10 @@ public class UnityPicker extends AppCompatActivity {
                         user.setUsername(username);
                         user.setToken(authToken);
 
+                        // SET DATABSE
+                        initDatabase();
+
+                        // START MAIN ACTIVITY
                         Intent intent = new Intent(getBaseContext(), MainActivity.class);
 
                         ((Application) getApplicationContext()).user = user;
@@ -90,6 +102,11 @@ public class UnityPicker extends AppCompatActivity {
                         startActivityForResult(intent, 1);
                     }
                 }, null);
+    }
+
+    private void initDatabase() {
+        UnityPickerDB db = new UnityPickerDB(this);
+        DatabaseManager.initializeInstance(db);
     }
 
     private Account getCurrentAccount() {
@@ -125,5 +142,9 @@ public class UnityPicker extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         initData();
+    }
+
+    public static Context getContext() {
+        return app.getApplicationContext();
     }
 }
