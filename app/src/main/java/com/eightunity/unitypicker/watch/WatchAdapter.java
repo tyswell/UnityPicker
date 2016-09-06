@@ -41,6 +41,7 @@ public class WatchAdapter extends RecyclerView.Adapter<WatchViewHolder> {
 
         holder.searchWordView.setText(watch.getSearchWord());
         holder.searchType.setText(watch.getSearchType());
+        holder.timeDescView.setText(watch.getTimeDesc());
     }
 
     @Override

@@ -58,6 +58,7 @@ public class LoginActivity extends AccountAuthenticatorActivity {
 
     public static final String PARAM_USERNAME = "fb_email";
     public static final String PARAM_AUTHTOKEN_TYPE = "authtokenType";
+    public static final String PROFILE_URL = "PROFILE_URL";
     private AccountManager mAccountManager;
     private static final int RC_SIGN_IN = 9001;
 
@@ -241,6 +242,7 @@ public class LoginActivity extends AccountAuthenticatorActivity {
                     user.setUsername(username);
                     user.setToken(accessToken);
                     user.setTokenType(AuthenticatorConstant.FACEBOOK_ACCOUNTYTPE);
+                    user.setProfileURL("https://graph.facebook.com/" + username + "/picture?type=large");
                     loginService(user);
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -251,7 +253,7 @@ public class LoginActivity extends AccountAuthenticatorActivity {
         }
     }
 
-    private void setAuthenticator(final String username, final String token, final String tokenType) {
+    private void setAuthenticator(final String username, final String token, final String tokenType, final String profileUrl) {
         Account account;
         if (mRequestNewAccount) {
             account = new Account(username, AuthenticatorConstant.UNITY_PICKER_ACCOUNTYTPE);
@@ -318,6 +320,7 @@ public class LoginActivity extends AccountAuthenticatorActivity {
             user.setUsername(acct.getEmail());
             user.setToken(idToken);
             user.setTokenType(AuthenticatorConstant.GOOGLE_ACCOUNTYTPE);
+            user.setProfileURL(acct.getPhotoUrl().toString());
             loginService(user);
 
 //            Account account = new Account(acct.getEmail(), AuthenticatorConstant.UNITY_PICKER_ACCOUNTYTPE);
@@ -386,7 +389,7 @@ public class LoginActivity extends AccountAuthenticatorActivity {
         });
         */
 
-        setAuthenticator(user.getUsername(), user.getToken(), user.getTokenType());
+        setAuthenticator(user.getUsername(), user.getToken(), user.getTokenType(), user.getProfileURL());
     }
 
 

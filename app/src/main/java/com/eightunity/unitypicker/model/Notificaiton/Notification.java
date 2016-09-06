@@ -1,4 +1,4 @@
-package com.eightunity.unitypicker.model.Notificaiton;
+package com.eightunity.unitypicker.model.notificaiton;
 
 /**
  * Created by chokechaic on 8/26/2016.

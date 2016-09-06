@@ -80,7 +80,6 @@ public class WatchFragment extends Fragment {
 
     private void callWSMytask() {
         watches.clear();
-//        watches.addAll(TempNotification.getModel());
         watches.addAll(getDataFromDB());
         watchAdapter.notifyDataSetChanged();
     }

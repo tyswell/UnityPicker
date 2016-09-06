@@ -14,6 +14,7 @@ public class WatchViewHolder extends RecyclerView.ViewHolder {
 
     public TextView searchWordView;
     public TextView searchType;
+    public TextView timeDescView;
     public ImageButton optionBtn;
 
     public WatchViewHolder(View itemView) {
@@ -21,6 +22,7 @@ public class WatchViewHolder extends RecyclerView.ViewHolder {
 
         searchWordView = (TextView) itemView.findViewById(R.id.searchWordView);
         searchType = (TextView) itemView.findViewById(R.id.searchType);
+        timeDescView = (TextView) itemView.findViewById(R.id.timeDescView);
         optionBtn = (ImageButton) itemView.findViewById(R.id.optionBtn);
     }
 }

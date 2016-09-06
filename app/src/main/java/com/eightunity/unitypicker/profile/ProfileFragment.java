@@ -6,15 +6,20 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.TextView;
 
 import com.eightunity.unitypicker.R;
 import com.eightunity.unitypicker.ui.AuthenticaterActivity;
+
+import de.hdodenhof.circleimageview.CircleImageView;
 
 /**
  * Created by chokechaic on 8/26/2016.
  */
 public class ProfileFragment extends Fragment {
 
+    private CircleImageView profileImage;
+    private TextView usernameView;
     private Button logoutBtn;
 
     @Override
@@ -23,9 +28,16 @@ public class ProfileFragment extends Fragment {
     }
 
     @Override
+    public void onStart() {
+        super.onStart();
+    }
+
+    @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        profileImage = (CircleImageView) view.findViewById(R.id.profileImage);
+        usernameView = (TextView) view.findViewById(R.id.usernameView);
         logoutBtn = (Button) view.findViewById(R.id.logoutBtn);
         logoutBtn.setOnClickListener(new View.OnClickListener() {
             @Override

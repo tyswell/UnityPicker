@@ -12,6 +12,7 @@ public class User {
     private String username;
     private String token;
     private String tokenType;
+    private String profileURL;
     private List<Device> devices;
 
 
@@ -37,6 +38,14 @@ public class User {
 
     public void setTokenType(String tokenType) {
         this.tokenType = tokenType;
+    }
+
+    public String getProfileURL() {
+        return profileURL;
+    }
+
+    public void setProfileURL(String profileURL) {
+        this.profileURL = profileURL;
     }
 
     public List<Device> getDevices() {
