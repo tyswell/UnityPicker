@@ -15,6 +15,7 @@ import com.eightunity.unitypicker.database.ESearchWordDAO;
 import com.eightunity.unitypicker.model.dao.ESearchWord;
 import com.eightunity.unitypicker.model.watch.Watch;
 import com.eightunity.unitypicker.search.SearchUtility;
+import com.eightunity.unitypicker.ui.BaseActivity;
 import com.eightunity.unitypicker.ui.LinearLayoutManager;
 import com.eightunity.unitypicker.ui.recyclerview.DividerItemDecoration;
 import com.eightunity.unitypicker.ui.recyclerview.RecycleClickListener;
@@ -85,7 +86,8 @@ public class WatchFragment extends Fragment {
     }
 
     private List<Watch> getDataFromDB() {
-        List<ESearchWord> eSearchWords = dao.getAllData();
+        String username = ((BaseActivity)getActivity()).getUser().getUsername();
+        List<ESearchWord> eSearchWords = dao.getAllData(username);
         List<Watch> datas = new ArrayList<>();
         for (ESearchWord eSearchWord : eSearchWords) {
             Watch data = new Watch();

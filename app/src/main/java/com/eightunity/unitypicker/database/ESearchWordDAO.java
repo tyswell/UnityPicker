@@ -22,6 +22,7 @@ public class ESearchWordDAO {
 
     public static final String TABLE_E_SEARCH_WORD = "E_SEARCH_WORD";
     public static final String ID_FIELD = "id";
+    public static final String USERNAME_FIELD = "username";
     public static final String DESCRIPTION_FIELD = "description";
     public static final String SEARCH_TYPE_FIELD = "SEARCH_TYPE";
     public static final String MODIFIED_DATE_FIELD = "modified_date";
@@ -32,6 +33,7 @@ public class ESearchWordDAO {
         return "CREATE TABLE " + TABLE_E_SEARCH_WORD +
                 " (" +
                     ID_FIELD            +   " INTEGER PRIMARY KEY," +
+                    USERNAME_FIELD      +   " TEXT,"+
                     DESCRIPTION_FIELD   +   " TEXT,"+
                     SEARCH_TYPE_FIELD   +   " INTEGER," +
                     MODIFIED_DATE_FIELD +   " DATETIME DEFAULT CURRENT_TIMESTAMP" +
@@ -41,6 +43,7 @@ public class ESearchWordDAO {
     public int add(ESearchWord data) {
         SQLiteDatabase db = DatabaseManager.getInstance().openDatabase();
         ContentValues values = new ContentValues();
+        values.put(USERNAME_FIELD, data.getUsername());
         values.put(DESCRIPTION_FIELD, data.getDescription());
         values.put(SEARCH_TYPE_FIELD, data.getSearch_type());
 
@@ -59,11 +62,12 @@ public class ESearchWordDAO {
         DatabaseManager.getInstance().closeDatabase();
     }
 
-    public ESearchWord getByKey(int id) {
+    public ESearchWord getByKey(int id, String username) {
         String query =
                 "SELECT *" +
                         " FROM " + TABLE_E_SEARCH_WORD +
-                        " WHERE " + ID_FIELD + " = " + id;
+                        " WHERE " + ID_FIELD + " = " + id +
+                                    USERNAME_FIELD + " = '" + username +"'";
 
         SQLiteDatabase db = DatabaseManager.getInstance().openDatabase();
         Cursor cursor = db.rawQuery(query, null);
@@ -83,10 +87,11 @@ public class ESearchWordDAO {
         }
     }
 
-    public List<ESearchWord> getAllData() {
+    public List<ESearchWord> getAllData(String username) {
         String query =
                 "SELECT *" +
-                        " FROM " + TABLE_E_SEARCH_WORD;
+                        " FROM " + TABLE_E_SEARCH_WORD+
+                        " WHERE " + USERNAME_FIELD + " = '" + username + "'";
         List<ESearchWord> datas = new ArrayList<>();
 
         SQLiteDatabase db = DatabaseManager.getInstance().openDatabase();
@@ -106,13 +111,10 @@ public class ESearchWordDAO {
 
     private ESearchWord getData(Cursor cursor) {
         ESearchWord data= new ESearchWord();
-        Log.d(TAG, "ID :"+cursor.getInt(cursor.getColumnIndex(ID_FIELD)));
         data.setId(cursor.getInt(cursor.getColumnIndex(ID_FIELD)));
-        Log.d(TAG, "DESCRIPTION_FIELD :" + cursor.getString(cursor.getColumnIndex(DESCRIPTION_FIELD)));
+        data.setUsername(cursor.getString(cursor.getColumnIndex(USERNAME_FIELD)));
         data.setDescription(cursor.getString(cursor.getColumnIndex(DESCRIPTION_FIELD)));
-        Log.d(TAG, "SEARCH_TYPE_FIELD :" + cursor.getInt(cursor.getColumnIndex(SEARCH_TYPE_FIELD)));
         data.setSearch_type(cursor.getInt(cursor.getColumnIndex(SEARCH_TYPE_FIELD)));
-        Log.d(TAG, "MODIFIED_DATE_FIELD :" + cursor.getString(cursor.getColumnIndex(MODIFIED_DATE_FIELD)));
         data.setModified_date(DateUtil.stringToDate(cursor.getString(cursor.getColumnIndex(MODIFIED_DATE_FIELD))));
 
         return data;

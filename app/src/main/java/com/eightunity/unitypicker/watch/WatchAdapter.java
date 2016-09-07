@@ -7,9 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.eightunity.unitypicker.R;
-import com.eightunity.unitypicker.model.notificaiton.Notification;
 import com.eightunity.unitypicker.model.watch.Watch;
-import com.eightunity.unitypicker.notification.NotificationViewHolder;
 
 import java.util.List;
 

@@ -10,12 +10,21 @@ import java.util.Date;
 public class EMatching {
 
     private Integer id;
+    private String username;
     private Integer seacrh_word_id;
     private String search_word_desc;
     private String title_content;
     private String web_name;
     private String url;
     private Date matching_date;
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
 
     public Integer getId() {
         return id;

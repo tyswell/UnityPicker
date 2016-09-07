@@ -17,6 +17,7 @@ public class EMatchingDAO {
 
     public static final String TABLE_E_MATCHING = "E_MATCHING";
     public static final String ID_FIELD = "id";
+    public static final String USERNAME_FIELD = "username";
     public static final String SEARCH_WORD_ID_FIELD = "seacrh_word_id";
     public static final String SEARCH_WORD_DESC_FIELD = "search_word_desc";
     public static final String TITLE_CONTENT_FIELD = "title_content";
@@ -28,6 +29,7 @@ public class EMatchingDAO {
         return "CREATE TABLE " + TABLE_E_MATCHING +
                 " (" +
                     ID_FIELD              + "INTEGER PRIMARY KEY," +
+                    USERNAME_FIELD        + "TEXT," +
                     SEARCH_WORD_ID_FIELD  + "INTEGER," +
                     SEARCH_WORD_DESC_FIELD+ "TEXT," +
                     TITLE_CONTENT_FIELD   + "TEXT," +
@@ -40,6 +42,7 @@ public class EMatchingDAO {
     public int add(EMatching data) {
         SQLiteDatabase db = DatabaseManager.getInstance().openDatabase();
         ContentValues values = new ContentValues();
+        values.put(USERNAME_FIELD, data.getUsername());
         values.put(SEARCH_WORD_ID_FIELD, data.getSeacrh_word_id());
         values.put(SEARCH_WORD_DESC_FIELD, data.getSearch_word_desc());
         values.put(TITLE_CONTENT_FIELD, data.getTitle_content());
@@ -61,11 +64,12 @@ public class EMatchingDAO {
         DatabaseManager.getInstance().closeDatabase();
     }
 
-    public EMatching getByKey(int id) {
+    public EMatching getByKey(int id, String username) {
         String query =
                 "SELECT *" +
                         " FROM " + TABLE_E_MATCHING +
-                        " WHERE " + ID_FIELD + " = " + id;
+                        " WHERE " + ID_FIELD + " = " + id +
+                                    USERNAME_FIELD + " = '" + username + "'";
 
         SQLiteDatabase db = DatabaseManager.getInstance().openDatabase();
         Cursor cursor = db.rawQuery(query, null);
@@ -85,10 +89,11 @@ public class EMatchingDAO {
         }
     }
 
-    public List<EMatching> getAllData() {
+    public List<EMatching> getAllData(String username) {
         String query =
                 "SELECT *" +
-                        " FROM " + TABLE_E_MATCHING;
+                        " FROM " + TABLE_E_MATCHING +
+                        " WHERE " + USERNAME_FIELD + " = '" + username + "'";
         List<EMatching> datas = new ArrayList<>();
 
         SQLiteDatabase db = DatabaseManager.getInstance().openDatabase();
@@ -109,6 +114,7 @@ public class EMatchingDAO {
     private EMatching getData(Cursor cursor) {
         EMatching data= new EMatching();
         data.setId(cursor.getInt(cursor.getColumnIndex(ID_FIELD)));
+        data.setUsername(cursor.getString(cursor.getColumnIndex(USERNAME_FIELD)));
         data.setSeacrh_word_id(cursor.getInt(cursor.getColumnIndex(SEARCH_WORD_ID_FIELD)));
         data.setSearch_word_desc(cursor.getString(cursor.getColumnIndex(SEARCH_WORD_DESC_FIELD)));
         data.setTitle_content(cursor.getString(cursor.getColumnIndex(TITLE_CONTENT_FIELD)));

@@ -67,7 +67,10 @@ public class SearchFragment extends Fragment {
     }
 
     private ESearchWord getDBData(Search search) {
+        String username = ((BaseActivity)getActivity()).getUser().getUsername();
+
         ESearchWord data = new ESearchWord();
+        data.setUsername(username);
         data.setDescription(search.getSearchWord());
         data.setSearch_type(SearchUtility.descToCode(search.getSearchType()));
         return data;

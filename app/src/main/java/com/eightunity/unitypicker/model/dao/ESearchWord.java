@@ -8,11 +8,19 @@ import java.util.Date;
 public class ESearchWord {
 
     private Integer id;
+    private String username;
     private String description;
     private Integer search_type;
     private Date modified_date;
 
 
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
 
     public Integer getId() {
         return id;
