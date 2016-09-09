@@ -10,11 +10,28 @@ import java.util.List;
 public class User {
 
     private String username;
+    private String name;
+    private String userId;
     private String token;
     private String tokenType;
     private String profileURL;
     private List<Device> devices;
 
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
 
     public String getUsername() {
         return username;

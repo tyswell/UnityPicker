@@ -6,6 +6,7 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.eightunity.unitypicker.R;
+import com.eightunity.unitypicker.database.EMatchingDAO;
 
 /**
  * Created by chokechaic on 8/26/2016.
@@ -26,5 +27,6 @@ public class NotificationViewHolder extends RecyclerView.ViewHolder {
         webNameView = (TextView) itemView.findViewById(R.id.webNameView);
         timeDescView = (TextView) itemView.findViewById(R.id.timeDescView);
         optionBtn = (ImageButton) itemView.findViewById(R.id.optionBtn);
+
     }
 }

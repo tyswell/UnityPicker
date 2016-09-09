@@ -6,19 +6,29 @@ import android.content.Context;
 import android.content.Intent;
 import android.media.RingtoneManager;
 import android.net.Uri;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import com.eightunity.unitypicker.R;
 import com.eightunity.unitypicker.UnityPicker;
+import com.eightunity.unitypicker.database.DatabaseManager;
+import com.eightunity.unitypicker.database.EMatchingDAO;
+import com.eightunity.unitypicker.database.UnityPickerDB;
+import com.eightunity.unitypicker.model.dao.EMatching;
+import com.eightunity.unitypicker.utility.DateUtil;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
+
+import java.util.Map;
+
 /**
  * Created by deksen on 9/2/16 AD.
  */
 public class FirebaseMsgService extends FirebaseMessagingService {
 
     private static final String TAG = "FirebaseMsgService";
+    private EMatchingDAO dao;
 
     /**
      * Called when message is received.
@@ -47,10 +57,14 @@ public class FirebaseMsgService extends FirebaseMessagingService {
             Log.d(TAG, "Message data payload: " + remoteMessage.getData());
         }
 
+        addToDB(convertMsg(remoteMessage.getData()));
+
         // Check if message contains a notification payload.
         if (remoteMessage.getNotification() != null) {
             Log.d(TAG, "Message Notification Body: " + remoteMessage.getNotification().getBody());
         }
+
+        sendNotification("aaaaaa");
 
         // Also if you intend on generating your own notifications as a result of a received FCM
         // message, here is where that should be initiated. See sendNotification method below.
@@ -64,7 +78,6 @@ public class FirebaseMsgService extends FirebaseMessagingService {
      */
     private void sendNotification(String messageBody) {
         Intent intent = new Intent(this, UnityPicker.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0 /* Request code */, intent,
                 PendingIntent.FLAG_ONE_SHOT);
 
@@ -81,6 +94,33 @@ public class FirebaseMsgService extends FirebaseMessagingService {
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
         notificationManager.notify(0 /* ID of notification */, notificationBuilder.build());
+    }
+
+    private EMatching convertMsg(Map<String, String> map) {
+        EMatching eMatching = new EMatching();
+        eMatching.setUsername(map.get("username"));
+        eMatching.setId(Integer.parseInt(map.get("id")));
+        eMatching.setMatching_date(DateUtil.stringToDate(map.get("matching_date")));
+        eMatching.setSeacrh_word_id(Integer.parseInt(map.get("seacrh_word_id")));
+        eMatching.setSearch_word_desc(map.get("search_word_desc"));
+        eMatching.setTitle_content(map.get("title_content"));
+        eMatching.setUrl(map.get("url"));
+        eMatching.setWeb_name(map.get("web_name"));
+
+        return eMatching;
+    }
+
+    private void addToDB(EMatching eMatching) {
+        if (!DatabaseManager.isDBMInitial()) {
+            initDatabase();
+        }
+        dao = new EMatchingDAO();
+        dao.add(eMatching);
+    }
+
+    private void initDatabase() {
+        UnityPickerDB db = new UnityPickerDB(this);
+        DatabaseManager.initializeInstance(db);
     }
 
 }

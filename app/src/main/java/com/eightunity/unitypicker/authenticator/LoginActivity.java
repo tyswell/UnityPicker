@@ -232,6 +232,10 @@ public class LoginActivity extends AccountAuthenticatorActivity {
                 try {
                     JSONObject userInfo = response.getJSONObject();
                     String username = userInfo.getString("email");
+                    String userID =  userInfo.getString("id");
+                    String name =  userInfo.getString("name");
+                    Log.d("FACEBO", "userID = "+userID);
+                    Log.d("FACEBO", "name = "+name);
                     if (username == null ||
                             username.length() == 0) {
                         username = AccessToken.getCurrentAccessToken().getToken();
@@ -239,10 +243,12 @@ public class LoginActivity extends AccountAuthenticatorActivity {
                     final String accessToken = AccessToken.getCurrentAccessToken().getToken();
 
                     User user = new User();
+                    user.setName(name);
+                    user.setUserId(userID);
                     user.setUsername(username);
                     user.setToken(accessToken);
                     user.setTokenType(AuthenticatorConstant.FACEBOOK_ACCOUNTYTPE);
-                    user.setProfileURL("https://graph.facebook.com/" + username + "/picture?type=large");
+                    user.setProfileURL("https://graph.facebook.com/" + userID + "/picture?type=large");
                     loginService(user);
                 } catch (JSONException e) {
                     e.printStackTrace();

@@ -92,7 +92,9 @@ public class UnityPicker extends AppCompatActivity {
                         user.setToken(authToken);
 
                         // SET DATABSE
-                        initDatabase();
+                        if (!DatabaseManager.isDBMInitial()) {
+                            initDatabase();
+                        }
 
                         // START MAIN ACTIVITY
                         Intent intent = new Intent(getBaseContext(), MainActivity.class);

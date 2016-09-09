@@ -11,11 +11,18 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.eightunity.unitypicker.R;
+import com.eightunity.unitypicker.database.EMatchingDAO;
+import com.eightunity.unitypicker.model.dao.EMatching;
+import com.eightunity.unitypicker.model.dao.ESearchWord;
 import com.eightunity.unitypicker.model.notificaiton.Notification;
+import com.eightunity.unitypicker.model.watch.Watch;
+import com.eightunity.unitypicker.search.SearchUtility;
+import com.eightunity.unitypicker.ui.BaseActivity;
 import com.eightunity.unitypicker.ui.LinearLayoutManager;
 import com.eightunity.unitypicker.ui.recyclerview.DividerItemDecoration;
 import com.eightunity.unitypicker.ui.recyclerview.RecycleClickListener;
 import com.eightunity.unitypicker.ui.recyclerview.RecyclerTouchListener;
+import com.eightunity.unitypicker.utility.DateUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +34,7 @@ public class NotificationFragment extends Fragment {
 
     private RecyclerView notificationRecycler;
     private NotificationAdapter notificationAdapter;
+    private EMatchingDAO dao;
 
     List<Notification> notifications = new ArrayList<>();
 
@@ -36,6 +44,8 @@ public class NotificationFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_notification, container, false);
 
         initView(rootView);
+
+        dao = new EMatchingDAO();
 
         return rootView;
     }
@@ -72,7 +82,23 @@ public class NotificationFragment extends Fragment {
 
     private void callWSMytask() {
         notifications.clear();
-        notifications.addAll(TempNotification.getModel());
+        notifications.addAll(getDataFromDB());
         notificationAdapter.notifyDataSetChanged();
+    }
+
+    private List<Notification> getDataFromDB() {
+        String username = ((BaseActivity)getActivity()).getUser().getUsername();
+        List<EMatching> eMatchings = dao.getAllData(username);
+        List<Notification> datas = new ArrayList<>();
+        for (EMatching eMatching : eMatchings) {
+            Notification data = new Notification();
+            data.setSearchWord(eMatching.getSearch_word_desc());
+            data.setTimeDesc(DateUtil.timeSpent(eMatching.getMatching_date()));
+            data.setTitleContent(eMatching.getTitle_content());
+            data.setWebName(eMatching.getWeb_name());
+            datas.add(data);
+        }
+
+        return datas;
     }
 }

@@ -29,6 +29,13 @@ public class DatabaseManager {
         return dbm;
     }
 
+    public static synchronized boolean isDBMInitial() {
+        if (dbm == null) {
+            return false;
+        }
+        return true;
+    }
+
     public synchronized SQLiteDatabase openDatabase() {
         mOpenCounter+=1;
         if(mOpenCounter == 1) {

@@ -8,8 +8,13 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.bumptech.glide.DrawableTypeRequest;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.RequestManager;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.eightunity.unitypicker.R;
 import com.eightunity.unitypicker.ui.AuthenticaterActivity;
+import com.eightunity.unitypicker.ui.BaseActivity;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -30,6 +35,7 @@ public class ProfileFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
+        callWSMytask();
     }
 
     @Override
@@ -45,5 +51,26 @@ public class ProfileFragment extends Fragment {
                 ((AuthenticaterActivity)getActivity()).logout();
             }
         });
+    }
+
+    private void callWSMytask() {
+        String name = ((BaseActivity)getActivity()).getUser().getName();
+        String userId = ((BaseActivity)getActivity()).getUser().getUserId();
+        usernameView.setText(name);
+        String imageURL = "http://graph.facebook.com/" + "10154907477446754" + "/picture?type=large";
+
+        RequestManager rm = Glide.with(getContext());
+        DrawableTypeRequest dr = null;
+        if (imageURL != null) {
+            dr = rm.load(imageURL);
+        } else {
+            dr = rm.load(R.mipmap.ic_default_profile);
+        }
+        dr.crossFade()
+                .thumbnail(0.5f)
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
+                .placeholder(R.mipmap.ic_default_profile)
+                .error(R.mipmap.ic_default_profile)
+                .into(profileImage);
     }
 }

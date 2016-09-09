@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "124874219817-r6hfq93ofl9cc3ihq1t8eo80nfovqakk.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.eightunity.unitypicker",
+            "certificate_hash": "494203831DA2EAF2F83D8CD6FB8D57243FB17486"
+          }
+        },
+        {
           "client_id": "124874219817-0jkbo2dq9l7qv14fo49v5rg3rkm95c72.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {

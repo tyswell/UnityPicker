@@ -28,14 +28,14 @@ public class EMatchingDAO {
     public static String createTable() {
         return "CREATE TABLE " + TABLE_E_MATCHING +
                 " (" +
-                    ID_FIELD              + "INTEGER PRIMARY KEY," +
-                    USERNAME_FIELD        + "TEXT," +
-                    SEARCH_WORD_ID_FIELD  + "INTEGER," +
-                    SEARCH_WORD_DESC_FIELD+ "TEXT," +
-                    TITLE_CONTENT_FIELD   + "TEXT," +
-                    WEB_NAME_FIELD        + "TEXT," +
-                    URL_FIELD             + "TEXT," +
-                    MATCHING_DATE_FIELD   + "DATETIME DEFAULT CURRENT_TIMESTAMP" +
+                    ID_FIELD              + " INTEGER PRIMARY KEY," +
+                    USERNAME_FIELD        + " TEXT," +
+                    SEARCH_WORD_ID_FIELD  + " INTEGER," +
+                    SEARCH_WORD_DESC_FIELD+ " TEXT," +
+                    TITLE_CONTENT_FIELD   + " TEXT," +
+                    WEB_NAME_FIELD        + " TEXT," +
+                    URL_FIELD             + " TEXT," +
+                    MATCHING_DATE_FIELD   + " DATETIME DEFAULT CURRENT_TIMESTAMP" +
                 " )";
     }
 
@@ -93,7 +93,7 @@ public class EMatchingDAO {
         String query =
                 "SELECT *" +
                         " FROM " + TABLE_E_MATCHING +
-                        " WHERE " + USERNAME_FIELD + " = '" + username + "'";
+                        " WHERE " + USERNAME_FIELD + "='" + username + "'";
         List<EMatching> datas = new ArrayList<>();
 
         SQLiteDatabase db = DatabaseManager.getInstance().openDatabase();
