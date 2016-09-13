@@ -4,17 +4,13 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.CursorLoader;
-import android.support.v4.content.Loader;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,10 +18,7 @@ import android.view.ViewGroup;
 import com.eightunity.unitypicker.R;
 import com.eightunity.unitypicker.database.EMatchingDAO;
 import com.eightunity.unitypicker.model.dao.EMatching;
-import com.eightunity.unitypicker.model.dao.ESearchWord;
-import com.eightunity.unitypicker.model.notificaiton.Notification;
-import com.eightunity.unitypicker.model.watch.Watch;
-import com.eightunity.unitypicker.search.SearchUtility;
+import com.eightunity.unitypicker.model.Notificaiton.Notification;
 import com.eightunity.unitypicker.ui.BaseActivity;
 import com.eightunity.unitypicker.ui.LinearLayoutManager;
 import com.eightunity.unitypicker.ui.recyclerview.DividerItemDecoration;
@@ -103,6 +96,8 @@ public class NotificationFragment extends Fragment {
     private RecycleClickListener notificationRecyclerListener = new RecycleClickListener() {
         @Override
         public void onClick(View view, int position) {
+            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(notifications.get(position).getUrl()));
+            startActivity(browserIntent);
         }
     };
 
@@ -122,6 +117,7 @@ public class NotificationFragment extends Fragment {
             data.setTimeDesc(DateUtil.timeSpent(eMatching.getMatching_date()));
             data.setTitleContent(eMatching.getTitle_content());
             data.setWebName(eMatching.getWeb_name());
+            data.setUrl(eMatching.getUrl());
             datas.add(data);
         }
 

@@ -1,4 +1,4 @@
-package com.eightunity.unitypicker.model.notificaiton;
+package com.eightunity.unitypicker.model.Notificaiton;
 
 /**
  * Created by chokechaic on 8/26/2016.
@@ -9,6 +9,7 @@ public class Notification {
     private String titleContent;
     private String webName;
     private String timeDesc;
+    private String url;
 
     public String getTimeDesc() {
         return timeDesc;
@@ -42,5 +43,11 @@ public class Notification {
         this.webName = webName;
     }
 
+    public String getUrl() {
+        return url;
+    }
 
+    public void setUrl(String url) {
+        this.url = url;
+    }
 }
