@@ -91,7 +91,8 @@ public class ESearchWordDAO {
         String query =
                 "SELECT *" +
                         " FROM " + TABLE_E_SEARCH_WORD+
-                        " WHERE " + USERNAME_FIELD + "='" + username + "'";
+                        " WHERE " + USERNAME_FIELD + "='" + username + "'" +
+                        " ORDER BY " + MODIFIED_DATE_FIELD + " DESC";
         List<ESearchWord> datas = new ArrayList<>();
 
         SQLiteDatabase db = DatabaseManager.getInstance().openDatabase();

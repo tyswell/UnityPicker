@@ -13,6 +13,7 @@ import com.eightunity.unitypicker.profile.ProfileFragment;
 import com.eightunity.unitypicker.search.SearchFragment;
 import com.eightunity.unitypicker.ui.BaseActivity;
 import com.eightunity.unitypicker.ui.ViewPagerAdapter;
+import com.eightunity.unitypicker.utility.notification.FirebaseMsgService;
 import com.eightunity.unitypicker.watch.WatchFragment;
 
 public class MainActivity extends BaseActivity {
@@ -20,6 +21,11 @@ public class MainActivity extends BaseActivity {
     private Toolbar toolbar;
     private TabLayout tabLayout;
     private ViewPager viewPager;
+
+    private static final int WATCH_PAGE = 0;
+    private static final int NOTIFICATION_PAGE = 1;
+    private static final int SEARCH_PAGE = 2;
+    private static final int PROFILE_PAGE = 3;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -32,11 +38,21 @@ public class MainActivity extends BaseActivity {
 
         viewPager = (ViewPager) findViewById(R.id.viewpager);
         setupViewPager(viewPager);
-        viewPager.setCurrentItem(2);
+
 
         tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(viewPager);
         setupTabIcons();
+
+        setStartPage();
+    }
+
+    private void setStartPage() {
+        if (getIntent().getStringExtra(FirebaseMsgService.NOTIFICATION_INTENT) != null) {
+            viewPager.setCurrentItem(NOTIFICATION_PAGE);
+        } else {
+            viewPager.setCurrentItem(SEARCH_PAGE);
+        }
     }
 
     private void setupTabIcons() {
@@ -47,10 +63,10 @@ public class MainActivity extends BaseActivity {
                 R.drawable.ic_account_circle
         };
 
-        tabLayout.getTabAt(0).setIcon(tabIcons[0]);
-        tabLayout.getTabAt(1).setIcon(tabIcons[1]);
-        tabLayout.getTabAt(2).setIcon(tabIcons[2]);
-        tabLayout.getTabAt(3).setIcon(tabIcons[3]);
+        tabLayout.getTabAt(WATCH_PAGE).setIcon(tabIcons[0]);
+        tabLayout.getTabAt(NOTIFICATION_PAGE).setIcon(tabIcons[1]);
+        tabLayout.getTabAt(SEARCH_PAGE).setIcon(tabIcons[2]);
+        tabLayout.getTabAt(PROFILE_PAGE).setIcon(tabIcons[3]);
     }
 
 

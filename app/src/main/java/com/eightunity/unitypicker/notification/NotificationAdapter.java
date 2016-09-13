@@ -1,6 +1,7 @@
 package com.eightunity.unitypicker.notification;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -47,4 +48,5 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationViewHo
     public int getItemCount() {
         return notifications.size();
     }
+
 }

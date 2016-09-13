@@ -1,11 +1,20 @@
 package com.eightunity.unitypicker.notification;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,6 +32,7 @@ import com.eightunity.unitypicker.ui.recyclerview.DividerItemDecoration;
 import com.eightunity.unitypicker.ui.recyclerview.RecycleClickListener;
 import com.eightunity.unitypicker.ui.recyclerview.RecyclerTouchListener;
 import com.eightunity.unitypicker.utility.DateUtil;
+import com.eightunity.unitypicker.utility.notification.FirebaseMsgService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,9 +42,13 @@ import java.util.List;
  */
 public class NotificationFragment extends Fragment {
 
+    private static final String TAG = "NotificationFragment";
+
     private RecyclerView notificationRecycler;
     private NotificationAdapter notificationAdapter;
     private EMatchingDAO dao;
+
+    private boolean isReceiverRegistered;
 
     List<Notification> notifications = new ArrayList<>();
 
@@ -55,6 +69,18 @@ public class NotificationFragment extends Fragment {
         super.onStart();
 
         callWSMytask();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        registerReceiver();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        unregisterReceiver();
     }
 
     private void initView(View rootView) {
@@ -101,4 +127,24 @@ public class NotificationFragment extends Fragment {
 
         return datas;
     }
+
+    private BroadcastReceiver mRegistrationBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            callWSMytask();
+        }
+    };
+
+    private void registerReceiver() {
+        if (!isReceiverRegistered) {
+            LocalBroadcastManager.getInstance(getContext()).registerReceiver(mRegistrationBroadcastReceiver, new IntentFilter(FirebaseMsgService.REGISTRATION_COMPLETE));
+            isReceiverRegistered = true;
+        }
+    }
+
+    private void unregisterReceiver() {
+        LocalBroadcastManager.getInstance(getContext()).unregisterReceiver(mRegistrationBroadcastReceiver);
+        isReceiverRegistered = false;
+    }
+
 }

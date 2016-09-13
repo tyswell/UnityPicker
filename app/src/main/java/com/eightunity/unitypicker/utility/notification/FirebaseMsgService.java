@@ -8,8 +8,10 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
+import com.eightunity.unitypicker.MainActivity;
 import com.eightunity.unitypicker.R;
 import com.eightunity.unitypicker.UnityPicker;
 import com.eightunity.unitypicker.database.DatabaseManager;
@@ -29,6 +31,8 @@ public class FirebaseMsgService extends FirebaseMessagingService {
 
     private static final String TAG = "FirebaseMsgService";
     private EMatchingDAO dao;
+    public static final String REGISTRATION_COMPLETE = "registrationComplete";
+    public static final String NOTIFICATION_INTENT = "ACTION_INTENT";
 
     /**
      * Called when message is received.
@@ -57,17 +61,14 @@ public class FirebaseMsgService extends FirebaseMessagingService {
             Log.d(TAG, "Message data payload: " + remoteMessage.getData());
         }
 
-        addToDB(convertMsg(remoteMessage.getData()));
+        EMatching eMatching = convertMsg(remoteMessage.getData());
 
-        // Check if message contains a notification payload.
-        if (remoteMessage.getNotification() != null) {
-            Log.d(TAG, "Message Notification Body: " + remoteMessage.getNotification().getBody());
-        }
+        addToDB(eMatching);
 
-        sendNotification("aaaaaa");
+        sendNotification(eMatching.getSearch_word_desc(), eMatching.getTitle_content());
 
-        // Also if you intend on generating your own notifications as a result of a received FCM
-        // message, here is where that should be initiated. See sendNotification method below.
+        Intent registrationComplete = new Intent(REGISTRATION_COMPLETE);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(registrationComplete);
     }
     // [END receive_message]
 
@@ -76,15 +77,17 @@ public class FirebaseMsgService extends FirebaseMessagingService {
      *
      * @param messageBody FCM message body received.
      */
-    private void sendNotification(String messageBody) {
+    private void sendNotification(String title, String messageBody) {
         Intent intent = new Intent(this, UnityPicker.class);
+        intent.putExtra(NOTIFICATION_INTENT, "tempValue");
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0 /* Request code */, intent,
                 PendingIntent.FLAG_ONE_SHOT);
 
         Uri defaultSoundUri= RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this)
                 .setSmallIcon(R.drawable.ic_notifications)
-                .setContentTitle("FCM Message")
+                .setContentTitle(title)
                 .setContentText(messageBody)
                 .setAutoCancel(true)
                 .setSound(defaultSoundUri)

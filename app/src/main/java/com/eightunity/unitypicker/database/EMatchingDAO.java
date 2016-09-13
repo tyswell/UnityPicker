@@ -93,7 +93,8 @@ public class EMatchingDAO {
         String query =
                 "SELECT *" +
                         " FROM " + TABLE_E_MATCHING +
-                        " WHERE " + USERNAME_FIELD + "='" + username + "'";
+                        " WHERE " + USERNAME_FIELD + "='" + username + "'" +
+                        " ORDER BY " + MATCHING_DATE_FIELD + " DESC";
         List<EMatching> datas = new ArrayList<>();
 
         SQLiteDatabase db = DatabaseManager.getInstance().openDatabase();

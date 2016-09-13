@@ -6,10 +6,16 @@ import android.accounts.AccountManagerCallback;
 import android.accounts.AccountManagerFuture;
 import android.accounts.AuthenticatorException;
 import android.accounts.OperationCanceledException;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 
 import com.eightunity.unitypicker.authenticator.Constant.AuthenticatorConstant;
 import com.eightunity.unitypicker.authenticator.LoginActivity;
@@ -17,6 +23,7 @@ import com.eightunity.unitypicker.database.DatabaseManager;
 import com.eightunity.unitypicker.database.UnityPickerDB;
 import com.eightunity.unitypicker.model.account.User;
 import com.eightunity.unitypicker.ui.Application;
+import com.eightunity.unitypicker.utility.notification.FirebaseMsgService;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 
@@ -29,13 +36,17 @@ public class UnityPicker extends AppCompatActivity {
 
     private AccountManager accountManager;
 
+    private static final String TAG = "UnityPicker";
+
     private static UnityPicker app = null;
+
 
     public static final int REQUEST_GOOGLE_PLAY_SERVICES = 2404;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
 
         accountManager = AccountManager.get(this);
         app = this;
@@ -46,6 +57,8 @@ public class UnityPicker extends AppCompatActivity {
             }
         }
     }
+
+
 
     private boolean checkGooglePlayService() {
         GoogleApiAvailability googleAPI = GoogleApiAvailability.getInstance();
@@ -96,8 +109,11 @@ public class UnityPicker extends AppCompatActivity {
                             initDatabase();
                         }
 
-                        // START MAIN ACTIVITY
                         Intent intent = new Intent(getBaseContext(), MainActivity.class);
+
+                        if (getIntent().getStringExtra(FirebaseMsgService.NOTIFICATION_INTENT) != null) {
+                            intent.putExtra(FirebaseMsgService.NOTIFICATION_INTENT, "tempValue");
+                        }
 
                         ((Application) getApplicationContext()).user = user;
 
@@ -149,4 +165,6 @@ public class UnityPicker extends AppCompatActivity {
     public static Context getContext() {
         return app.getApplicationContext();
     }
+
+
 }
