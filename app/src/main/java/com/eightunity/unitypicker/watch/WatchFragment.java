@@ -1,6 +1,7 @@
 package com.eightunity.unitypicker.watch;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -12,6 +13,7 @@ import android.view.ViewGroup;
 
 import com.eightunity.unitypicker.R;
 import com.eightunity.unitypicker.database.ESearchWordDAO;
+import com.eightunity.unitypicker.match.MatchActivity;
 import com.eightunity.unitypicker.model.dao.ESearchWord;
 import com.eightunity.unitypicker.model.watch.Watch;
 import com.eightunity.unitypicker.search.SearchUtility;
@@ -29,6 +31,10 @@ import java.util.List;
  * Created by chokechaic on 8/26/2016.
  */
 public class WatchFragment extends Fragment {
+
+    public static final String SEARCH_WORD_ID_PARAM = "SEARCH_WORD_ID_PARAM";
+    public static final String SEARCH_WORD_DETAIL_PARAM = "SEARCH_WORD_DETAIL_PARAM";
+    public static final String SEARCH_WORD_TYPE_PARAM = "SEARCH_WORD_TYPE_PARAM";
 
     private RecyclerView watchRecycler;
     private WatchAdapter watchAdapter;
@@ -76,6 +82,11 @@ public class WatchFragment extends Fragment {
     private RecycleClickListener watchRecyclerListener = new RecycleClickListener() {
         @Override
         public void onClick(View view, int position) {
+            Intent intent = new Intent(getContext(), MatchActivity.class);
+            intent.putExtra(SEARCH_WORD_ID_PARAM, watches.get(position).getId());
+            intent.putExtra(SEARCH_WORD_DETAIL_PARAM, watches.get(position).getSearchWord());
+            intent.putExtra(SEARCH_WORD_TYPE_PARAM, watches.get(position).getSearchType());
+            startActivity(intent);
         }
     };
 
@@ -91,8 +102,9 @@ public class WatchFragment extends Fragment {
         List<Watch> datas = new ArrayList<>();
         for (ESearchWord eSearchWord : eSearchWords) {
             Watch data = new Watch();
+            data.setId(eSearchWord.getId());
             data.setSearchWord(eSearchWord.getDescription());
-            data.setSearchType(SearchUtility.codeToDesc(eSearchWord.getSearch_type()));
+            data.setSearchType(SearchUtility.searchTypeCodeToDesc(eSearchWord.getSearch_type()));
             data.setTimeDesc(DateUtil.timeSpent(eSearchWord.getModified_date()));
             datas.add(data);
         }

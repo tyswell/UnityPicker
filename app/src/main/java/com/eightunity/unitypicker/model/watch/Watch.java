@@ -7,9 +7,18 @@ import java.util.Date;
  */
 public class Watch {
 
+    private int id;
     private String searchWord;
     private String searchType;
     private String timeDesc;
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
 
     public String getSearchWord() {
         return searchWord;

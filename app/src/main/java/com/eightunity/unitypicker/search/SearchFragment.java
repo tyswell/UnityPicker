@@ -7,7 +7,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
@@ -24,6 +23,8 @@ import java.util.Arrays;
  * Created by chokechaic on 8/26/2016.
  */
 public class SearchFragment extends Fragment {
+
+    private static final String TAG = "SearchFragment";
 
     private EditText searchText;
     private Spinner searchTypeSpinner;
@@ -61,7 +62,8 @@ public class SearchFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 Search search = getContent();
-                dao.add(getDBData(search));
+                int id = dao.add(getDBData(search));
+                Log.d(TAG, "ADD ID="+id);
             }
         };
     }
@@ -72,7 +74,7 @@ public class SearchFragment extends Fragment {
         ESearchWord data = new ESearchWord();
         data.setUsername(username);
         data.setDescription(search.getSearchWord());
-        data.setSearch_type(SearchUtility.descToCode(search.getSearchType()));
+        data.setSearch_type(SearchUtility.searhTypeDescToCode(search.getSearchType()));
         return data;
     }
 

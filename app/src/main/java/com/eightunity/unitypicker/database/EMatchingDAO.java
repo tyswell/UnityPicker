@@ -112,6 +112,30 @@ public class EMatchingDAO {
         return datas;
     }
 
+    public List<EMatching> getBySearchWord(String username, int searchWordId) {
+        String query =
+                "SELECT *" +
+                        " FROM " + TABLE_E_MATCHING +
+                        " WHERE " + USERNAME_FIELD + "='" + username + "'" +
+                            " AND " +  SEARCH_WORD_ID_FIELD + "=" + searchWordId +
+                        " ORDER BY " + MATCHING_DATE_FIELD + " DESC";
+        List<EMatching> datas = new ArrayList<>();
+
+        SQLiteDatabase db = DatabaseManager.getInstance().openDatabase();
+        Cursor cursor = db.rawQuery(query, null);
+
+        if (cursor.moveToFirst()) {
+            do {
+                datas.add(getData(cursor));
+            } while (cursor.moveToNext());
+        }
+
+        cursor.close();
+        DatabaseManager.getInstance().closeDatabase();
+
+        return datas;
+    }
+
     private EMatching getData(Cursor cursor) {
         EMatching data= new EMatching();
         data.setId(cursor.getInt(cursor.getColumnIndex(ID_FIELD)));

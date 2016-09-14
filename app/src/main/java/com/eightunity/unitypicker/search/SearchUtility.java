@@ -8,7 +8,7 @@ import com.eightunity.unitypicker.UnityPicker;
  */
 public class SearchUtility {
 
-    public static final int descToCode(String desc) {
+    public static int searhTypeDescToCode(String desc) {
         String[] searchTypeDatas = UnityPicker.getContext().getResources().getStringArray(R.array.search_type);
         int code = 1;
         for (int i = 0; i < searchTypeDatas.length; i++) {
@@ -21,10 +21,26 @@ public class SearchUtility {
         return 0;
     }
 
-    public static final String codeToDesc(int code) {
+    public static String searchTypeCodeToDesc(int code) {
         String[] searchTypeDatas = UnityPicker.getContext().getResources().getStringArray(R.array.search_type);
 
         return searchTypeDatas[code - 1];
+    }
+
+    public static int searchTypeLogo(String desc) {
+        String[] searchTypeDatas = UnityPicker.getContext().getResources().getStringArray(R.array.search_type);
+        for (int i = 0; i < searchTypeDatas.length; i++) {
+            if (searchTypeDatas[i].equals(desc)) {
+                switch (i) {
+                    case 0:
+                        return R.drawable.ic_action_bike;
+                    default:
+                        return android.R.drawable.ic_menu_zoom;
+                }
+            }
+        }
+
+        return android.R.drawable.ic_menu_zoom;
     }
 
 }
