@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/titleContentView"
+        android:textSize="16dp"
+        android:textStyle="bold"
+        android:layout_below="@+id/searchWordView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+    <TextView
+        android:id="@+id/webNameView"
+        android:layout_below="@+id/titleContentView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+    <TextView
+        android:id="@+id/timeDescView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/webNameView"/>
+    <ImageButton
+        android:id="@+id/optionBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/webNameView"
+        android:layout_alignParentRight="true"
+        android:src="@drawable/com_facebook_button_icon"/>
+
+</RelativeLayout>
