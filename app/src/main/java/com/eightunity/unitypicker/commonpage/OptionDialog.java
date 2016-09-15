@@ -28,7 +28,7 @@ public class OptionDialog extends Dialog {
     private int position;
 
     public OptionDialog(Context context) {
-        super(context, R.style.MaterialDialogSheet);
+        super(context/*, R.style.MaterialDialogSheet*/);
     }
 
     public void show(int position) {
@@ -39,11 +39,13 @@ public class OptionDialog extends Dialog {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.dialog_option);
+        View view = getLayoutInflater().inflate(R.layout.dialog_option, null);
+        setContentView(view);
 
         stopWatchingView = (TextView)findViewById(R.id.stopWatchingView);
         removeFromListView = (TextView)findViewById(R.id.removeFromListView);
         cancelView = (TextView)findViewById( R.id.cancelView);
+
 
         setCancelable(true);
         getWindow().setLayout(LinearLayout.LayoutParams.MATCH_PARENT,

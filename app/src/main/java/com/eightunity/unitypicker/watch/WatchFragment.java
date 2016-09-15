@@ -2,6 +2,7 @@ package com.eightunity.unitypicker.watch;
 
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -12,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.eightunity.unitypicker.R;
+import com.eightunity.unitypicker.commonpage.OptionDialog;
 import com.eightunity.unitypicker.database.ESearchWordDAO;
 import com.eightunity.unitypicker.match.MatchActivity;
 import com.eightunity.unitypicker.model.dao.ESearchWord;
@@ -41,6 +43,8 @@ public class WatchFragment extends Fragment {
 
     private ESearchWordDAO dao;
 
+    private OptionDialog dialog;
+
     List<Watch> watches = new ArrayList<>();
 
     @Nullable
@@ -64,31 +68,35 @@ public class WatchFragment extends Fragment {
 
     private void initView(View rootView) {
         watchRecycler = (RecyclerView) rootView.findViewById(R.id.watchRecycler);
-        watchAdapter = new WatchAdapter(rootView.getContext(), watches);
-        configRecyclerView(watchRecycler, watchAdapter, watchRecyclerListener, rootView.getContext());
+        watchAdapter = new WatchAdapter(rootView.getContext(), watches, recycleClick, optionClick);
+        configRecyclerView(watchRecycler, watchAdapter, rootView.getContext());
+
+        dialog = new OptionDialog(getContext());
+        dialog.setDialogResult(optionDialogResult);
     }
 
-    private void configRecyclerView(RecyclerView recyclerView, RecyclerView.Adapter adapter, RecycleClickListener listener, Context context) {
+    private OptionDialog.OnOptionDialogResult optionDialogResult = new OptionDialog.OnOptionDialogResult() {
+        @Override
+        public void finish(int mode, int position) {
+            if (OptionDialog.STOP_WATCHING_MODE == mode) {
+
+            } else if (OptionDialog.REMOVE_FROM_LIST_MODE == mode) {
+                dao.delete(watches.get(position).getId());
+                watchAdapter.removeAt(position);
+            } else {
+
+            }
+        }
+    };
+
+    private void configRecyclerView(RecyclerView recyclerView, RecyclerView.Adapter adapter, Context context) {
         recyclerView.setLayoutManager(new LinearLayoutManager(context));
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.addItemDecoration(new DividerItemDecoration(context, LinearLayoutManager.VERTICAL));
         recyclerView.setAdapter(adapter);
         recyclerView.setNestedScrollingEnabled(false);
         recyclerView.hasFixedSize();
-        recyclerView.addOnItemTouchListener(
-                new RecyclerTouchListener(context, recyclerView, listener));
     }
-
-    private RecycleClickListener watchRecyclerListener = new RecycleClickListener() {
-        @Override
-        public void onClick(View view, int position) {
-            Intent intent = new Intent(getContext(), MatchActivity.class);
-            intent.putExtra(SEARCH_WORD_ID_PARAM, watches.get(position).getId());
-            intent.putExtra(SEARCH_WORD_DETAIL_PARAM, watches.get(position).getSearchWord());
-            intent.putExtra(SEARCH_WORD_TYPE_PARAM, watches.get(position).getSearchType());
-            startActivity(intent);
-        }
-    };
 
     private void callWSMytask() {
         watches.clear();
@@ -111,5 +119,25 @@ public class WatchFragment extends Fragment {
 
         return datas;
     }
+
+    private RecycleClickListener recycleClick = new RecycleClickListener() {
+        @Override
+        public void onClick(View view, int position) {
+            Intent intent = new Intent(getContext(), MatchActivity.class);
+            intent.putExtra(SEARCH_WORD_ID_PARAM, watches.get(position).getId());
+            intent.putExtra(SEARCH_WORD_DETAIL_PARAM, watches.get(position).getSearchWord());
+            intent.putExtra(SEARCH_WORD_TYPE_PARAM, watches.get(position).getSearchType());
+            startActivity(intent);
+        }
+    };
+
+    private RecycleClickListener optionClick = new RecycleClickListener() {
+        @Override
+        public void onClick(View view, int position) {
+            dialog.show(position);
+        }
+    };
+
+
 
 }

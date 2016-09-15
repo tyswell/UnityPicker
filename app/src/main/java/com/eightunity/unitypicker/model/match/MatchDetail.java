@@ -5,10 +5,19 @@ package com.eightunity.unitypicker.model.match;
  */
 public class MatchDetail {
 
+    private int matchID;
     private String titleContent;
     private String webName;
     private String timeDesc;
     private String url;
+
+    public int getMatchID() {
+        return matchID;
+    }
+
+    public void setMatchID(int matchID) {
+        this.matchID = matchID;
+    }
 
     public String getTitleContent() {
         return titleContent;

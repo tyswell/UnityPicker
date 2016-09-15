@@ -11,6 +11,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.eightunity.unitypicker.R;
+import com.eightunity.unitypicker.commonpage.OptionDialog;
 import com.eightunity.unitypicker.database.EMatchingDAO;
 import com.eightunity.unitypicker.model.dao.EMatching;
 import com.eightunity.unitypicker.model.match.Match;
@@ -38,6 +39,8 @@ public class MatchActivity extends BaseActivity {
     private RecyclerView matchRecycler;
     private MatchAdapter matchAdapter;
 
+    private OptionDialog dialog;
+
     private EMatchingDAO dao;
 
     private List<MatchDetail> matchDetails = new ArrayList<>();
@@ -52,10 +55,13 @@ public class MatchActivity extends BaseActivity {
         searchTypeView = (TextView) findViewById(R.id.searchTypeView);
 
         matchRecycler = (RecyclerView) findViewById(R.id.matchRecycler);
-        matchAdapter = new MatchAdapter(this, matchDetails);
-        configRecyclerView(matchRecycler, matchAdapter, matchRecyclerListener, this);
+        matchAdapter = new MatchAdapter(this, matchDetails, recycleClick, optionClick);
+        configRecyclerView(matchRecycler, matchAdapter, this);
 
         dao = new EMatchingDAO();
+
+        dialog = new OptionDialog(this);
+        dialog.setDialogResult(optionDialogResult);
     }
 
     @Override
@@ -64,24 +70,14 @@ public class MatchActivity extends BaseActivity {
         callWSMytask();
     }
 
-    private void configRecyclerView(RecyclerView recyclerView, RecyclerView.Adapter adapter, RecycleClickListener listener, Context context) {
+    private void configRecyclerView(RecyclerView recyclerView, RecyclerView.Adapter adapter, Context context) {
         recyclerView.setLayoutManager(new LinearLayoutManager(context));
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.addItemDecoration(new DividerItemDecoration(context, LinearLayoutManager.VERTICAL));
         recyclerView.setAdapter(adapter);
         recyclerView.setNestedScrollingEnabled(false);
         recyclerView.hasFixedSize();
-        recyclerView.addOnItemTouchListener(
-                new RecyclerTouchListener(context, recyclerView, listener));
     }
-
-    private RecycleClickListener matchRecyclerListener = new RecycleClickListener() {
-        @Override
-        public void onClick(View view, int position) {
-            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(matchDetails.get(position).getUrl()));
-            startActivity(browserIntent);
-        }
-    };
 
     private void callWSMytask() {
         int SearchWordId = getSearchWordId();
@@ -105,6 +101,7 @@ public class MatchActivity extends BaseActivity {
         List<MatchDetail> datas = new ArrayList<>();
         for (EMatching eMatching : eMatchings) {
             MatchDetail data = new MatchDetail();
+            data.setMatchID(eMatching.getId());
             data.setTimeDesc(DateUtil.timeSpent(eMatching.getMatching_date()));
             data.setTitleContent(eMatching.getTitle_content());
             data.setWebName(eMatching.getWeb_name());
@@ -126,4 +123,33 @@ public class MatchActivity extends BaseActivity {
         match.setSearchType(getIntent().getStringExtra(WatchFragment.SEARCH_WORD_TYPE_PARAM));
         return match;
     }
+
+    private OptionDialog.OnOptionDialogResult optionDialogResult = new OptionDialog.OnOptionDialogResult() {
+        @Override
+        public void finish(int mode, int position) {
+            if (OptionDialog.STOP_WATCHING_MODE == mode) {
+
+            } else if (OptionDialog.REMOVE_FROM_LIST_MODE == mode) {
+                dao.delete(matchDetails.get(position).getMatchID());
+                matchAdapter.removeAt(position);
+            } else {
+
+            }
+        }
+    };
+
+    private RecycleClickListener recycleClick = new RecycleClickListener() {
+        @Override
+        public void onClick(View view, int position) {
+            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(matchDetails.get(position).getUrl()));
+            startActivity(browserIntent);
+        }
+    };
+
+    private RecycleClickListener optionClick = new RecycleClickListener() {
+        @Override
+        public void onClick(View view, int position) {
+            dialog.show(position);
+        }
+    };
 }

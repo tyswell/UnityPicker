@@ -14,7 +14,7 @@ import com.eightunity.unitypicker.ui.recyclerview.RecycleClickListener;
 /**
  * Created by chokechaic on 8/26/2016.
  */
-public class NotificationViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
+public class NotificationViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
     private static final String TAG = "NotificationViewHolder";
 
@@ -39,7 +39,6 @@ public class NotificationViewHolder extends RecyclerView.ViewHolder implements V
         titleContentView.setOnClickListener(this);
         webNameView.setOnClickListener(this);
         timeDescView.setOnClickListener(this);
-        searchWordView.setOnClickListener(this);
         optionBtn.setOnClickListener(this);
 
         this.recycleClick = recycleClick;

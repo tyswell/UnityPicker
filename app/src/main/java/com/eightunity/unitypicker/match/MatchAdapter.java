@@ -10,6 +10,7 @@ import com.eightunity.unitypicker.R;
 import com.eightunity.unitypicker.model.Notificaiton.Notification;
 import com.eightunity.unitypicker.model.match.MatchDetail;
 import com.eightunity.unitypicker.notification.NotificationViewHolder;
+import com.eightunity.unitypicker.ui.recyclerview.RecycleClickListener;
 
 import java.util.List;
 
@@ -20,10 +21,14 @@ public class MatchAdapter extends RecyclerView.Adapter<MatchViewHolder> {
 
     private List<MatchDetail> matchDetails;
     private Context context;
+    private RecycleClickListener recycleClick;
+    private RecycleClickListener optionClick;
 
-    public MatchAdapter(Context context, List<MatchDetail> matchDetails) {
+    public MatchAdapter(Context context, List<MatchDetail> matchDetails, RecycleClickListener recycleClick, RecycleClickListener optionClick) {
         this.matchDetails = matchDetails;
         this.context = context;
+        this.recycleClick = recycleClick;
+        this.optionClick = optionClick;
     }
 
     @Override
@@ -32,7 +37,7 @@ public class MatchAdapter extends RecyclerView.Adapter<MatchViewHolder> {
                 R.layout.recycler_row_match,
                 parent,
                 false);
-        return new MatchViewHolder(itemView);
+        return new MatchViewHolder(itemView, recycleClick, optionClick);
     }
 
     @Override
@@ -47,6 +52,12 @@ public class MatchAdapter extends RecyclerView.Adapter<MatchViewHolder> {
     @Override
     public int getItemCount() {
         return matchDetails.size();
+    }
+
+    public void removeAt(int position) {
+        matchDetails.remove(position);
+        notifyItemRemoved(position);
+        notifyItemRangeChanged(position, matchDetails.size());
     }
 
 }
