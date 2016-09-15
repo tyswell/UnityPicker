@@ -5,11 +5,20 @@ package com.eightunity.unitypicker.model.Notificaiton;
  */
 public class Notification {
 
+    private int matchId;
     private String searchWord;
     private String titleContent;
     private String webName;
     private String timeDesc;
     private String url;
+
+    public int getMatchId() {
+        return matchId;
+    }
+
+    public void setMatchId(int matchId) {
+        this.matchId = matchId;
+    }
 
     public String getTimeDesc() {
         return timeDesc;

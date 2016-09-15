@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 
 import com.eightunity.unitypicker.R;
 import com.eightunity.unitypicker.model.Notificaiton.Notification;
+import com.eightunity.unitypicker.ui.recyclerview.RecycleClickListener;
 
 import java.util.List;
 
@@ -18,10 +19,14 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationViewHo
 
     private List<Notification> notifications;
     private Context context;
+    private RecycleClickListener recycleClick;
+    private RecycleClickListener optionClick;
 
-    public NotificationAdapter(Context context, List<Notification> notifications) {
+    public NotificationAdapter(Context context, List<Notification> notifications, RecycleClickListener recycleClick, RecycleClickListener optionClick) {
         this.notifications = notifications;
         this.context = context;
+        this.recycleClick = recycleClick;
+        this.optionClick = optionClick;
     }
 
     @Override
@@ -30,7 +35,7 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationViewHo
                 R.layout.recycler_row_notification,
                 parent,
                 false);
-        return new NotificationViewHolder(itemView);
+        return new NotificationViewHolder(itemView, recycleClick, optionClick);
     }
 
     @Override
@@ -41,6 +46,13 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationViewHo
         holder.titleContentView.setText(notification.getTitleContent());
         holder.webNameView.setText(notification.getWebName());
         holder.timeDescView.setText(notification.getTimeDesc());
+
+    }
+
+    public void removeAt(int position) {
+        notifications.remove(position);
+        notifyItemRemoved(position);
+        notifyItemRangeChanged(position, notifications.size());
     }
 
     @Override

@@ -15,4 +15,8 @@
 
     <string name="server_client_id">124874219817-6c41juoe7aerqljrfava34teprvle9ka.apps.googleusercontent.com</string>
     <string name="base_service_url">http://10.0.3.2:8080/boot/</string>
+
+    <string name="stop_watching">Stop Watching</string>
+    <string name="remove_from_List">Remove from list</string>
+    <string name="cancel">Cancel</string>
 </resources>
