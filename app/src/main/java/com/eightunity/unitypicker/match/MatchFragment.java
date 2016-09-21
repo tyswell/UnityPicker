@@ -148,6 +148,8 @@ public class MatchFragment extends Fragment{
     public void startArtical(int searchWordID, String searchWordDetail, String searchTypeDesc) {
         Log.d(TAG, "searchWordID="+searchWordID + " ||searchWordDetail="+searchWordDetail + " ||searchTypeDesc="+searchTypeDesc);
 
+        ((MainActivity)getActivity()).showBackActionBar();
+
         matchDetails.clear();
         matchDetails.addAll(getMatchDetailFromDB(searchWordID));
         matchAdapter.notifyDataSetChanged();

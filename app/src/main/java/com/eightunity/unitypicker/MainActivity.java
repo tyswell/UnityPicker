@@ -78,11 +78,14 @@ public class MainActivity extends BaseActivity {
                 }
             });
 
+        hideBackActionBar();
+
 
         tabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
                 viewPager.setCurrentItem(tab.getPosition());
+                hideBackActionBar();
             }
 
             @Override
@@ -94,6 +97,7 @@ public class MainActivity extends BaseActivity {
             public void onTabReselected(TabLayout.Tab tab) {
                 if (viewPager.getCurrentItem() == MATCH_PAGE) {
                     viewPager.setCurrentItem(WATCH_PAGE);
+                    hideBackActionBar();
                 }
             }
         });
@@ -113,8 +117,10 @@ public class MainActivity extends BaseActivity {
                 if (viewPager.getCurrentItem() == MATCH_PAGE) {
                     viewPager.setCurrentItem(WATCH_PAGE);
                 }
+                hideBackActionBar();
             }
         });
+
     }
 
 
