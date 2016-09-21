@@ -6,6 +6,7 @@
     <string name="profile_footer">Profile</string>
     <string name="notification_footer">Notification</string>
     <string name="watch_footer">Watch</string>
+    <string name="match_footer">Match</string>
 
     <string name="search_button">Search</string>
 

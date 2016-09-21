@@ -1,29 +1,32 @@
 package com.eightunity.unitypicker.watch;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.eightunity.unitypicker.MainActivity;
 import com.eightunity.unitypicker.R;
 import com.eightunity.unitypicker.commonpage.OptionDialog;
 import com.eightunity.unitypicker.database.ESearchWordDAO;
-import com.eightunity.unitypicker.match.MatchActivity;
+import com.eightunity.unitypicker.match.MatchFragment;
+import com.eightunity.unitypicker.model.account.User;
 import com.eightunity.unitypicker.model.dao.ESearchWord;
 import com.eightunity.unitypicker.model.watch.Watch;
 import com.eightunity.unitypicker.search.SearchUtility;
 import com.eightunity.unitypicker.ui.BaseActivity;
 import com.eightunity.unitypicker.ui.LinearLayoutManager;
+import com.eightunity.unitypicker.ui.NonSwipeViewPager;
 import com.eightunity.unitypicker.ui.recyclerview.DividerItemDecoration;
 import com.eightunity.unitypicker.ui.recyclerview.RecycleClickListener;
-import com.eightunity.unitypicker.ui.recyclerview.RecyclerTouchListener;
 import com.eightunity.unitypicker.utility.DateUtil;
 
 import java.util.ArrayList;
@@ -45,12 +48,27 @@ public class WatchFragment extends Fragment {
 
     private OptionDialog dialog;
 
+    private OnHeadlineSelectedListener mCallback;
+
+    private NonSwipeViewPager vp;
+
     List<Watch> watches = new ArrayList<>();
+
+    public interface OnHeadlineSelectedListener{
+        public void onArticleSelected(int searchWordID, String searchWordDetail, String searchTypeDesc) ;
+    }
+
+    public static WatchFragment newInstance() {
+        return new WatchFragment();
+    }
+
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView =  inflater.inflate(R.layout.fragment_watch, container, false);
+
+
 
         initView(rootView);
 
@@ -70,6 +88,8 @@ public class WatchFragment extends Fragment {
         watchRecycler = (RecyclerView) rootView.findViewById(R.id.watchRecycler);
         watchAdapter = new WatchAdapter(rootView.getContext(), watches, recycleClick, optionClick);
         configRecyclerView(watchRecycler, watchAdapter, rootView.getContext());
+
+        vp = (NonSwipeViewPager) getActivity().findViewById(R.id.viewpager);
 
         dialog = new OptionDialog(getContext());
         dialog.setDialogResult(optionDialogResult);
@@ -123,13 +143,16 @@ public class WatchFragment extends Fragment {
     private RecycleClickListener recycleClick = new RecycleClickListener() {
         @Override
         public void onClick(View view, int position) {
-            Intent intent = new Intent(getContext(), MatchActivity.class);
-            intent.putExtra(SEARCH_WORD_ID_PARAM, watches.get(position).getId());
-            intent.putExtra(SEARCH_WORD_DETAIL_PARAM, watches.get(position).getSearchWord());
-            intent.putExtra(SEARCH_WORD_TYPE_PARAM, watches.get(position).getSearchType());
-            startActivity(intent);
+            vp.setCurrentItem(MainActivity.MATCH_PAGE);
+            mCallback.onArticleSelected(watches.get(position).getId(),
+                    watches.get(position).getSearchWord(),
+                    watches.get(position).getSearchType());
         }
     };
+
+    public void setMyFragmentListener(OnHeadlineSelectedListener listener) {
+        mCallback = listener;
+    }
 
     private RecycleClickListener optionClick = new RecycleClickListener() {
         @Override

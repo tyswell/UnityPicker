@@ -12,6 +12,7 @@ import com.bumptech.glide.DrawableTypeRequest;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.eightunity.unitypicker.MainActivity;
 import com.eightunity.unitypicker.R;
 import com.eightunity.unitypicker.ui.AuthenticaterActivity;
 import com.eightunity.unitypicker.ui.BaseActivity;
@@ -27,6 +28,10 @@ public class ProfileFragment extends Fragment {
     private TextView usernameView;
     private Button logoutBtn;
 
+    public static ProfileFragment newInstance() {
+        return new ProfileFragment();
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_profile, container, false);
@@ -35,7 +40,9 @@ public class ProfileFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
+
         callWSMytask();
+
     }
 
     @Override

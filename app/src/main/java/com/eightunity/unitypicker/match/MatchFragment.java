@@ -4,15 +4,22 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.eightunity.unitypicker.MainActivity;
 import com.eightunity.unitypicker.R;
 import com.eightunity.unitypicker.commonpage.OptionDialog;
 import com.eightunity.unitypicker.database.EMatchingDAO;
+import com.eightunity.unitypicker.model.account.User;
 import com.eightunity.unitypicker.model.dao.EMatching;
 import com.eightunity.unitypicker.model.match.Match;
 import com.eightunity.unitypicker.model.match.MatchDetail;
@@ -21,9 +28,7 @@ import com.eightunity.unitypicker.ui.BaseActivity;
 import com.eightunity.unitypicker.ui.LinearLayoutManager;
 import com.eightunity.unitypicker.ui.recyclerview.DividerItemDecoration;
 import com.eightunity.unitypicker.ui.recyclerview.RecycleClickListener;
-import com.eightunity.unitypicker.ui.recyclerview.RecyclerTouchListener;
 import com.eightunity.unitypicker.utility.DateUtil;
-import com.eightunity.unitypicker.watch.WatchFragment;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,7 +36,9 @@ import java.util.List;
 /**
  * Created by chokechaic on 9/14/2016.
  */
-public class MatchActivity extends BaseActivity {
+public class MatchFragment extends Fragment{
+
+    private static final String TAG = "MatchFragment";
 
     private TextView searchWordView;
     private ImageView logo;
@@ -45,29 +52,34 @@ public class MatchActivity extends BaseActivity {
 
     private List<MatchDetail> matchDetails = new ArrayList<>();
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_match);
-
-        searchWordView = (TextView) findViewById(R.id.searchWordView);
-        logo = (ImageView) findViewById(R.id.logo);
-        searchTypeView = (TextView) findViewById(R.id.searchTypeView);
-
-        matchRecycler = (RecyclerView) findViewById(R.id.matchRecycler);
-        matchAdapter = new MatchAdapter(this, matchDetails, recycleClick, optionClick);
-        configRecyclerView(matchRecycler, matchAdapter, this);
-
-        dao = new EMatchingDAO();
-
-        dialog = new OptionDialog(this);
-        dialog.setDialogResult(optionDialogResult);
+    public static MatchFragment newInstance() {
+        return new MatchFragment();
     }
 
     @Override
-    protected void onStart() {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View rootView = inflater.inflate(R.layout.fragment_match, container, false);
+
+        searchWordView = (TextView) rootView.findViewById(R.id.searchWordView);
+        logo = (ImageView) rootView.findViewById(R.id.logo);
+        searchTypeView = (TextView) rootView.findViewById(R.id.searchTypeView);
+
+        matchRecycler = (RecyclerView) rootView.findViewById(R.id.matchRecycler);
+        matchAdapter = new MatchAdapter(getContext(), matchDetails, recycleClick, optionClick);
+        configRecyclerView(matchRecycler, matchAdapter, getContext());
+
+        dao = new EMatchingDAO();
+
+        dialog = new OptionDialog(getContext());
+        dialog.setDialogResult(optionDialogResult);
+
+        return rootView;
+    }
+
+    @Override
+    public void onStart() {
         super.onStart();
-        callWSMytask();
+
     }
 
     private void configRecyclerView(RecyclerView recyclerView, RecyclerView.Adapter adapter, Context context) {
@@ -79,24 +91,15 @@ public class MatchActivity extends BaseActivity {
         recyclerView.hasFixedSize();
     }
 
-    private void callWSMytask() {
-        int SearchWordId = getSearchWordId();
-        matchDetails.clear();
-        matchDetails.addAll(getMatchDetailFromDB(SearchWordId));
-        matchAdapter.notifyDataSetChanged();
-
-        setMatchData();
-    }
-
-    private void setMatchData() {
-        Match match = getMatchFromIntent();
+    private void setMatchData(Match match) {
         searchWordView.setText(match.getSearchWord());
         searchTypeView.setText(match.getSearchType());
         logo.setImageResource(SearchUtility.searchTypeLogo(match.getSearchType()));
     }
 
     private List<MatchDetail> getMatchDetailFromDB(int searchWordId) {
-        String username = getUser().getUsername();
+        String username = ((BaseActivity)getActivity()).getUser().getUsername();
+        Log.d(TAG, "searchWordId="+searchWordId);
         List<EMatching> eMatchings = dao.getBySearchWord(username, searchWordId);
         List<MatchDetail> datas = new ArrayList<>();
         for (EMatching eMatching : eMatchings) {
@@ -112,17 +115,6 @@ public class MatchActivity extends BaseActivity {
         return datas;
     }
 
-    public int getSearchWordId() {
-        int id = getIntent().getIntExtra(WatchFragment.SEARCH_WORD_ID_PARAM, 0);
-        return id;
-    }
-
-    public Match getMatchFromIntent() {
-        Match match = new Match();
-        match.setSearchWord(getIntent().getStringExtra(WatchFragment.SEARCH_WORD_DETAIL_PARAM));
-        match.setSearchType(getIntent().getStringExtra(WatchFragment.SEARCH_WORD_TYPE_PARAM));
-        return match;
-    }
 
     private OptionDialog.OnOptionDialogResult optionDialogResult = new OptionDialog.OnOptionDialogResult() {
         @Override
@@ -152,4 +144,17 @@ public class MatchActivity extends BaseActivity {
             dialog.show(position);
         }
     };
+
+    public void startArtical(int searchWordID, String searchWordDetail, String searchTypeDesc) {
+        Log.d(TAG, "searchWordID="+searchWordID + " ||searchWordDetail="+searchWordDetail + " ||searchTypeDesc="+searchTypeDesc);
+
+        matchDetails.clear();
+        matchDetails.addAll(getMatchDetailFromDB(searchWordID));
+        matchAdapter.notifyDataSetChanged();
+
+        Match match = new Match();
+        match.setSearchWord(searchWordDetail);
+        match.setSearchType(searchTypeDesc);
+        setMatchData(match);
+    }
 }

@@ -11,6 +11,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 
+import com.eightunity.unitypicker.MainActivity;
 import com.eightunity.unitypicker.R;
 import com.eightunity.unitypicker.database.ESearchWordDAO;
 import com.eightunity.unitypicker.model.dao.ESearchWord;
@@ -31,6 +32,10 @@ public class SearchFragment extends Fragment {
     private Button searchButton;
     private SearchTypeAdapter searchTypeAdapter;
     private ESearchWordDAO dao;
+
+    public static SearchFragment newInstance() {
+        return new SearchFragment();
+    }
 
     @Nullable
     @Override

@@ -54,6 +54,10 @@ public class NotificationFragment extends Fragment {
 
     List<Notification> notifications = new ArrayList<>();
 
+    public static NotificationFragment newInstance() {
+        return new NotificationFragment();
+    }
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
