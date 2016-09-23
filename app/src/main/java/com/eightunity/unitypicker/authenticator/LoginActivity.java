@@ -7,19 +7,25 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.eightunity.unitypicker.MainActivity;
 import com.eightunity.unitypicker.R;
+import com.eightunity.unitypicker.UnityPicker;
 import com.eightunity.unitypicker.authenticator.Constant.AuthenticatorConstant;
 import com.eightunity.unitypicker.model.account.User;
 import com.eightunity.unitypicker.model.service.ResponseService;
 import com.eightunity.unitypicker.service.ApiService;
+import com.eightunity.unitypicker.ui.Application;
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
@@ -30,6 +36,7 @@ import com.facebook.GraphResponse;
 import com.facebook.HttpMethod;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
+import com.facebook.login.widget.LoginButton;
 import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.auth.api.Auth;
@@ -38,10 +45,19 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthCredential;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FacebookAuthProvider;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.GoogleAuthProvider;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.util.Arrays;
 
 import retrofit2.Call;
@@ -72,23 +88,19 @@ public class LoginActivity extends AccountAuthenticatorActivity {
     public final Handler mHandler = new Handler();
     private SessionStatusCallback mStatusCallback = new SessionStatusCallback();
 
+    private FirebaseAuth mAuth;
+    private FirebaseAuth.AuthStateListener mAuthListener;
+
     @Override
     protected void onCreate(Bundle icicle) {
         super.onCreate(icicle);
-        FacebookSdk.sdkInitialize(getApplicationContext());
-        // [START configure_signin]
-        // Configure sign-in to request the user's ID, email address, and basic
-        // profile. ID and basic profile are included in DEFAULT_SIGN_IN.
+        FacebookSdk.sdkInitialize(this);
+
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.server_client_id))
                 .requestEmail()
                 .build();
 
-        // [START build_client]
-        // Build a GoogleApiClient with access to the Google Sign-In API and the
-        // options specified by gso.
-        // ATTENTION: This "addApi(AppIndex.API)"was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
                 .addApi(AppIndex.API).build();
@@ -97,14 +109,33 @@ public class LoginActivity extends AccountAuthenticatorActivity {
 
         final LoginActivity activity = this;
 
-        Button facebookBtn = (Button) findViewById(R.id.login_facebook_button);
-        facebookBtn.setOnClickListener(new View.OnClickListener() {
+        LoginButton facebookBtn = (LoginButton) findViewById(R.id.login_facebook_button);
+        mCallbackManager = CallbackManager.Factory.create();
+        facebookBtn.setReadPermissions("email", "public_profile");
+        facebookBtn.registerCallback(mCallbackManager, new FacebookCallback<LoginResult>() {
             @Override
-            public void onClick(View v) {
-                LoginManager.getInstance().registerCallback(mCallbackManager, mStatusCallback);
-                LoginManager.getInstance().logInWithReadPermissions(activity, Arrays.asList(Authenticator.REQUIRED_PERMISSIONS));
+            public void onSuccess(LoginResult loginResult) {
+                Log.d(TAG, "facebook:onSuccess:" + loginResult);
+                handleFacebookAccessToken(loginResult.getAccessToken());
+            }
+
+            @Override
+            public void onCancel() {
+                Log.d(TAG, "facebook:onCancel");
+            }
+
+            @Override
+            public void onError(FacebookException error) {
+                Log.d(TAG, "facebook:onError", error);
             }
         });
+//        facebookBtn.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                LoginManager.getInstance().registerCallback(mCallbackManager, mStatusCallback);
+//                LoginManager.getInstance().logInWithReadPermissions(activity, Arrays.asList(Authenticator.REQUIRED_PERMISSIONS));
+//            }
+//        });
 
         SignInButton googleBtn = (SignInButton) findViewById(R.id.login_google_button);
         googleBtn.setOnClickListener(new View.OnClickListener() {
@@ -138,7 +169,55 @@ public class LoginActivity extends AccountAuthenticatorActivity {
         mRequestNewAccount = (mUsername == null);
 
 
-        mCallbackManager = CallbackManager.Factory.create();
+
+
+        mAuth = FirebaseAuth.getInstance();
+        mAuthListener = new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                FirebaseUser fuser = firebaseAuth.getCurrentUser();
+                if (fuser != null) {
+                    Log.d(TAG, "onAuthStateChanged:signed_in:" + fuser.getUid());
+                    User user = setUserInfo(fuser);
+
+
+                    SharedPreferences pref = getApplicationContext().getSharedPreferences(AuthenticatorConstant.SHARE_PREFERENCE_NAME, 0); // 0 - for private mode
+                    SharedPreferences.Editor editor = pref.edit();
+                    editor.putString(AuthenticatorConstant.PARAM_USERNAME, user.getUsername());
+                    editor.putString(AuthenticatorConstant.PARAM_NAME, user.getName());
+                    editor.putString(AuthenticatorConstant.PARAM_TOEN, user.getToken());
+                    editor.putString(AuthenticatorConstant.PARAM_PROFILE_URL, user.getProfileURL());
+                    editor.putString(AuthenticatorConstant.PARAM_PROVIDERID, user.getTokenType());
+                    editor.commit();
+
+                    loginService(user);
+                } else {
+                    Log.d(TAG, "onAuthStateChanged:signed_out");
+                }
+
+            }
+        };
+    }
+
+    private User setUserInfo(FirebaseUser fuser) {
+        User user = new User();
+
+        String authToken = fuser.getUid();
+        String name = fuser.getDisplayName();
+        String username = fuser.getEmail();
+        String providerID = fuser.getProviderId();
+
+//        File myFile = new File(fuser.getPhotoUrl().getPath());
+        String photoUrl = fuser.getPhotoUrl().toString();
+        Log.d(TAG, "photoUrl="+photoUrl);
+
+        user.setUsername(username);
+        user.setToken(authToken);
+        user.setProfileURL(photoUrl);
+        user.setName(name);
+        user.setTokenType(providerID);
+
+        return user;
     }
 
     @Override
@@ -156,6 +235,8 @@ public class LoginActivity extends AccountAuthenticatorActivity {
     @Override
     public void onStart() {
         super.onStart();
+
+        mAuth.addAuthStateListener(mAuthListener);
 
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
@@ -177,6 +258,10 @@ public class LoginActivity extends AccountAuthenticatorActivity {
     public void onStop() {
         super.onStop();
 
+        if (mAuthListener != null) {
+            mAuth.removeAuthStateListener(mAuthListener);
+        }
+
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
         Action viewAction = Action.newAction(
@@ -197,17 +282,19 @@ public class LoginActivity extends AccountAuthenticatorActivity {
 
         @Override
         public void onSuccess(LoginResult loginResult) {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    mLoading.show();
-                }
-            });
-            Bundle parameters = new Bundle();
-            parameters.putString("fields", "id,name,first_name,middle_name,last_name,link,email");
-            GraphRequest gr = new GraphRequest(AccessToken.getCurrentAccessToken(),
-                    "me", parameters, HttpMethod.GET, new getUserInfo());
-            gr.executeAsync();
+//            mHandler.post(new Runnable() {
+//                @Override
+//                public void run() {
+//                    mLoading.show();
+//                }
+//            });
+//            Bundle parameters = new Bundle();
+//            parameters.putString("fields", "id,name,first_name,middle_name,last_name,link,email");
+//            GraphRequest gr = new GraphRequest(AccessToken.getCurrentAccessToken(),
+//                    "me", parameters, HttpMethod.GET, new getUserInfo());
+//            gr.executeAsync();
+            Log.d(TAG, "facebook:onSuccess:" + loginResult);
+            handleFacebookAccessToken(loginResult.getAccessToken());
         }
 
         @Override
@@ -223,43 +310,55 @@ public class LoginActivity extends AccountAuthenticatorActivity {
         }
     }
 
-    public class getUserInfo implements GraphRequest.Callback {
+    private void handleFacebookAccessToken(AccessToken token) {
+        Log.d(TAG, "handleFacebookAccessToken:" + token.getToken());
 
-        @Override
-        public void onCompleted(GraphResponse response) {
-            Log.i("response profile", response.toString());
-            if (response.getError() == null) {
-                try {
-                    JSONObject userInfo = response.getJSONObject();
-                    String username = userInfo.getString("email");
-                    String userID =  userInfo.getString("id");
-                    String name =  userInfo.getString("name");
-                    Log.d("FACEBO", "userID = "+userID);
-                    Log.d("FACEBO", "name = "+name);
-                    if (username == null ||
-                            username.length() == 0) {
-                        username = AccessToken.getCurrentAccessToken().getToken();
-                    }
-                    final String accessToken = AccessToken.getCurrentAccessToken().getToken();
-
-                    User user = new User();
-                    user.setName(name);
-                    user.setUserId(userID);
-                    user.setUsername(username);
-                    user.setToken(accessToken);
-                    user.setTokenType(AuthenticatorConstant.FACEBOOK_ACCOUNTYTPE);
-                    user.setProfileURL("https://graph.facebook.com/" + userID + "/picture?type=large");
-                    loginService(user);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            } else {
-                mHandler.post(new DisplayException("API error:\n" + response.getError().getErrorMessage()));
+        AuthCredential credential = FacebookAuthProvider.getCredential(token.getToken());
+        mAuth.signInWithCredential(credential).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+            @Override
+            public void onComplete(@NonNull Task<AuthResult> task) {
+                Log.d(TAG, "signInWithCredential:onComplete:" + task.isSuccessful());
             }
-        }
+        });
     }
 
-    private void setAuthenticator(final String username, final String token, final String tokenType, final String profileUrl) {
+//    public class getUserInfo implements GraphRequest.Callback {
+//
+//        @Override
+//        public void onCompleted(GraphResponse response) {
+//            Log.i("response profile", response.toString());
+//            if (response.getError() == null) {
+//                try {
+//                    JSONObject userInfo = response.getJSONObject();
+//                    String username = userInfo.getString("email");
+//                    String userID =  userInfo.getString("id");
+//                    String name =  userInfo.getString("name");
+//                    Log.d("FACEBO", "userID = "+userID);
+//                    Log.d("FACEBO", "name = "+name);
+//                    if (username == null ||
+//                            username.length() == 0) {
+//                        username = AccessToken.getCurrentAccessToken().getToken();
+//                    }
+//                    final String accessToken = AccessToken.getCurrentAccessToken().getToken();
+//
+//                    User user = new User();
+//                    user.setName(name);
+//                    user.setUserId(userID);
+//                    user.setUsername(username);
+//                    user.setToken(accessToken);
+//                    user.setTokenType(AuthenticatorConstant.FACEBOOK_ACCOUNTYTPE);
+//                    user.setProfileURL("https://graph.facebook.com/" + userID + "/picture?type=large");
+//                    loginService(user);
+//                } catch (JSONException e) {
+//                    e.printStackTrace();
+//                }
+//            } else {
+//                mHandler.post(new DisplayException("API error:\n" + response.getError().getErrorMessage()));
+//            }
+//        }
+//    }
+
+    private void setAuthenticator(final String username, final String token, final String tokenType, final String profileUrl, final String name) {
         Account account;
         if (mRequestNewAccount) {
             account = new Account(username, AuthenticatorConstant.UNITY_PICKER_ACCOUNTYTPE);
@@ -278,6 +377,8 @@ public class LoginActivity extends AccountAuthenticatorActivity {
                 intent.putExtra(AccountManager.KEY_ACCOUNT_NAME, username);
                 intent.putExtra(AccountManager.KEY_ACCOUNT_TYPE, tokenType);
                 intent.putExtra(AccountManager.KEY_AUTHTOKEN, token);
+                intent.putExtra(AuthenticatorConstant.PARAM_PROFILE_URL, profileUrl);
+                intent.putExtra(AuthenticatorConstant.PARAM_NAME, name);
                 setAccountAuthenticatorResult(intent.getExtras());
                 setResult(1, intent);
                 finish();
@@ -318,16 +419,12 @@ public class LoginActivity extends AccountAuthenticatorActivity {
         if (result.isSuccess()) {
             // Signed in successfully, show authenticated UI.
             GoogleSignInAccount acct = result.getSignInAccount();
-            String idToken = acct.getIdToken();
-            Log.d(TAG, "ID Token: " + idToken);
-
-            //TODO CALL SERVICE TO REGISTER
-            User user = new User();
-            user.setUsername(acct.getEmail());
-            user.setToken(idToken);
-            user.setTokenType(AuthenticatorConstant.GOOGLE_ACCOUNTYTPE);
-            user.setProfileURL(acct.getPhotoUrl().toString());
-            loginService(user);
+            if (result.isSuccess()) {
+                // Google Sign In was successful, authenticate with Firebase
+                GoogleSignInAccount account = result.getSignInAccount();
+                firebaseAuthWithGoogle(account);
+            } else {
+            }
 
 //            Account account = new Account(acct.getEmail(), AuthenticatorConstant.UNITY_PICKER_ACCOUNTYTPE);
 //            mAccountManager.addAccountExplicitly(account, idToken, null);
@@ -342,6 +439,18 @@ public class LoginActivity extends AccountAuthenticatorActivity {
         } else {
             // Signed out, show unauthenticated UI.
         }
+    }
+
+    private void firebaseAuthWithGoogle(GoogleSignInAccount acct) {
+        Log.d(TAG, "firebaseAuthWithGoogle:" + acct.getId());
+
+        AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
+        mAuth.signInWithCredential(credential).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+            @Override
+            public void onComplete(@NonNull Task<AuthResult> task) {
+                Log.d(TAG, "signInWithCredential:onComplete:" + task.isSuccessful());
+            }
+        });
     }
 
     @Override
@@ -395,7 +504,7 @@ public class LoginActivity extends AccountAuthenticatorActivity {
         });
         */
 
-        setAuthenticator(user.getUsername(), user.getToken(), user.getTokenType(), user.getProfileURL());
+        setAuthenticator(user.getUsername(), user.getToken(), user.getTokenType(), user.getProfileURL(), user.getName());
     }
 
 

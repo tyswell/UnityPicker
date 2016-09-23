@@ -84,8 +84,15 @@ public class MainActivity extends BaseActivity {
         tabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
-                viewPager.setCurrentItem(tab.getPosition());
-                hideBackActionBar();
+                Log.d(TAG, "onTabSelected position = " + tab.getPosition());
+                Log.d(TAG, "onTabSelected getCurrentItem = " + viewPager.getCurrentItem());
+                if (viewPager.getCurrentItem() == MATCH_PAGE && tab.getPosition() == WATCH_PAGE) {
+                    viewPager.setCurrentItem(MATCH_PAGE);
+                } else {
+                    viewPager.setCurrentItem(tab.getPosition());
+                    hideBackActionBar();
+                }
+
             }
 
             @Override
@@ -95,9 +102,12 @@ public class MainActivity extends BaseActivity {
 
             @Override
             public void onTabReselected(TabLayout.Tab tab) {
+                Log.d(TAG, "onTabReselected position = "+tab.getPosition());
                 if (viewPager.getCurrentItem() == MATCH_PAGE) {
                     viewPager.setCurrentItem(WATCH_PAGE);
                     hideBackActionBar();
+                } else {
+                    viewPager.setCurrentItem(tab.getPosition());
                 }
             }
         });
@@ -105,6 +115,27 @@ public class MainActivity extends BaseActivity {
         setupTabIcons();
 
         setStartPage();
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        outState.putInt("CURRENT_ITEM", viewPager.getCurrentItem());
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+
+        int currentPage = savedInstanceState.getInt("CURRENT_ITEM");
+        Log.d(TAG, "currentPage="+currentPage);
+
+        if (currentPage == MATCH_PAGE) {
+            Log.d(TAG, "setPAGE");
+            viewPager.setCurrentItem(MATCH_PAGE);
+            tabLayout.getTabAt(WATCH_PAGE).select();
+        }
     }
 
     public void showBackActionBar() {

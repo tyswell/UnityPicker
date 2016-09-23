@@ -1,14 +1,12 @@
 package com.eightunity.unitypicker.watch;
 
-import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,8 +15,6 @@ import com.eightunity.unitypicker.MainActivity;
 import com.eightunity.unitypicker.R;
 import com.eightunity.unitypicker.commonpage.OptionDialog;
 import com.eightunity.unitypicker.database.ESearchWordDAO;
-import com.eightunity.unitypicker.match.MatchFragment;
-import com.eightunity.unitypicker.model.account.User;
 import com.eightunity.unitypicker.model.dao.ESearchWord;
 import com.eightunity.unitypicker.model.watch.Watch;
 import com.eightunity.unitypicker.search.SearchUtility;
@@ -37,9 +33,9 @@ import java.util.List;
  */
 public class WatchFragment extends Fragment {
 
-    public static final String SEARCH_WORD_ID_PARAM = "SEARCH_WORD_ID_PARAM";
-    public static final String SEARCH_WORD_DETAIL_PARAM = "SEARCH_WORD_DETAIL_PARAM";
-    public static final String SEARCH_WORD_TYPE_PARAM = "SEARCH_WORD_TYPE_PARAM";
+    private static final String TAG = "WatchFragment";
+
+    public static final String PARACEL_WATCHFRAGMENT = "PARACEL_WATCHFRAGMENT";
 
     private RecyclerView watchRecycler;
     private WatchAdapter watchAdapter;
@@ -54,21 +50,16 @@ public class WatchFragment extends Fragment {
 
     List<Watch> watches = new ArrayList<>();
 
-    public interface OnHeadlineSelectedListener{
-        public void onArticleSelected(int searchWordID, String searchWordDetail, String searchTypeDesc) ;
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setRetainInstance(true);
     }
-
-    public static WatchFragment newInstance() {
-        return new WatchFragment();
-    }
-
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView =  inflater.inflate(R.layout.fragment_watch, container, false);
-
-
 
         initView(rootView);
 
@@ -78,10 +69,36 @@ public class WatchFragment extends Fragment {
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
 
-        callWSMytask();
+        if (savedInstanceState == null) {
+            setDataOnPageOpen();
+        } else {
+            restoreInstanceState(savedInstanceState);
+        }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        ArrayList<Watch> datas = new ArrayList<>();
+        datas.addAll(watches);
+        outState.putParcelableArrayList(PARACEL_WATCHFRAGMENT, datas);
+    }
+
+    private void restoreInstanceState(Bundle savedInstanceState) {
+        List<Watch> watches = savedInstanceState.getParcelableArrayList(PARACEL_WATCHFRAGMENT);
+        updateUI(watches);
+    }
+
+    public interface OnHeadlineSelectedListener{
+        public void onArticleSelected(String username, int searchWordID, String searchWordDetail, String searchTypeDesc) ;
+    }
+
+    public static WatchFragment newInstance() {
+        return new WatchFragment();
     }
 
     private void initView(View rootView) {
@@ -118,10 +135,9 @@ public class WatchFragment extends Fragment {
         recyclerView.hasFixedSize();
     }
 
-    private void callWSMytask() {
-        watches.clear();
-        watches.addAll(getDataFromDB());
-        watchAdapter.notifyDataSetChanged();
+    private void setDataOnPageOpen() {
+        List<Watch> watches = getDataFromDB();
+        updateUI(watches);
     }
 
     private List<Watch> getDataFromDB() {
@@ -140,11 +156,21 @@ public class WatchFragment extends Fragment {
         return datas;
     }
 
+    private void updateUI(List<Watch> datas) {
+        watches.clear();
+        watches.addAll(datas);
+        watchAdapter.notifyDataSetChanged();
+    }
+
     private RecycleClickListener recycleClick = new RecycleClickListener() {
         @Override
         public void onClick(View view, int position) {
             vp.setCurrentItem(MainActivity.MATCH_PAGE);
-            mCallback.onArticleSelected(watches.get(position).getId(),
+
+            String username = ((BaseActivity)getActivity()).getUser().getUsername();
+            mCallback.onArticleSelected(
+                    ((BaseActivity)getActivity()).getUser().getUsername(),
+                    watches.get(position).getId(),
                     watches.get(position).getSearchWord(),
                     watches.get(position).getSearchType());
         }

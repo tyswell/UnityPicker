@@ -1,6 +1,5 @@
 package com.eightunity.unitypicker.notification;
 
-import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -12,25 +11,20 @@ import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import com.eightunity.unitypicker.R;
 import com.eightunity.unitypicker.commonpage.OptionDialog;
 import com.eightunity.unitypicker.database.EMatchingDAO;
 import com.eightunity.unitypicker.model.dao.EMatching;
 import com.eightunity.unitypicker.model.Notificaiton.Notification;
+import com.eightunity.unitypicker.model.watch.Watch;
 import com.eightunity.unitypicker.ui.BaseActivity;
 import com.eightunity.unitypicker.ui.LinearLayoutManager;
 import com.eightunity.unitypicker.ui.recyclerview.DividerItemDecoration;
 import com.eightunity.unitypicker.ui.recyclerview.RecycleClickListener;
-import com.eightunity.unitypicker.ui.recyclerview.RecyclerTouchListener;
 import com.eightunity.unitypicker.utility.DateUtil;
 import com.eightunity.unitypicker.utility.notification.FirebaseMsgService;
 
@@ -43,6 +37,8 @@ import java.util.List;
 public class NotificationFragment extends Fragment {
 
     private static final String TAG = "NotificationFragment";
+
+    public static final String PARACEL_NOTIFICATIONFRAGMENT = "PARACEL_NOTIFICATIONFRAGMENT";
 
     private RecyclerView notificationRecycler;
     private NotificationAdapter notificationAdapter;
@@ -58,6 +54,12 @@ public class NotificationFragment extends Fragment {
         return new NotificationFragment();
     }
 
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setRetainInstance(true);
+    }
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -71,11 +73,25 @@ public class NotificationFragment extends Fragment {
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
 
-        callWSMytask();
+        if (savedInstanceState == null) {
+            setDataOnPageOpen();
+        } else {
+            restoreInstanceState(savedInstanceState);
+        }
     }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        ArrayList<Notification> datas = new ArrayList<>();
+        datas.addAll(notifications);
+        outState.putParcelableArrayList(PARACEL_NOTIFICATIONFRAGMENT, datas);
+    }
+
 
     @Override
     public void onResume() {
@@ -87,6 +103,11 @@ public class NotificationFragment extends Fragment {
     public void onPause() {
         super.onPause();
         unregisterReceiver();
+    }
+
+    private void restoreInstanceState(Bundle savedInstanceState) {
+        List<Notification> watches = savedInstanceState.getParcelableArrayList(PARACEL_NOTIFICATIONFRAGMENT);
+        updateUI(watches);
     }
 
     private void initView(View rootView) {
@@ -136,9 +157,14 @@ public class NotificationFragment extends Fragment {
         }
     };
 
-    private void callWSMytask() {
+    private void setDataOnPageOpen() {
+        List<Notification> datas = getDataFromDB();
+        updateUI(datas);
+    }
+
+    private void updateUI(List<Notification> datas) {
         notifications.clear();
-        notifications.addAll(getDataFromDB());
+        notifications.addAll(datas);
         notificationAdapter.notifyDataSetChanged();
     }
 
@@ -163,7 +189,7 @@ public class NotificationFragment extends Fragment {
     private BroadcastReceiver mRegistrationBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            callWSMytask();
+            setDataOnPageOpen();
         }
     };
 
@@ -178,51 +204,5 @@ public class NotificationFragment extends Fragment {
         LocalBroadcastManager.getInstance(getContext()).unregisterReceiver(mRegistrationBroadcastReceiver);
         isReceiverRegistered = false;
     }
-
-//    public void openBottomSheet() {
-//        View view = getActivity().getLayoutInflater().inflate(R.layout.dialog_option, null);
-//        TextView stopWatchingView = (TextView)view.findViewById(R.id.stopWatchingView);
-//        TextView removeFromListView = (TextView)view.findViewById(R.id.removeFromListView);
-//        TextView cancelView = (TextView)view.findViewById( R.id.cancelView);
-//
-//        final Dialog mBottomSheetDialog = new Dialog (getActivity(),
-//                R.style.MaterialDialogSheet);
-//        mBottomSheetDialog.setContentView(view);
-//        mBottomSheetDialog.setCancelable(true);
-//        mBottomSheetDialog.getWindow ().setLayout(LinearLayout.LayoutParams.MATCH_PARENT,
-//                LinearLayout.LayoutParams.WRAP_CONTENT);
-//        mBottomSheetDialog.getWindow ().setGravity(Gravity.BOTTOM);
-//        mBottomSheetDialog.show();
-//
-//
-//        stopWatchingView.setOnClickListener(new View.OnClickListener() {
-//
-//            @Override
-//            public void onClick(View v) {
-//                Toast.makeText(getActivity(),"Clicked Backup",Toast.LENGTH_SHORT).show();
-//                mBottomSheetDialog.dismiss();
-//            }
-//        });
-//
-//        removeFromListView.setOnClickListener(new View.OnClickListener() {
-//
-//            @Override
-//            public void onClick(View v) {
-////                dao.delete(notifications.get(position).getMatchId());
-////                notificationAdapter.removeAt(position);
-//                mBottomSheetDialog.dismiss();
-//            }
-//        });
-//
-//        cancelView.setOnClickListener(new View.OnClickListener() {
-//
-//            @Override
-//            public void onClick(View v) {
-//                Toast.makeText(getActivity(), "Clicked Open", Toast.LENGTH_SHORT).show();
-//                mBottomSheetDialog.dismiss();
-//            }
-//        });
-//
-//    }
 
 }

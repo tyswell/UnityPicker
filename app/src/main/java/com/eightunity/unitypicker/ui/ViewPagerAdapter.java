@@ -96,11 +96,10 @@ public class ViewPagerAdapter extends FragmentPagerAdapter implements WatchFragm
     }
 
     @Override
-    public void onArticleSelected(int searchWordID, String searchWordDetail, String searchTypeDesc) {
+    public void onArticleSelected(String username, int searchWordID, String searchWordDetail, String searchTypeDesc) {
         if (matchFragment == null) {
             matchFragment = (MatchFragment)getItem(MainActivity.MATCH_PAGE);
         }
-        Log.d(TAG, "matchFragment="+matchFragment+" ||searchWordID=" + searchWordID + " ||searchWordDetail=" + searchWordDetail + " ||searchTypeDesc=" + searchTypeDesc);
-        matchFragment.startArtical(searchWordID, searchWordDetail, searchTypeDesc);
+        matchFragment.startArtical(username, searchWordID, searchWordDetail, searchTypeDesc);
     }
 }

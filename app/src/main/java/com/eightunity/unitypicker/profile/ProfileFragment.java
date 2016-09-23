@@ -2,6 +2,7 @@ package com.eightunity.unitypicker.profile;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,12 +25,20 @@ import de.hdodenhof.circleimageview.CircleImageView;
  */
 public class ProfileFragment extends Fragment {
 
+    private static final String TAG = "ProfileFragment";
+
     private CircleImageView profileImage;
     private TextView usernameView;
     private Button logoutBtn;
 
     public static ProfileFragment newInstance() {
         return new ProfileFragment();
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setRetainInstance(true);
     }
 
     @Override
@@ -64,7 +73,9 @@ public class ProfileFragment extends Fragment {
         String name = ((BaseActivity)getActivity()).getUser().getName();
         String userId = ((BaseActivity)getActivity()).getUser().getUserId();
         usernameView.setText(name);
-        String imageURL = "http://graph.facebook.com/" + "10154907477446754" + "/picture?type=large";
+        String imageURL = ((BaseActivity)getActivity()).getUser().getProfileURL();
+
+        Log.d(TAG, "imageURL="+imageURL);
 
         RequestManager rm = Glide.with(getContext());
         DrawableTypeRequest dr = null;

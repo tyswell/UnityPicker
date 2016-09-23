@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Parcel;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -30,6 +31,8 @@ import com.eightunity.unitypicker.ui.recyclerview.DividerItemDecoration;
 import com.eightunity.unitypicker.ui.recyclerview.RecycleClickListener;
 import com.eightunity.unitypicker.utility.DateUtil;
 
+import org.parceler.Parcels;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,10 +53,27 @@ public class MatchFragment extends Fragment{
 
     private EMatchingDAO dao;
 
+    private Match match;
     private List<MatchDetail> matchDetails = new ArrayList<>();
 
     public static MatchFragment newInstance() {
         return new MatchFragment();
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setRetainInstance(true);
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        if (savedInstanceState != null) {
+            match = Parcels.unwrap(savedInstanceState.getParcelable("PARAM_MATCHFRAGMENT"));
+            setDataUI();
+        }
     }
 
     @Override
@@ -77,9 +97,9 @@ public class MatchFragment extends Fragment{
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
-
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelable("PARAM_MATCHFRAGMENT", Parcels.wrap(match));
     }
 
     private void configRecyclerView(RecyclerView recyclerView, RecyclerView.Adapter adapter, Context context) {
@@ -97,9 +117,8 @@ public class MatchFragment extends Fragment{
         logo.setImageResource(SearchUtility.searchTypeLogo(match.getSearchType()));
     }
 
-    private List<MatchDetail> getMatchDetailFromDB(int searchWordId) {
-        String username = ((BaseActivity)getActivity()).getUser().getUsername();
-        Log.d(TAG, "searchWordId="+searchWordId);
+    private List<MatchDetail> getMatchDetailFromDB(String username, int searchWordId) {
+        Log.d(TAG, "dao="+dao);
         List<EMatching> eMatchings = dao.getBySearchWord(username, searchWordId);
         List<MatchDetail> datas = new ArrayList<>();
         for (EMatching eMatching : eMatchings) {
@@ -145,18 +164,24 @@ public class MatchFragment extends Fragment{
         }
     };
 
-    public void startArtical(int searchWordID, String searchWordDetail, String searchTypeDesc) {
-        Log.d(TAG, "searchWordID="+searchWordID + " ||searchWordDetail="+searchWordDetail + " ||searchTypeDesc="+searchTypeDesc);
+    public void startArtical(String username, int searchWordID, String searchWordDetail, String searchTypeDesc) {
+        List<MatchDetail> list = getMatchDetailFromDB(username, searchWordID);
+        match = new Match();
+        match.setSearchType(searchTypeDesc);
+        match.setSearchWord(searchWordDetail);
+        match.setMatchDetails(list);
 
+        setDataUI();
+    }
+
+    public void setDataUI() {
         ((MainActivity)getActivity()).showBackActionBar();
 
-        matchDetails.clear();
-        matchDetails.addAll(getMatchDetailFromDB(searchWordID));
-        matchAdapter.notifyDataSetChanged();
-
-        Match match = new Match();
-        match.setSearchWord(searchWordDetail);
-        match.setSearchType(searchTypeDesc);
         setMatchData(match);
+
+        matchDetails.clear();
+        matchDetails.addAll(match.getMatchDetails());
+        matchAdapter.notifyDataSetChanged();
     }
+
 }
