@@ -4,9 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Parcel;
 import android.support.v4.app.Fragment;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -16,16 +14,13 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.eightunity.unitypicker.MainActivity;
 import com.eightunity.unitypicker.R;
 import com.eightunity.unitypicker.commonpage.OptionDialog;
 import com.eightunity.unitypicker.database.EMatchingDAO;
-import com.eightunity.unitypicker.model.account.User;
 import com.eightunity.unitypicker.model.dao.EMatching;
 import com.eightunity.unitypicker.model.match.Match;
 import com.eightunity.unitypicker.model.match.MatchDetail;
 import com.eightunity.unitypicker.search.SearchUtility;
-import com.eightunity.unitypicker.ui.BaseActivity;
 import com.eightunity.unitypicker.ui.LinearLayoutManager;
 import com.eightunity.unitypicker.ui.recyclerview.DividerItemDecoration;
 import com.eightunity.unitypicker.ui.recyclerview.RecycleClickListener;
@@ -48,7 +43,6 @@ public class MatchFragment extends Fragment{
     private TextView searchTypeView;
     private RecyclerView matchRecycler;
     private MatchAdapter matchAdapter;
-
     private OptionDialog dialog;
 
     private EMatchingDAO dao;
@@ -56,9 +50,12 @@ public class MatchFragment extends Fragment{
     private Match match;
     private List<MatchDetail> matchDetails = new ArrayList<>();
 
-    public static MatchFragment newInstance() {
-        return new MatchFragment();
-    }
+    public static final String PARAM_USERNAME = "PARAM_USERNAME";
+    public static final String PARAM_SEARCH_WORD_ID = "PARAM_SEARCH_WORD_ID";
+    public static final String PARAM_SEARCH_WORD_DETAIL = "PARAM_SEARCH_WORD_DETAIL";
+    public static final String PARAM_SEARCH_TYPE_DESC = "PARAM_SEARCH_TYPE_DESC";
+
+    private static final String PARAM_MATCH_FRAGMENT_DATA = "PARAM_MATCH_FRAGMENT_DATA";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -71,7 +68,8 @@ public class MatchFragment extends Fragment{
         super.onActivityCreated(savedInstanceState);
 
         if (savedInstanceState != null) {
-            match = Parcels.unwrap(savedInstanceState.getParcelable("PARAM_MATCHFRAGMENT"));
+            Log.d(TAG, "onActivityCreated is called and don't load data again");
+            match = Parcels.unwrap(savedInstanceState.getParcelable(PARAM_MATCH_FRAGMENT_DATA));
             setDataUI();
         }
     }
@@ -99,26 +97,22 @@ public class MatchFragment extends Fragment{
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putParcelable("PARAM_MATCHFRAGMENT", Parcels.wrap(match));
+        outState.putParcelable(PARAM_MATCH_FRAGMENT_DATA, Parcels.wrap(match));
     }
 
     @Override
     public void onStart() {
+        Log.d(TAG, "onStart is called");
+
         super.onStart();
 
-        // During startup, check if there are arguments passed to the fragment.
-        // onStart is a good place to do this because the layout has already been
-        // applied to the fragment at this point so we can safely call the method
-        // below that sets the article text.
         Bundle args = getArguments();
         if (args != null) {
-            // Set article based on argument passed in
-//            updateArticleView(args.getInt(ARG_POSITION));
-            String a1 = args.getString("A1");
-            int a2 = args.getInt("A2");
-            String a3 = args.getString("A3");
-            String a4 = args.getString("A4");
-            startArtical(a1, a2, a3, a4);
+            String username = args.getString(PARAM_USERNAME);
+            int searchWordID = args.getInt(PARAM_SEARCH_WORD_ID);
+            String searchWordDetail = args.getString(PARAM_SEARCH_WORD_DETAIL);
+            String searchTypeDesc = args.getString(PARAM_SEARCH_TYPE_DESC);
+            startArtical(username, searchWordID, searchWordDetail, searchTypeDesc);
         }
     }
 
@@ -138,7 +132,6 @@ public class MatchFragment extends Fragment{
     }
 
     private List<MatchDetail> getMatchDetailFromDB(String username, int searchWordId) {
-        Log.d(TAG, "dao="+dao);
         List<EMatching> eMatchings = dao.getBySearchWord(username, searchWordId);
         List<MatchDetail> datas = new ArrayList<>();
         for (EMatching eMatching : eMatchings) {
@@ -195,8 +188,6 @@ public class MatchFragment extends Fragment{
     }
 
     public void setDataUI() {
-//        ((MainActivity)getActivity()).showBackActionBar();
-
         setMatchData(match);
 
         matchDetails.clear();

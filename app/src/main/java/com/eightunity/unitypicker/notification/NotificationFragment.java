@@ -78,11 +78,12 @@ public class NotificationFragment extends Fragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        Log.d(TAG, "onActivityCreated is called");
 
         if (savedInstanceState == null) {
+            Log.d(TAG, "onActivityCreated is called with init data");
             setDataOnPageOpen();
         } else {
+            Log.d(TAG, "onActivityCreated is called and don't load data again");
             restoreInstanceState(savedInstanceState);
         }
     }

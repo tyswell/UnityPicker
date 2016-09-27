@@ -13,7 +13,6 @@ import com.bumptech.glide.DrawableTypeRequest;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.eightunity.unitypicker.MainActivity;
 import com.eightunity.unitypicker.R;
 import com.eightunity.unitypicker.ui.AuthenticaterActivity;
 import com.eightunity.unitypicker.ui.BaseActivity;
@@ -38,7 +37,7 @@ public class ProfileFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-//        setRetainInstance(true);
+        setRetainInstance(true);
     }
 
     @Override
@@ -74,8 +73,6 @@ public class ProfileFragment extends Fragment {
         String userId = ((BaseActivity)getActivity()).getUser().getUserId();
         usernameView.setText(name);
         String imageURL = ((BaseActivity)getActivity()).getUser().getProfileURL();
-
-        Log.d(TAG, "imageURL="+imageURL);
 
         RequestManager rm = Glide.with(getContext());
         DrawableTypeRequest dr = null;

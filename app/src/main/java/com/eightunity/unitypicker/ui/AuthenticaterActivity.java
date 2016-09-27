@@ -18,9 +18,6 @@ import com.eightunity.unitypicker.model.account.User;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-
-import java.io.File;
 
 
 /**

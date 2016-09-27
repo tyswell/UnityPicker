@@ -88,8 +88,10 @@ public class WatchFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
 
         if (savedInstanceState == null) {
+            Log.d(TAG, "onActivityCreated is called with init data");
             setDataOnPageOpen();
         } else {
+            Log.d(TAG, "onActivityCreated is called and don't load data again");
             restoreInstanceState(savedInstanceState);
         }
     }
@@ -107,10 +109,6 @@ public class WatchFragment extends Fragment {
         List<Watch> watches = savedInstanceState.getParcelableArrayList(PARACEL_WATCHFRAGMENT);
         updateUI(watches);
     }
-
-//    public static WatchFragment newInstance() {
-//        return new WatchFragment();
-//    }
 
     private void initView(View rootView) {
         watchRecycler = (RecyclerView) rootView.findViewById(R.id.watchRecycler);
@@ -174,8 +172,6 @@ public class WatchFragment extends Fragment {
     private RecycleClickListener recycleClick = new RecycleClickListener() {
         @Override
         public void onClick(View view, int position) {
-//            vp.setCurrentItem(MainActivity.MATCH_PAGE);
-
             String username = ((BaseActivity)getActivity()).getUser().getUsername();
 
             mCallback.onArticleSelected(
@@ -185,11 +181,6 @@ public class WatchFragment extends Fragment {
                     watches.get(position).getSearchType());
         }
     };
-
-    public void setMyFragmentListener(OnHeadlineSelectedListener listener) {
-        Log.d(TAG, "xxxxx="+mCallback);
-        mCallback = listener;
-    }
 
     private RecycleClickListener optionClick = new RecycleClickListener() {
         @Override

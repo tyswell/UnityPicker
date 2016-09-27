@@ -1,6 +1,5 @@
 package com.eightunity.unitypicker;
 
-import android.os.PersistableBundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
@@ -37,15 +36,12 @@ public class MainActivity extends BaseActivity implements WatchFragment.OnHeadli
     private ProfileFragment profileFragment;
     private MatchFragment matchFragment;
 
-    private static final String FRAGMENT_MATCH_TAG = "FRAGMENT_MATCH_TAG";
-
-    @Override
-    public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
-        super.onSaveInstanceState(outState, outPersistentState);
-    }
+    private static final String PARAM_CURRENT_PAGE = "PARAM_CURRENT_PAGE";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        Log.d(TAG, "onCreate is called");
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -54,11 +50,81 @@ public class MainActivity extends BaseActivity implements WatchFragment.OnHeadli
 
         tabLayout = (TabLayout) findViewById(R.id.tabs);
 
+        initFragment(savedInstanceState);
+
+        setupTabIcons();
+        setTabListner();
+
+        if (savedInstanceState == null) {
+            setStartPage();
+        }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        Log.d(TAG, "onSaveInstanceState is called");
+
+        super.onSaveInstanceState(outState);
+
+        outState.putInt(PARAM_CURRENT_PAGE, currentPage);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        Log.d(TAG, "onRestoreInstanceState is called");
+
+        super.onRestoreInstanceState(savedInstanceState);
+
+        opentPage(savedInstanceState.getInt(PARAM_CURRENT_PAGE));
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        hideBackActionBar();
+
+        Fragment f = getSupportFragmentManager().findFragmentById(R.id.mainFragment);
+
+        if (f instanceof WatchFragment) {
+            currentPage = WATCH_PAGE;
+        } else if (f instanceof NotificationFragment) {
+            currentPage = NOTIFICATION_PAGE;
+        } else if (f instanceof SearchFragment) {
+            currentPage = SEARCH_PAGE;
+        } else if (f instanceof ProfileFragment) {
+            currentPage = PROFILE_PAGE;
+        }else if (f instanceof MatchFragment) {
+            currentPage = MATCH_PAGE;
+        }
+
+        setTab(currentPage);
+    }
+
+    @Override
+    public void onArticleSelected(String username, int searchWordID, String searchWordDetail, String searchTypeDesc) {
+        Log.d(TAG, "onArticleSelected is called {username :" + username + " | searchWordID :" + searchWordID + " | searchWordDetail :" + searchWordDetail + " | searchTypeDesc :" + searchTypeDesc);
+
+        if (matchFragment.getArguments() == null) {
+            matchFragment.setArguments(new Bundle());
+        }
+
+        matchFragment.getArguments().putString(MatchFragment.PARAM_USERNAME, username);
+        matchFragment.getArguments().putInt(MatchFragment.PARAM_SEARCH_WORD_ID, searchWordID);
+        matchFragment.getArguments().putString(MatchFragment.PARAM_SEARCH_WORD_DETAIL, searchWordDetail);
+        matchFragment.getArguments().putString(MatchFragment.PARAM_SEARCH_TYPE_DESC, searchTypeDesc);
+
+        opentPage(MATCH_PAGE);
+        showBackActionBar();
+    }
+
+
+
+    private void initFragment(Bundle savedInstanceState) {
         if (savedInstanceState != null) {
             for (Fragment f : getSupportFragmentManager().getFragments()){
-                if (f instanceof WatchFragment) {
+                /*if (f instanceof WatchFragment) {
                     watchFragment = (WatchFragment)f;
-                } else if (f instanceof NotificationFragment) {
+                } else */if (f instanceof NotificationFragment) {
                     notificationFragment = (NotificationFragment)f;
                 } else if (f instanceof SearchFragment) {
                     searchFragment = (SearchFragment)f;
@@ -89,51 +155,13 @@ public class MainActivity extends BaseActivity implements WatchFragment.OnHeadli
         if (matchFragment == null) {
             matchFragment = new MatchFragment();
         }
-
-        setupTabIcons();
-        setTabListner();
-
-        if (savedInstanceState == null) {
-            setStartPage();
-        }
     }
 
     private void setTabListner() {
         tabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
-                Log.d(TAG, "tab.getPosition()=" + tab.getPosition());
-                Log.d(TAG, "tabLayout.getSelectedTabPosition()=" + tabLayout.getSelectedTabPosition());
-
-                if (tab.getPosition() == WATCH_PAGE) {
-                    getSupportFragmentManager()
-                            .beginTransaction()
-                            .addToBackStack(null)
-                            .replace(R.id.mainFragment, watchFragment)
-                            .commit();
-                    currentPage = WATCH_PAGE;
-                } else if (tab.getPosition() == NOTIFICATION_PAGE) {
-                    getSupportFragmentManager()
-                            .beginTransaction()
-                            .addToBackStack(null)
-                            .replace(R.id.mainFragment, notificationFragment)
-                            .commit();
-                    currentPage = NOTIFICATION_PAGE;
-                } else if (tab.getPosition() == SEARCH_PAGE) {
-                    getSupportFragmentManager()
-                            .beginTransaction()
-                            .addToBackStack(null)
-                            .replace(R.id.mainFragment, searchFragment)
-                            .commit();
-                    currentPage = SEARCH_PAGE;
-                } else if (tab.getPosition() == PROFILE_PAGE) {
-                    getSupportFragmentManager()
-                            .beginTransaction()
-                            .addToBackStack(null)
-                            .replace(R.id.mainFragment, profileFragment)
-                            .commit();
-                    currentPage = PROFILE_PAGE;
-                }
+                opentPage(tab.getPosition());
                 hideBackActionBar();
             }
 
@@ -151,22 +179,68 @@ public class MainActivity extends BaseActivity implements WatchFragment.OnHeadli
         });
     }
 
-    private void setStartPage() {
-        if (getIntent().getStringExtra(FirebaseMsgService.NOTIFICATION_INTENT) != null) {
-            tabLayout.getTabAt(NOTIFICATION_PAGE).select();
-            getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.mainFragment, notificationFragment)
+    private void opentPage(int page) {
+        Log.d(TAG, "opentPage is called {page : " + page);
+
+        if (page == WATCH_PAGE) {
+            setTab(WATCH_PAGE);
+            getSupportFragmentManager()
+                    .beginTransaction()
                     .addToBackStack(null)
+                    .replace(R.id.mainFragment, watchFragment)
+                    .commit();
+            currentPage = WATCH_PAGE;
+        } else if (page == NOTIFICATION_PAGE) {
+            setTab(NOTIFICATION_PAGE);
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .addToBackStack(null)
+                    .replace(R.id.mainFragment, notificationFragment)
                     .commit();
             currentPage = NOTIFICATION_PAGE;
-
-        } else {
-            tabLayout.getTabAt(SEARCH_PAGE).select();
-            getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.mainFragment, searchFragment)
+        } else if (page == SEARCH_PAGE) {
+            setTab(SEARCH_PAGE);
+            getSupportFragmentManager()
+                    .beginTransaction()
                     .addToBackStack(null)
+                    .replace(R.id.mainFragment, searchFragment)
                     .commit();
             currentPage = SEARCH_PAGE;
+        } else if (page == PROFILE_PAGE) {
+            setTab(PROFILE_PAGE);
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .addToBackStack(null)
+                    .replace(R.id.mainFragment, profileFragment)
+                    .commit();
+            currentPage = PROFILE_PAGE;
+        }else if (page == MATCH_PAGE) {
+            setTab(WATCH_PAGE);
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.mainFragment, matchFragment)
+                    .addToBackStack(null)
+                    .commit();
+            showBackActionBar();
+            currentPage = MATCH_PAGE;
+        }
+    }
+
+    private void setTab(int page) {
+        if (page == MATCH_PAGE) {
+            tabLayout.getTabAt(WATCH_PAGE).select();
+        } else {
+            tabLayout.getTabAt(page).select();
+        }
+    }
+
+    private void setStartPage() {
+        Log.d(TAG, "setStartPage is called");
+
+        if (getIntent().getStringExtra(FirebaseMsgService.NOTIFICATION_INTENT) != null) {
+            opentPage(NOTIFICATION_PAGE);
+        } else {
+            opentPage(SEARCH_PAGE);
         }
     }
 
@@ -186,97 +260,6 @@ public class MainActivity extends BaseActivity implements WatchFragment.OnHeadli
         tabLayout.addTab(tabLayout.newTab().setIcon(tabIcons[3]));
     }
 
-    @Override
-    public void onArticleSelected(String username, int searchWordID, String searchWordDetail, String searchTypeDesc) {
-        if (matchFragment.getArguments() != null) {
-            matchFragment.getArguments().putString("A1", username);
-            matchFragment.getArguments().putInt("A2", searchWordID);
-            matchFragment.getArguments().putString("A3", searchWordDetail);
-            matchFragment.getArguments().putString("A4", searchTypeDesc);
-        } else {
-            Bundle args = new Bundle();
-            args.putString("A1", username);
-            args.putInt("A2", searchWordID);
-            args.putString("A3", searchWordDetail);
-            args.putString("A4", searchTypeDesc);
-            matchFragment.setArguments(args);
-        }
-
-        getSupportFragmentManager()
-                .beginTransaction()
-                .replace(R.id.mainFragment, matchFragment, FRAGMENT_MATCH_TAG)
-                .addToBackStack(null)
-                .commit();
-        currentPage = MATCH_PAGE;
-        showBackActionBar();
-    }
-
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-
-        outState.putInt("CURRENT_ITEM", currentPage);
-    }
-
-    @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
-
-        int currentPage = savedInstanceState.getInt("CURRENT_ITEM");
-        Log.d(TAG, "currentPage=" + currentPage);
-
-        if (currentPage == WATCH_PAGE) {
-            Log.d(TAG, "watchFragment="+watchFragment);
-
-            tabLayout.getTabAt(WATCH_PAGE).select();
-            getSupportFragmentManager()
-                    .beginTransaction()
-                    .addToBackStack(null)
-                    .replace(R.id.mainFragment, watchFragment)
-                    .commit();
-            currentPage = WATCH_PAGE;
-        } else if (currentPage == NOTIFICATION_PAGE) {
-            tabLayout.getTabAt(NOTIFICATION_PAGE).select();
-            getSupportFragmentManager()
-                    .beginTransaction()
-                    .addToBackStack(null)
-                    .replace(R.id.mainFragment, notificationFragment)
-                    .commit();
-            currentPage = NOTIFICATION_PAGE;
-        } else if (currentPage == SEARCH_PAGE) {
-            tabLayout.getTabAt(SEARCH_PAGE).select();
-            getSupportFragmentManager()
-                    .beginTransaction()
-                    .addToBackStack(null)
-                    .replace(R.id.mainFragment, searchFragment)
-                    .commit();
-            currentPage = SEARCH_PAGE;
-        } else if (currentPage == PROFILE_PAGE) {
-            tabLayout.getTabAt(PROFILE_PAGE).select();
-            getSupportFragmentManager()
-                    .beginTransaction()
-                    .addToBackStack(null)
-                    .replace(R.id.mainFragment, profileFragment)
-                    .commit();
-            currentPage = PROFILE_PAGE;
-        }else if (currentPage == MATCH_PAGE) {
-            tabLayout.getTabAt(WATCH_PAGE).select();
-            getSupportFragmentManager()
-                    .beginTransaction()
-                    .replace(R.id.mainFragment, matchFragment, FRAGMENT_MATCH_TAG)
-                    .addToBackStack(null)
-                    .commit();
-            showBackActionBar();
-        }
-
-    }
-
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-        hideBackActionBar();
-    }
-
     public void showBackActionBar() {
         toolbar.setNavigationIcon(R.drawable.abc_ic_ab_back_mtrl_am_alpha);
 
@@ -287,9 +270,7 @@ public class MainActivity extends BaseActivity implements WatchFragment.OnHeadli
                 hideBackActionBar();
             }
         });
-
     }
-
 
     public void hideBackActionBar() {
         toolbar.setNavigationIcon(null);
