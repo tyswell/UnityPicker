@@ -1,37 +1,29 @@
 package com.eightunity.unitypicker;
 
+import android.os.PersistableBundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
-import android.support.v4.view.ViewPager;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
-import android.widget.LinearLayout;
-import android.widget.TabHost;
 
 import com.eightunity.unitypicker.match.MatchFragment;
 import com.eightunity.unitypicker.notification.NotificationFragment;
 import com.eightunity.unitypicker.profile.ProfileFragment;
 import com.eightunity.unitypicker.search.SearchFragment;
 import com.eightunity.unitypicker.ui.BaseActivity;
-import com.eightunity.unitypicker.ui.NonSwipeViewPager;
-import com.eightunity.unitypicker.ui.ViewPagerAdapter;
 import com.eightunity.unitypicker.utility.notification.FirebaseMsgService;
 import com.eightunity.unitypicker.watch.WatchFragment;
 
-import java.util.ArrayList;
-import java.util.List;
-
-public class MainActivity extends BaseActivity {
+public class MainActivity extends BaseActivity implements WatchFragment.OnHeadlineSelectedListener{
 
     private static final String TAG = "MainActivity";
 
     private Toolbar toolbar;
     private TabLayout tabLayout;
-    private NonSwipeViewPager viewPager;
+
+    private int currentPage = -1;
 
     public static final int WATCH_PAGE = 0;
     public static final int NOTIFICATION_PAGE = 1;
@@ -39,13 +31,18 @@ public class MainActivity extends BaseActivity {
     public static final int PROFILE_PAGE = 3;
     public static final int MATCH_PAGE = 4;
 
-    private Fragment watchFragment;
-    private Fragment notificationFragment;
-    private Fragment searchFragment;
-    private Fragment profileFragment;
-    private Fragment matchFragment;
+    private WatchFragment watchFragment;
+    private NotificationFragment notificationFragment;
+    private SearchFragment searchFragment;
+    private ProfileFragment profileFragment;
+    private MatchFragment matchFragment;
 
-    private ViewPagerAdapter adapter;
+    private static final String FRAGMENT_MATCH_TAG = "FRAGMENT_MATCH_TAG";
+
+    @Override
+    public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
+        super.onSaveInstanceState(outState, outPersistentState);
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -54,45 +51,90 @@ public class MainActivity extends BaseActivity {
 
         toolbar = (Toolbar)findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-//        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
-//        watchFragment= new WatchFragment();
-//        notificationFragment = new NotificationFragment();
-//        searchFragment = new SearchFragment();
-//        profileFragment = new ProfileFragment();
-//        matchFragment = new MatchFragment();
-
-        viewPager = (NonSwipeViewPager) findViewById(R.id.viewpager);
-        setupViewPager(viewPager);
 
         tabLayout = (TabLayout) findViewById(R.id.tabs);
-//        viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
 
-        viewPager.addOnPageChangeListener(
-            new ViewPager.SimpleOnPageChangeListener() {
-                @Override
-                public void onPageSelected(int position) {
-                    if (position != MATCH_PAGE) {
-                        tabLayout.getTabAt(position).select();
-                    }
+        if (savedInstanceState != null) {
+            for (Fragment f : getSupportFragmentManager().getFragments()){
+                if (f instanceof WatchFragment) {
+                    watchFragment = (WatchFragment)f;
+                } else if (f instanceof NotificationFragment) {
+                    notificationFragment = (NotificationFragment)f;
+                } else if (f instanceof SearchFragment) {
+                    searchFragment = (SearchFragment)f;
+                } else if (f instanceof ProfileFragment) {
+                    profileFragment = (ProfileFragment)f;
+                }else if (f instanceof MatchFragment) {
+                    matchFragment = (MatchFragment)f;
                 }
-            });
+            }
+        }
 
-        hideBackActionBar();
+        if (watchFragment == null) {
+            watchFragment = new WatchFragment();
+        }
 
+        if (notificationFragment == null) {
+            notificationFragment = new NotificationFragment();
+        }
 
+        if (searchFragment == null) {
+            searchFragment = new SearchFragment();
+        }
+
+        if (profileFragment == null) {
+            profileFragment = new ProfileFragment();
+        }
+
+        if (matchFragment == null) {
+            matchFragment = new MatchFragment();
+        }
+
+        setupTabIcons();
+        setTabListner();
+
+        if (savedInstanceState == null) {
+            setStartPage();
+        }
+    }
+
+    private void setTabListner() {
         tabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
-                Log.d(TAG, "onTabSelected position = " + tab.getPosition());
-                Log.d(TAG, "onTabSelected getCurrentItem = " + viewPager.getCurrentItem());
-                if (viewPager.getCurrentItem() == MATCH_PAGE && tab.getPosition() == WATCH_PAGE) {
-                    viewPager.setCurrentItem(MATCH_PAGE);
-                } else {
-                    viewPager.setCurrentItem(tab.getPosition());
-                    hideBackActionBar();
-                }
+                Log.d(TAG, "tab.getPosition()=" + tab.getPosition());
+                Log.d(TAG, "tabLayout.getSelectedTabPosition()=" + tabLayout.getSelectedTabPosition());
 
+                if (tab.getPosition() == WATCH_PAGE) {
+                    getSupportFragmentManager()
+                            .beginTransaction()
+                            .addToBackStack(null)
+                            .replace(R.id.mainFragment, watchFragment)
+                            .commit();
+                    currentPage = WATCH_PAGE;
+                } else if (tab.getPosition() == NOTIFICATION_PAGE) {
+                    getSupportFragmentManager()
+                            .beginTransaction()
+                            .addToBackStack(null)
+                            .replace(R.id.mainFragment, notificationFragment)
+                            .commit();
+                    currentPage = NOTIFICATION_PAGE;
+                } else if (tab.getPosition() == SEARCH_PAGE) {
+                    getSupportFragmentManager()
+                            .beginTransaction()
+                            .addToBackStack(null)
+                            .replace(R.id.mainFragment, searchFragment)
+                            .commit();
+                    currentPage = SEARCH_PAGE;
+                } else if (tab.getPosition() == PROFILE_PAGE) {
+                    getSupportFragmentManager()
+                            .beginTransaction()
+                            .addToBackStack(null)
+                            .replace(R.id.mainFragment, profileFragment)
+                            .commit();
+                    currentPage = PROFILE_PAGE;
+                }
+                hideBackActionBar();
             }
 
             @Override
@@ -102,26 +144,78 @@ public class MainActivity extends BaseActivity {
 
             @Override
             public void onTabReselected(TabLayout.Tab tab) {
-                Log.d(TAG, "onTabReselected position = "+tab.getPosition());
-                if (viewPager.getCurrentItem() == MATCH_PAGE) {
-                    viewPager.setCurrentItem(WATCH_PAGE);
-                    hideBackActionBar();
-                } else {
-                    viewPager.setCurrentItem(tab.getPosition());
+                if (currentPage == MATCH_PAGE) {
+                    onBackPressed();
                 }
             }
         });
+    }
 
-        setupTabIcons();
+    private void setStartPage() {
+        if (getIntent().getStringExtra(FirebaseMsgService.NOTIFICATION_INTENT) != null) {
+            tabLayout.getTabAt(NOTIFICATION_PAGE).select();
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.mainFragment, notificationFragment)
+                    .addToBackStack(null)
+                    .commit();
+            currentPage = NOTIFICATION_PAGE;
 
-        setStartPage();
+        } else {
+            tabLayout.getTabAt(SEARCH_PAGE).select();
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.mainFragment, searchFragment)
+                    .addToBackStack(null)
+                    .commit();
+            currentPage = SEARCH_PAGE;
+        }
+    }
+
+    private void setupTabIcons() {
+        tabLayout.removeAllTabs();
+
+        int[] tabIcons = {
+                R.drawable.ic_action_glasses,
+                R.drawable.ic_notifications,
+                R.drawable.ic_search,
+                R.drawable.ic_account_circle
+        };
+
+        tabLayout.addTab(tabLayout.newTab().setIcon(tabIcons[0]));
+        tabLayout.addTab(tabLayout.newTab().setIcon(tabIcons[1]));
+        tabLayout.addTab(tabLayout.newTab().setIcon(tabIcons[2]));
+        tabLayout.addTab(tabLayout.newTab().setIcon(tabIcons[3]));
+    }
+
+    @Override
+    public void onArticleSelected(String username, int searchWordID, String searchWordDetail, String searchTypeDesc) {
+        if (matchFragment.getArguments() != null) {
+            matchFragment.getArguments().putString("A1", username);
+            matchFragment.getArguments().putInt("A2", searchWordID);
+            matchFragment.getArguments().putString("A3", searchWordDetail);
+            matchFragment.getArguments().putString("A4", searchTypeDesc);
+        } else {
+            Bundle args = new Bundle();
+            args.putString("A1", username);
+            args.putInt("A2", searchWordID);
+            args.putString("A3", searchWordDetail);
+            args.putString("A4", searchTypeDesc);
+            matchFragment.setArguments(args);
+        }
+
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.mainFragment, matchFragment, FRAGMENT_MATCH_TAG)
+                .addToBackStack(null)
+                .commit();
+        currentPage = MATCH_PAGE;
+        showBackActionBar();
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
-        outState.putInt("CURRENT_ITEM", viewPager.getCurrentItem());
+        outState.putInt("CURRENT_ITEM", currentPage);
     }
 
     @Override
@@ -129,25 +223,67 @@ public class MainActivity extends BaseActivity {
         super.onRestoreInstanceState(savedInstanceState);
 
         int currentPage = savedInstanceState.getInt("CURRENT_ITEM");
-        Log.d(TAG, "currentPage="+currentPage);
+        Log.d(TAG, "currentPage=" + currentPage);
 
-        if (currentPage == MATCH_PAGE) {
-            Log.d(TAG, "setPAGE");
-            viewPager.setCurrentItem(MATCH_PAGE);
+        if (currentPage == WATCH_PAGE) {
+            Log.d(TAG, "watchFragment="+watchFragment);
+
             tabLayout.getTabAt(WATCH_PAGE).select();
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .addToBackStack(null)
+                    .replace(R.id.mainFragment, watchFragment)
+                    .commit();
+            currentPage = WATCH_PAGE;
+        } else if (currentPage == NOTIFICATION_PAGE) {
+            tabLayout.getTabAt(NOTIFICATION_PAGE).select();
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .addToBackStack(null)
+                    .replace(R.id.mainFragment, notificationFragment)
+                    .commit();
+            currentPage = NOTIFICATION_PAGE;
+        } else if (currentPage == SEARCH_PAGE) {
+            tabLayout.getTabAt(SEARCH_PAGE).select();
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .addToBackStack(null)
+                    .replace(R.id.mainFragment, searchFragment)
+                    .commit();
+            currentPage = SEARCH_PAGE;
+        } else if (currentPage == PROFILE_PAGE) {
+            tabLayout.getTabAt(PROFILE_PAGE).select();
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .addToBackStack(null)
+                    .replace(R.id.mainFragment, profileFragment)
+                    .commit();
+            currentPage = PROFILE_PAGE;
+        }else if (currentPage == MATCH_PAGE) {
+            tabLayout.getTabAt(WATCH_PAGE).select();
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.mainFragment, matchFragment, FRAGMENT_MATCH_TAG)
+                    .addToBackStack(null)
+                    .commit();
+            showBackActionBar();
         }
+
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        hideBackActionBar();
     }
 
     public void showBackActionBar() {
-//        toolbar.getNavigationIcon().setVisible(true, true);
         toolbar.setNavigationIcon(R.drawable.abc_ic_ab_back_mtrl_am_alpha);
 
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (viewPager.getCurrentItem() == MATCH_PAGE) {
-                    viewPager.setCurrentItem(WATCH_PAGE);
-                }
+                onBackPressed();
                 hideBackActionBar();
             }
         });
@@ -156,63 +292,8 @@ public class MainActivity extends BaseActivity {
 
 
     public void hideBackActionBar() {
-//        toolbar.getNavigationIcon().setVisible(false, false);
         toolbar.setNavigationIcon(null);
     }
 
-    private void setStartPage() {
-        if (getIntent().getStringExtra(FirebaseMsgService.NOTIFICATION_INTENT) != null) {
-            viewPager.setCurrentItem(NOTIFICATION_PAGE);
-        } else {
-            viewPager.setCurrentItem(SEARCH_PAGE);
-        }
-    }
-
-    private void setupTabIcons() {
-        int[] tabIcons = {
-                R.drawable.ic_action_glasses,
-                R.drawable.ic_notifications,
-                R.drawable.ic_search,
-                R.drawable.ic_account_circle
-        };
-
-//        tabLayout.getTabAt(WATCH_PAGE).setIcon(tabIcons[0]);
-//        tabLayout.getTabAt(NOTIFICATION_PAGE).setIcon(tabIcons[1]);
-//        tabLayout.getTabAt(SEARCH_PAGE).setIcon(tabIcons[2]);
-//        tabLayout.getTabAt(PROFILE_PAGE).setIcon(tabIcons[3]);
-
-        tabLayout.addTab(tabLayout.newTab().setIcon(tabIcons[0]));
-        tabLayout.addTab(tabLayout.newTab().setIcon(tabIcons[1]));
-        tabLayout.addTab(tabLayout.newTab().setIcon(tabIcons[2]));
-        tabLayout.addTab(tabLayout.newTab().setIcon(tabIcons[3]));
-    }
-
-    private void setupViewPager(ViewPager viewPager) {
-        adapter = new ViewPagerAdapter(getSupportFragmentManager());
-
-        watchFragment = WatchFragment.newInstance();
-        notificationFragment= NotificationFragment.newInstance();
-        searchFragment = SearchFragment.newInstance();
-        profileFragment = ProfileFragment.newInstance();
-        matchFragment = MatchFragment.newInstance();
-
-        adapter.addFrag(watchFragment, getResources().getString(R.string.watch_footer));
-        adapter.addFrag(notificationFragment, getResources().getString(R.string.notification_footer));
-        adapter.addFrag(searchFragment, getResources().getString(R.string.search_footer));
-        adapter.addFrag(profileFragment, getResources().getString(R.string.profile_footer));
-        adapter.addFrag(matchFragment);
-        viewPager.setAdapter(adapter);
-    }
-
-    @Override
-    public void onBackPressed() {
-        int currentPage = viewPager.getCurrentItem();
-        if (currentPage == MATCH_PAGE) {
-            viewPager.setCurrentItem(WATCH_PAGE);
-        }
-        else {
-            viewPager.setCurrentItem(SEARCH_PAGE);
-        }
-    }
 
 }

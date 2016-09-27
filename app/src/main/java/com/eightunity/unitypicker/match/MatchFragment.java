@@ -102,6 +102,26 @@ public class MatchFragment extends Fragment{
         outState.putParcelable("PARAM_MATCHFRAGMENT", Parcels.wrap(match));
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        // During startup, check if there are arguments passed to the fragment.
+        // onStart is a good place to do this because the layout has already been
+        // applied to the fragment at this point so we can safely call the method
+        // below that sets the article text.
+        Bundle args = getArguments();
+        if (args != null) {
+            // Set article based on argument passed in
+//            updateArticleView(args.getInt(ARG_POSITION));
+            String a1 = args.getString("A1");
+            int a2 = args.getInt("A2");
+            String a3 = args.getString("A3");
+            String a4 = args.getString("A4");
+            startArtical(a1, a2, a3, a4);
+        }
+    }
+
     private void configRecyclerView(RecyclerView recyclerView, RecyclerView.Adapter adapter, Context context) {
         recyclerView.setLayoutManager(new LinearLayoutManager(context));
         recyclerView.setItemAnimator(new DefaultItemAnimator());
@@ -175,7 +195,7 @@ public class MatchFragment extends Fragment{
     }
 
     public void setDataUI() {
-        ((MainActivity)getActivity()).showBackActionBar();
+//        ((MainActivity)getActivity()).showBackActionBar();
 
         setMatchData(match);
 

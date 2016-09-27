@@ -11,6 +11,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -56,6 +57,7 @@ public class NotificationFragment extends Fragment {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        Log.d(TAG, "onCreate is called");
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
     }
@@ -63,6 +65,7 @@ public class NotificationFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        Log.d(TAG, "onCreateView is called");
         View rootView = inflater.inflate(R.layout.fragment_notification, container, false);
 
         initView(rootView);
@@ -75,6 +78,7 @@ public class NotificationFragment extends Fragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        Log.d(TAG, "onActivityCreated is called");
 
         if (savedInstanceState == null) {
             setDataOnPageOpen();
@@ -86,6 +90,7 @@ public class NotificationFragment extends Fragment {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
+        Log.d(TAG, "onSaveInstanceState is called");
 
         ArrayList<Notification> datas = new ArrayList<>();
         datas.addAll(notifications);
@@ -96,7 +101,15 @@ public class NotificationFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+        Log.d(TAG, "onResume is called");
+
         registerReceiver();
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        Log.d(TAG, "onStart is called");
     }
 
     @Override

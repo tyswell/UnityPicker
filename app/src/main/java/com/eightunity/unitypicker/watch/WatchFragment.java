@@ -1,5 +1,6 @@
 package com.eightunity.unitypicker.watch;
 
+import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -11,7 +12,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.eightunity.unitypicker.MainActivity;
 import com.eightunity.unitypicker.R;
 import com.eightunity.unitypicker.commonpage.OptionDialog;
 import com.eightunity.unitypicker.database.ESearchWordDAO;
@@ -20,7 +20,6 @@ import com.eightunity.unitypicker.model.watch.Watch;
 import com.eightunity.unitypicker.search.SearchUtility;
 import com.eightunity.unitypicker.ui.BaseActivity;
 import com.eightunity.unitypicker.ui.LinearLayoutManager;
-import com.eightunity.unitypicker.ui.NonSwipeViewPager;
 import com.eightunity.unitypicker.ui.recyclerview.DividerItemDecoration;
 import com.eightunity.unitypicker.ui.recyclerview.RecycleClickListener;
 import com.eightunity.unitypicker.utility.DateUtil;
@@ -32,6 +31,10 @@ import java.util.List;
  * Created by chokechaic on 8/26/2016.
  */
 public class WatchFragment extends Fragment {
+
+    public interface OnHeadlineSelectedListener{
+        public void onArticleSelected(String username, int searchWordID, String searchWordDetail, String searchTypeDesc) ;
+    }
 
     private static final String TAG = "WatchFragment";
 
@@ -46,9 +49,21 @@ public class WatchFragment extends Fragment {
 
     private OnHeadlineSelectedListener mCallback;
 
-    private NonSwipeViewPager vp;
-
     List<Watch> watches = new ArrayList<>();
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+
+        Activity a;
+
+        if (context instanceof Activity){
+            a=(Activity) context;
+
+            mCallback = (OnHeadlineSelectedListener) a;
+        }
+
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -93,20 +108,14 @@ public class WatchFragment extends Fragment {
         updateUI(watches);
     }
 
-    public interface OnHeadlineSelectedListener{
-        public void onArticleSelected(String username, int searchWordID, String searchWordDetail, String searchTypeDesc) ;
-    }
-
-    public static WatchFragment newInstance() {
-        return new WatchFragment();
-    }
+//    public static WatchFragment newInstance() {
+//        return new WatchFragment();
+//    }
 
     private void initView(View rootView) {
         watchRecycler = (RecyclerView) rootView.findViewById(R.id.watchRecycler);
         watchAdapter = new WatchAdapter(rootView.getContext(), watches, recycleClick, optionClick);
         configRecyclerView(watchRecycler, watchAdapter, rootView.getContext());
-
-        vp = (NonSwipeViewPager) getActivity().findViewById(R.id.viewpager);
 
         dialog = new OptionDialog(getContext());
         dialog.setDialogResult(optionDialogResult);
@@ -165,11 +174,12 @@ public class WatchFragment extends Fragment {
     private RecycleClickListener recycleClick = new RecycleClickListener() {
         @Override
         public void onClick(View view, int position) {
-            vp.setCurrentItem(MainActivity.MATCH_PAGE);
+//            vp.setCurrentItem(MainActivity.MATCH_PAGE);
 
             String username = ((BaseActivity)getActivity()).getUser().getUsername();
+
             mCallback.onArticleSelected(
-                    ((BaseActivity)getActivity()).getUser().getUsername(),
+                    username,
                     watches.get(position).getId(),
                     watches.get(position).getSearchWord(),
                     watches.get(position).getSearchType());
@@ -177,6 +187,7 @@ public class WatchFragment extends Fragment {
     };
 
     public void setMyFragmentListener(OnHeadlineSelectedListener listener) {
+        Log.d(TAG, "xxxxx="+mCallback);
         mCallback = listener;
     }
 
