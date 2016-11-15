@@ -102,7 +102,7 @@ public class LoginActivity extends AccountAuthenticatorActivity {
     private SessionStatusCallback mStatusCallback = new SessionStatusCallback();
 
     private FirebaseAuth mAuth;
-    private FirebaseAuth.AuthStateListener mAuthListener;
+//    private FirebaseAuth.AuthStateListener mAuthListener;
 
     private ESearchWordDAO dao;
 
@@ -182,31 +182,53 @@ public class LoginActivity extends AccountAuthenticatorActivity {
 
 
         mAuth = FirebaseAuth.getInstance();
-        mAuthListener = new FirebaseAuth.AuthStateListener() {
-            @Override
-            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                final FirebaseUser fuser = firebaseAuth.getCurrentUser();
-                if (fuser != null) {
-                    fuser.getToken(true).addOnCompleteListener(new OnCompleteListener<GetTokenResult>() {
-                        public void onComplete(@NonNull Task<GetTokenResult> task) {
-                            if (task.isSuccessful()) {
-                                String idToken = task.getResult().getToken();
-                                Log.d(TAG, "idTokeAAAAA="+idToken);
-                                Log.d(TAG, "UID="+fuser.getUid());
-                                LoginReceive loginObj = setUserInfo(fuser, idToken);
+//        mAuthListener = new FirebaseAuth.AuthStateListener() {
+//            @Override
+//            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+//                final FirebaseUser fuser = firebaseAuth.getCurrentUser();
+//                if (fuser != null) {
+//                    fuser.getToken(true).addOnCompleteListener(new OnCompleteListener<GetTokenResult>() {
+//                        public void onComplete(@NonNull Task<GetTokenResult> task) {
+//                            if (task.isSuccessful()) {
+//                                String idToken = task.getResult().getToken();
+//                                Log.d(TAG, "idTokeAAAAA="+idToken);
+//                                Log.d(TAG, "UID="+fuser.getUid());
+//                                LoginReceive loginObj = setUserInfo(fuser, idToken);
+//
+//                                loginService(loginObj);
+//                            } else {
+//                                Log.d(TAG, "task.getException()="+task.getException());
+//                            }
+//                        }
+//                    });
+//                } else {
+//                    Log.d(TAG, "onAuthStateChanged:signed_out");
+//                }
+//
+//            }
+//        };
+    }
 
-                                loginService(loginObj);
-                            } else {
-                                Log.d(TAG, "task.getException()="+task.getException());
-                            }
-                        }
-                    });
-                } else {
-                    Log.d(TAG, "onAuthStateChanged:signed_out");
+    private void logined() {
+        final FirebaseUser fuser = FirebaseAuth.getInstance().getCurrentUser();
+        if (fuser != null) {
+            fuser.getToken(true).addOnCompleteListener(new OnCompleteListener<GetTokenResult>() {
+                public void onComplete(@NonNull Task<GetTokenResult> task) {
+                    if (task.isSuccessful()) {
+                        String idToken = task.getResult().getToken();
+                        Log.d(TAG, "idTokeAAAAA="+idToken);
+                        Log.d(TAG, "UID="+fuser.getUid());
+                        LoginReceive loginObj = setUserInfo(fuser, idToken);
+
+                        loginService(loginObj);
+                    } else {
+                        Log.d(TAG, "task.getException()="+task.getException());
+                    }
                 }
-
-            }
-        };
+            });
+        } else {
+            Log.d(TAG, "onAuthStateChanged:signed_out");
+        }
     }
 
     private LoginReceive setUserInfo(FirebaseUser fuser, String tokenId) {
@@ -264,7 +286,7 @@ public class LoginActivity extends AccountAuthenticatorActivity {
     public void onStart() {
         super.onStart();
 
-        mAuth.addAuthStateListener(mAuthListener);
+//        mAuth.addAuthStateListener(mAuthListener);
 
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
@@ -286,9 +308,9 @@ public class LoginActivity extends AccountAuthenticatorActivity {
     public void onStop() {
         super.onStop();
 
-        if (mAuthListener != null) {
-            mAuth.removeAuthStateListener(mAuthListener);
-        }
+//        if (mAuthListener != null) {
+//            mAuth.removeAuthStateListener(mAuthListener);
+//        }
 
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
@@ -346,6 +368,7 @@ public class LoginActivity extends AccountAuthenticatorActivity {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
                 Log.d(TAG, "signInWithCredential:onComplete:" + task.isSuccessful());
+                logined();
             }
         });
     }
@@ -376,6 +399,7 @@ public class LoginActivity extends AccountAuthenticatorActivity {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
                 Log.d(TAG, "signInWithCredential:onComplete:" + task.isSuccessful());
+                logined();
             }
         });
     }
@@ -419,19 +443,22 @@ public class LoginActivity extends AccountAuthenticatorActivity {
             public void onResponse(Call<ResponseService> call, retrofit2.Response<ResponseService> response) {
                 if (response.isSuccessful()) {
                     Log.d(TAG, "SUCCESS LOGIN CODE="+response.body().getCode());
+                    finish();
                 } else {
                     Log.e(TAG, "ERROR" + response.message());
+                    FirebaseAuth.getInstance().signOut();
                 }
             }
 
             @Override
             public void onFailure(Call<ResponseService> call, Throwable t) {
                 Log.d(TAG, "ERROR" + t.getMessage());
+                FirebaseAuth.getInstance().signOut();
             }
         });
 
 
-        finish();
+
     }
 
 

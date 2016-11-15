@@ -110,7 +110,7 @@ public class ESearchWordDAO {
 
     public List<Integer> getAllId(String username) {
         String query =
-                "SELECT ID_FIELD " +
+                "SELECT " + ID_FIELD +
                         " FROM " + TABLE_E_SEARCH_WORD+
                         " WHERE " + USERNAME_FIELD + "='" + username + "'" +
                         " ORDER BY " + MODIFIED_DATE_FIELD + " DESC";

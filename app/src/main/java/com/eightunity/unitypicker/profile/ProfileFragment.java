@@ -69,7 +69,7 @@ public class ProfileFragment extends Fragment {
                 ((AuthenticaterActivity)getActivity()).logout();
                 Intent intent = new Intent(getContext(), LoginActivity.class);
                 startActivityForResult(intent, 1);
-                LoginManager.getInstance().logOut();
+//                LoginManager.getInstance().logOut();
             }
         });
     }

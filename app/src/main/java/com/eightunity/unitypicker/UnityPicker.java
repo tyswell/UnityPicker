@@ -32,8 +32,8 @@ public class UnityPicker extends AppCompatActivity {
 
         app = this;
 
+        initDatabase();
         if (isLogined()) {
-            initDatabase();
             openFirstPage();
         } else {
             Intent intent = new Intent(UnityPicker.this, LoginActivity.class);
