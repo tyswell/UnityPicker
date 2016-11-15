@@ -1,5 +1,6 @@
 package com.eightunity.unitypicker.profile;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -14,8 +15,10 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.eightunity.unitypicker.R;
+import com.eightunity.unitypicker.authenticator.LoginActivity;
 import com.eightunity.unitypicker.ui.AuthenticaterActivity;
 import com.eightunity.unitypicker.ui.BaseActivity;
+import com.facebook.login.LoginManager;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -64,13 +67,15 @@ public class ProfileFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 ((AuthenticaterActivity)getActivity()).logout();
+                Intent intent = new Intent(getContext(), LoginActivity.class);
+                startActivityForResult(intent, 1);
+                LoginManager.getInstance().logOut();
             }
         });
     }
 
     private void callWSMytask() {
-        String name = ((BaseActivity)getActivity()).getUser().getName();
-        String userId = ((BaseActivity)getActivity()).getUser().getUserId();
+        String name = ((BaseActivity)getActivity()).getUser().getDisplayName();
         usernameView.setText(name);
         String imageURL = ((BaseActivity)getActivity()).getUser().getProfileURL();
 

@@ -261,7 +261,7 @@ public class MainActivity extends BaseActivity implements WatchFragment.OnHeadli
     }
 
     public void showBackActionBar() {
-        toolbar.setNavigationIcon(R.drawable.abc_ic_ab_back_mtrl_am_alpha);
+        toolbar.setNavigationIcon(R.drawable.ic_keyboard_backspace);
 
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override

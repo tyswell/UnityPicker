@@ -27,8 +27,6 @@ public class ESearchWordDAO {
     public static final String SEARCH_TYPE_FIELD = "SEARCH_TYPE";
     public static final String MODIFIED_DATE_FIELD = "modified_date";
 
-
-
     public static String createTable() {
         return "CREATE TABLE " + TABLE_E_SEARCH_WORD +
                 " (" +
@@ -101,6 +99,29 @@ public class ESearchWordDAO {
         if (cursor.moveToFirst()) {
             do {
                 datas.add(getData(cursor));
+            } while (cursor.moveToNext());
+        }
+
+        cursor.close();
+        DatabaseManager.getInstance().closeDatabase();
+
+        return datas;
+    }
+
+    public List<Integer> getAllId(String username) {
+        String query =
+                "SELECT ID_FIELD " +
+                        " FROM " + TABLE_E_SEARCH_WORD+
+                        " WHERE " + USERNAME_FIELD + "='" + username + "'" +
+                        " ORDER BY " + MODIFIED_DATE_FIELD + " DESC";
+        List<Integer> datas = new ArrayList<>();
+
+        SQLiteDatabase db = DatabaseManager.getInstance().openDatabase();
+        Cursor cursor = db.rawQuery(query, null);
+
+        if (cursor.moveToFirst()) {
+            do {
+                datas.add(cursor.getInt(cursor.getColumnIndex(ID_FIELD)));
             } while (cursor.moveToNext());
         }
 

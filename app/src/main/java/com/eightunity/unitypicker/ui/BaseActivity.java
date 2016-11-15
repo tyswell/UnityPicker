@@ -3,6 +3,8 @@ package com.eightunity.unitypicker.ui;
 import android.os.Bundle;
 
 import com.eightunity.unitypicker.model.account.User;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 
 /**
@@ -18,7 +20,16 @@ public class BaseActivity extends AuthenticaterActivity {
     }
 
     public User getUser() {
-        return ((Application)getApplicationContext()).user;
+        User user = new User();
+
+        FirebaseUser fbUser = FirebaseAuth.getInstance().getCurrentUser();
+
+        user.setUsername(fbUser.getEmail());
+        user.setDisplayName(fbUser.getDisplayName());
+        user.setProfileURL(fbUser.getPhotoUrl().toString());
+
+        return user;
     }
+
 
 }

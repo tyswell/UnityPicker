@@ -7,34 +7,31 @@ import android.os.Build;
  */
 public class Device {
 
+    private int osType;
     private String tokenNotification;
     private String deviceModel;
 
+    public int getOsType() {
+        return osType;
+    }
+
+    public void setOsType(int osType) {
+        this.osType = osType;
+    }
+
+    public String getTokenNotification() {
+        return tokenNotification;
+    }
+
+    public void setTokenNotification(String tokenNotification) {
+        this.tokenNotification = tokenNotification;
+    }
+
     public String getDeviceModel() {
-        return getDeviceName();
+        return deviceModel;
     }
 
-    private String getDeviceName() {
-        String manufacturer = Build.MANUFACTURER;
-        String model = Build.MODEL;
-        if (model.startsWith(manufacturer)) {
-            return capitalize(model);
-        } else {
-            return capitalize(manufacturer) + " " + model;
-        }
+    public void setDeviceModel(String deviceModel) {
+        this.deviceModel = deviceModel;
     }
-
-
-    private String capitalize(String s) {
-        if (s == null || s.length() == 0) {
-            return "";
-        }
-        char first = s.charAt(0);
-        if (Character.isUpperCase(first)) {
-            return s;
-        } else {
-            return Character.toUpperCase(first) + s.substring(1);
-        }
-    }
-
 }

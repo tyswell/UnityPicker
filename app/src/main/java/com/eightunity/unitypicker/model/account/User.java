@@ -10,19 +10,28 @@ import java.util.List;
 public class User {
 
     private String username;
-    private String name;
+    private String displayName;
     private String userId;
-    private String token;
-    private String tokenType;
+    private String tokenUID;
     private String profileURL;
-    private List<Device> devices;
+    private Integer userLoginType;
+    private Device device;
+    private FacebookUser facebookUser;
 
-    public String getName() {
-        return name;
+    public String getUsername() {
+        return username;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
     }
 
     public String getUserId() {
@@ -33,28 +42,12 @@ public class User {
         this.userId = userId;
     }
 
-    public String getUsername() {
-        return username;
+    public String getTokenUID() {
+        return tokenUID;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getToken() {
-        return token;
-    }
-
-    public void setToken(String token) {
-        this.token = token;
-    }
-
-    public String getTokenType() {
-        return tokenType;
-    }
-
-    public void setTokenType(String tokenType) {
-        this.tokenType = tokenType;
+    public void setTokenUID(String tokenUID) {
+        this.tokenUID = tokenUID;
     }
 
     public String getProfileURL() {
@@ -65,11 +58,27 @@ public class User {
         this.profileURL = profileURL;
     }
 
-    public List<Device> getDevices() {
-        return devices;
+    public Device getDevice() {
+        return device;
     }
 
-    public void setDevices(List<Device> devices) {
-        this.devices = devices;
+    public void setDevice(Device device) {
+        this.device = device;
+    }
+
+    public FacebookUser getFacebookUser() {
+        return facebookUser;
+    }
+
+    public void setFacebookUser(FacebookUser facebookUser) {
+        this.facebookUser = facebookUser;
+    }
+
+    public Integer getUserLoginType() {
+        return userLoginType;
+    }
+
+    public void setUserLoginType(Integer userLoginType) {
+        this.userLoginType = userLoginType;
     }
 }

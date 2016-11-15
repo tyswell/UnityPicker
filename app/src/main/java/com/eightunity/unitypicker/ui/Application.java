@@ -10,8 +10,6 @@ import com.eightunity.unitypicker.model.account.User;
  */
 public class Application extends android.app.Application {
 
-    public User user;
-
     @Override
     protected void attachBaseContext(Context base) {
         super.attachBaseContext(base);

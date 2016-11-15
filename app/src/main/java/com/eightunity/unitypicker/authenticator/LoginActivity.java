@@ -22,10 +22,17 @@ import com.eightunity.unitypicker.MainActivity;
 import com.eightunity.unitypicker.R;
 import com.eightunity.unitypicker.UnityPicker;
 import com.eightunity.unitypicker.authenticator.Constant.AuthenticatorConstant;
+import com.eightunity.unitypicker.database.ESearchWordDAO;
+import com.eightunity.unitypicker.model.account.OSType;
 import com.eightunity.unitypicker.model.account.User;
+import com.eightunity.unitypicker.model.account.UserLoginType;
+import com.eightunity.unitypicker.model.server.user.Device;
+import com.eightunity.unitypicker.model.server.user.FacebookUser;
+import com.eightunity.unitypicker.model.server.user.LoginReceive;
 import com.eightunity.unitypicker.model.service.ResponseService;
 import com.eightunity.unitypicker.service.ApiService;
 import com.eightunity.unitypicker.ui.Application;
+import com.eightunity.unitypicker.utility.DeviceUtil;
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
@@ -46,19 +53,25 @@ import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.GetTokenResult;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.iid.FirebaseInstanceId;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.concurrent.ExecutionException;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -91,10 +104,14 @@ public class LoginActivity extends AccountAuthenticatorActivity {
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
 
+    private ESearchWordDAO dao;
+
     @Override
     protected void onCreate(Bundle icicle) {
         super.onCreate(icicle);
         FacebookSdk.sdkInitialize(this);
+
+        dao = new ESearchWordDAO();
 
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.server_client_id))
@@ -111,7 +128,7 @@ public class LoginActivity extends AccountAuthenticatorActivity {
 
         LoginButton facebookBtn = (LoginButton) findViewById(R.id.login_facebook_button);
         mCallbackManager = CallbackManager.Factory.create();
-        facebookBtn.setReadPermissions("email", "public_profile");
+        facebookBtn.setReadPermissions("email", "public_profile", "user_managed_groups", "user_likes");
         facebookBtn.registerCallback(mCallbackManager, new FacebookCallback<LoginResult>() {
             @Override
             public void onSuccess(LoginResult loginResult) {
@@ -129,13 +146,6 @@ public class LoginActivity extends AccountAuthenticatorActivity {
                 Log.d(TAG, "facebook:onError", error);
             }
         });
-//        facebookBtn.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                LoginManager.getInstance().registerCallback(mCallbackManager, mStatusCallback);
-//                LoginManager.getInstance().logInWithReadPermissions(activity, Arrays.asList(Authenticator.REQUIRED_PERMISSIONS));
-//            }
-//        });
 
         SignInButton googleBtn = (SignInButton) findViewById(R.id.login_google_button);
         googleBtn.setOnClickListener(new View.OnClickListener() {
@@ -175,22 +185,22 @@ public class LoginActivity extends AccountAuthenticatorActivity {
         mAuthListener = new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                FirebaseUser fuser = firebaseAuth.getCurrentUser();
+                final FirebaseUser fuser = firebaseAuth.getCurrentUser();
                 if (fuser != null) {
-                    Log.d(TAG, "onAuthStateChanged:signed_in:" + fuser.getUid());
-                    User user = setUserInfo(fuser);
+                    fuser.getToken(true).addOnCompleteListener(new OnCompleteListener<GetTokenResult>() {
+                        public void onComplete(@NonNull Task<GetTokenResult> task) {
+                            if (task.isSuccessful()) {
+                                String idToken = task.getResult().getToken();
+                                Log.d(TAG, "idTokeAAAAA="+idToken);
+                                Log.d(TAG, "UID="+fuser.getUid());
+                                LoginReceive loginObj = setUserInfo(fuser, idToken);
 
-
-                    SharedPreferences pref = getApplicationContext().getSharedPreferences(AuthenticatorConstant.SHARE_PREFERENCE_NAME, 0); // 0 - for private mode
-                    SharedPreferences.Editor editor = pref.edit();
-                    editor.putString(AuthenticatorConstant.PARAM_USERNAME, user.getUsername());
-                    editor.putString(AuthenticatorConstant.PARAM_NAME, user.getName());
-                    editor.putString(AuthenticatorConstant.PARAM_TOEN, user.getToken());
-                    editor.putString(AuthenticatorConstant.PARAM_PROFILE_URL, user.getProfileURL());
-                    editor.putString(AuthenticatorConstant.PARAM_PROVIDERID, user.getTokenType());
-                    editor.commit();
-
-                    loginService(user);
+                                loginService(loginObj);
+                            } else {
+                                Log.d(TAG, "task.getException()="+task.getException());
+                            }
+                        }
+                    });
                 } else {
                     Log.d(TAG, "onAuthStateChanged:signed_out");
                 }
@@ -199,25 +209,43 @@ public class LoginActivity extends AccountAuthenticatorActivity {
         };
     }
 
-    private User setUserInfo(FirebaseUser fuser) {
-        User user = new User();
+    private LoginReceive setUserInfo(FirebaseUser fuser, String tokenId) {
+        LoginReceive loginObj = new LoginReceive();
 
-        String authToken = fuser.getUid();
-        String name = fuser.getDisplayName();
-        String username = fuser.getEmail();
-        String providerID = fuser.getProviderId();
+        loginObj.setTokenId(tokenId);
+        loginObj.setSearchingIds(dao.getAllId(fuser.getUid()));
+        loginObj.setUserLoginType(UserLoginType.FACEBOOK_LOGIN_TYPE_CODE);
 
-//        File myFile = new File(fuser.getPhotoUrl().getPath());
-        String photoUrl = fuser.getPhotoUrl().toString();
-        Log.d(TAG, "photoUrl="+photoUrl);
+        Device device = new Device();
+        device.setOsTypeCode(OSType.ANDROID_OS);
+        device.setTokenNotification(FirebaseInstanceId.getInstance().getToken());
+        device.setDeviceModel(DeviceUtil.getDeviceName());
+        loginObj.setDevice(device);
 
-        user.setUsername(username);
-        user.setToken(authToken);
-        user.setProfileURL(photoUrl);
-        user.setName(name);
-        user.setTokenType(providerID);
+        FacebookUser fbUser = new FacebookUser();
+        fbUser.setFacebookID(fuser.getProviderId());
+        loginObj.setFacebookUser(fbUser);
 
-        return user;
+        return loginObj;
+
+//        String refreshedToken = FirebaseInstanceId.getInstance().getToken();
+//        String name = fuser.getDisplayName();
+//        String username = fuser.getEmail();
+//        String providerID = fuser.getProviderId();
+//        String photoUrl = fuser.getPhotoUrl().toString();
+//
+//        device.setOsType(OSType.ANDROID_OS);
+//        device.setTokenNotification(refreshedToken);
+//        device.setDeviceModel(DeviceUtil.getDeviceName());
+//
+//        loginObj.setUsername(username);
+//        loginObj.setProfileURL(photoUrl);
+//        loginObj.setDisplayName(name);
+//        loginObj.setUserLoginType(UserLoginType.getCode(providerID));
+//
+//        user.setDevice(device);
+//
+//        return user;
     }
 
     @Override
@@ -322,97 +350,6 @@ public class LoginActivity extends AccountAuthenticatorActivity {
         });
     }
 
-//    public class getUserInfo implements GraphRequest.Callback {
-//
-//        @Override
-//        public void onCompleted(GraphResponse response) {
-//            Log.i("response profile", response.toString());
-//            if (response.getError() == null) {
-//                try {
-//                    JSONObject userInfo = response.getJSONObject();
-//                    String username = userInfo.getString("email");
-//                    String userID =  userInfo.getString("id");
-//                    String name =  userInfo.getString("name");
-//                    Log.d("FACEBO", "userID = "+userID);
-//                    Log.d("FACEBO", "name = "+name);
-//                    if (username == null ||
-//                            username.length() == 0) {
-//                        username = AccessToken.getCurrentAccessToken().getToken();
-//                    }
-//                    final String accessToken = AccessToken.getCurrentAccessToken().getToken();
-//
-//                    User user = new User();
-//                    user.setName(name);
-//                    user.setUserId(userID);
-//                    user.setUsername(username);
-//                    user.setToken(accessToken);
-//                    user.setTokenType(AuthenticatorConstant.FACEBOOK_ACCOUNTYTPE);
-//                    user.setProfileURL("https://graph.facebook.com/" + userID + "/picture?type=large");
-//                    loginService(user);
-//                } catch (JSONException e) {
-//                    e.printStackTrace();
-//                }
-//            } else {
-//                mHandler.post(new DisplayException("API error:\n" + response.getError().getErrorMessage()));
-//            }
-//        }
-//    }
-
-    private void setAuthenticator(final String username, final String token, final String tokenType, final String profileUrl, final String name) {
-        Account account;
-        if (mRequestNewAccount) {
-            account = new Account(username, AuthenticatorConstant.UNITY_PICKER_ACCOUNTYTPE);
-            mAccountManager.addAccountExplicitly(account, token, null);
-        } else {
-            account = new Account(mUsername, AuthenticatorConstant.UNITY_PICKER_ACCOUNTYTPE);
-            mAccountManager.setPassword(account, token);
-        }
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                if (mLoading != null) {
-                    mLoading.dismiss();
-                }
-                final Intent intent = new Intent();
-                intent.putExtra(AccountManager.KEY_ACCOUNT_NAME, username);
-                intent.putExtra(AccountManager.KEY_ACCOUNT_TYPE, tokenType);
-                intent.putExtra(AccountManager.KEY_AUTHTOKEN, token);
-                intent.putExtra(AuthenticatorConstant.PARAM_PROFILE_URL, profileUrl);
-                intent.putExtra(AuthenticatorConstant.PARAM_NAME, name);
-                setAccountAuthenticatorResult(intent.getExtras());
-                setResult(1, intent);
-                finish();
-            }
-        });
-    }
-
-    protected  class DisplayException implements Runnable {
-        String mMessage;
-
-        public DisplayException(String msg) {
-            mMessage = msg;
-        }
-
-        @Override
-        public void run() {
-            AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
-            builder.setTitle("Facebook Error");
-            builder.setMessage(mMessage);
-            builder.setOnCancelListener(new DialogInterface.OnCancelListener() {
-                @Override
-                public void onCancel(DialogInterface dialog) {
-                    mDialog.dismiss();
-                    mLoading.dismiss();
-                    LoginActivity.this.finish();
-                }
-            });
-            try {
-                mDialog = builder.create();
-                mDialog.show();
-            } catch (Exception e) { }
-        }
-    }
-
     // [START handleSignInResult]
     private void handleSignInResult(GoogleSignInResult result) {
         Log.d(TAG, "handleSignInResult:" + result.isSuccess());
@@ -426,16 +363,6 @@ public class LoginActivity extends AccountAuthenticatorActivity {
             } else {
             }
 
-//            Account account = new Account(acct.getEmail(), AuthenticatorConstant.UNITY_PICKER_ACCOUNTYTPE);
-//            mAccountManager.addAccountExplicitly(account, idToken, null);
-//            final Intent intent = new Intent();
-//            intent.putExtra(AccountManager.KEY_ACCOUNT_NAME, acct.getEmail());
-//            intent.putExtra(AccountManager.KEY_ACCOUNT_TYPE, AuthenticatorConstant.GOOGLE_ACCOUNTYTPE);
-//            intent.putExtra(AccountManager.KEY_AUTHTOKEN, idToken);
-//            setAccountAuthenticatorResult(intent.getExtras());
-//            setResult(1, intent);
-
-            //finish();
         } else {
             // Signed out, show unauthenticated UI.
         }
@@ -476,8 +403,9 @@ public class LoginActivity extends AccountAuthenticatorActivity {
         mLoading.dismiss();
     }
 
-    private void loginService(final User user) {
-        /*
+    private void loginService(final LoginReceive loginObj) {
+        Log.d(TAG, "LOGIN SERVICE : " + loginObj.getTokenId());
+
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(getString(R.string.base_service_url))
                 .addConverterFactory(JacksonConverterFactory.create())
@@ -485,13 +413,12 @@ public class LoginActivity extends AccountAuthenticatorActivity {
 
         ApiService service = retrofit.create(ApiService.class);
 
-        Call<ResponseService> call = service.login(user);
+        Call<ResponseService> call = service.login(loginObj);
         call.enqueue(new Callback<ResponseService>() {
             @Override
             public void onResponse(Call<ResponseService> call, retrofit2.Response<ResponseService> response) {
                 if (response.isSuccessful()) {
                     Log.d(TAG, "SUCCESS LOGIN CODE="+response.body().getCode());
-                    setAuthenticator(user.getUsername(), user.getToken(), user.getTokenType());
                 } else {
                     Log.e(TAG, "ERROR" + response.message());
                 }
@@ -502,9 +429,9 @@ public class LoginActivity extends AccountAuthenticatorActivity {
                 Log.d(TAG, "ERROR" + t.getMessage());
             }
         });
-        */
 
-        setAuthenticator(user.getUsername(), user.getToken(), user.getTokenType(), user.getProfileURL(), user.getName());
+
+        finish();
     }
 
 
