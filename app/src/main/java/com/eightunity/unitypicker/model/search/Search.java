@@ -5,8 +5,17 @@ package com.eightunity.unitypicker.model.search;
  */
 public class Search {
 
+    private Integer searchId;
     private String searchWord;
     private String searchType;
+
+    public Integer getSearchId() {
+        return searchId;
+    }
+
+    public void setSearchId(Integer searchId) {
+        this.searchId = searchId;
+    }
 
     public String getSearchWord() {
         return searchWord;

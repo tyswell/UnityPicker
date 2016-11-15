@@ -17,7 +17,13 @@ import com.eightunity.unitypicker.R;
 import com.eightunity.unitypicker.database.ESearchWordDAO;
 import com.eightunity.unitypicker.model.dao.ESearchWord;
 import com.eightunity.unitypicker.model.search.Search;
+import com.eightunity.unitypicker.model.server.device.DeviceToken;
+import com.eightunity.unitypicker.model.server.search.Searching;
+import com.eightunity.unitypicker.model.service.ResponseService;
+import com.eightunity.unitypicker.service.ApiService;
+import com.eightunity.unitypicker.ui.AuthenticaterActivity;
 import com.eightunity.unitypicker.ui.BaseActivity;
+import com.eightunity.unitypicker.utility.DeviceUtil;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -29,6 +35,11 @@ import com.google.firebase.auth.GetTokenResult;
 
 import java.util.Arrays;
 import java.util.concurrent.ExecutionException;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Retrofit;
+import retrofit2.converter.jackson.JacksonConverterFactory;
 
 /**
  * Created by chokechaic on 8/26/2016.
@@ -83,9 +94,8 @@ public class SearchFragment extends Fragment {
         return new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Search search = getContent();
-                int id = dao.add(getDBData(search));
-                Log.d(TAG, "ADD ID="+id);
+                Searching search = getContent();
+                addSearchService(search);
             }
         };
     }
@@ -100,11 +110,57 @@ public class SearchFragment extends Fragment {
         return data;
     }
 
-    private Search getContent() {
-        Search search = new Search();
-        search.setSearchWord(searchText.getText().toString());
-        search.setSearchType(searchTypeSpinner.getSelectedItem().toString());
+    private Searching getContent() {
+        Searching search = new Searching();
+        search.setDescription(searchText.getText().toString());
+//        search.setSearchTypeCode(searchTypeSpinner.getSelectedItem().toString());
+        search.setSearchTypeCode(1);
+
         return search;
+    }
+
+    private void addSearchService(final Searching search) {
+        FirebaseUser fUser = FirebaseAuth.getInstance().getCurrentUser();
+        fUser.getToken(true).addOnCompleteListener(new OnCompleteListener<GetTokenResult>() {
+            @Override
+            public void onComplete(@NonNull Task<GetTokenResult> task) {
+                search.setTokenId(task.getResult().getToken());
+
+                Retrofit retrofit = new Retrofit.Builder()
+                        .baseUrl(getString(R.string.base_service_url))
+                        .addConverterFactory(JacksonConverterFactory.create())
+                        .build();
+
+                ApiService service = retrofit.create(ApiService.class);
+
+                Call<Integer> call = service.addSearching(search);
+                call.enqueue(new Callback<Integer>() {
+                    @Override
+                    public void onResponse(Call<Integer> call, retrofit2.Response<Integer> response) {
+                        if (response.isSuccessful()) {
+                            Log.d(TAG, "SUCCESS ADD SEARCH ID ="+response.body());
+                            Search searchDao = new Search();
+                            searchDao.setSearchId(response.body());
+                            searchDao.setSearchType(searchTypeSpinner.getSelectedItem().toString());
+                            searchDao.setSearchWord(search.getDescription());
+
+                            addSearchDao(searchDao);
+                        } else {
+                            Log.e(TAG, "ERROR" + response.message());
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<Integer> call, Throwable t) {
+                        Log.d(TAG, "ERROR" + t.getMessage());
+                    }
+                });
+            }
+        });
+    }
+
+    private void addSearchDao(Search search) {
+        dao.add(getDBData(search));
     }
 
 

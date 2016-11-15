@@ -26,9 +26,13 @@ import com.eightunity.unitypicker.database.ESearchWordDAO;
 import com.eightunity.unitypicker.model.account.OSType;
 import com.eightunity.unitypicker.model.account.User;
 import com.eightunity.unitypicker.model.account.UserLoginType;
+import com.eightunity.unitypicker.model.dao.ESearchWord;
+import com.eightunity.unitypicker.model.search.Search;
+import com.eightunity.unitypicker.model.server.search.Searching;
 import com.eightunity.unitypicker.model.server.user.Device;
 import com.eightunity.unitypicker.model.server.user.FacebookUser;
 import com.eightunity.unitypicker.model.server.user.LoginReceive;
+import com.eightunity.unitypicker.model.server.user.LoginResponse;
 import com.eightunity.unitypicker.model.service.ResponseService;
 import com.eightunity.unitypicker.service.ApiService;
 import com.eightunity.unitypicker.ui.Application;
@@ -71,6 +75,7 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import retrofit2.Call;
@@ -220,7 +225,7 @@ public class LoginActivity extends AccountAuthenticatorActivity {
                         Log.d(TAG, "UID="+fuser.getUid());
                         LoginReceive loginObj = setUserInfo(fuser, idToken);
 
-                        loginService(loginObj);
+                        loginService(loginObj, fuser.getUid());
                     } else {
                         Log.d(TAG, "task.getException()="+task.getException());
                     }
@@ -427,9 +432,8 @@ public class LoginActivity extends AccountAuthenticatorActivity {
         mLoading.dismiss();
     }
 
-    private void loginService(final LoginReceive loginObj) {
+    private void loginService(final LoginReceive loginObj, final String username) {
         Log.d(TAG, "LOGIN SERVICE : " + loginObj.getTokenId());
-
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(getString(R.string.base_service_url))
                 .addConverterFactory(JacksonConverterFactory.create())
@@ -437,12 +441,14 @@ public class LoginActivity extends AccountAuthenticatorActivity {
 
         ApiService service = retrofit.create(ApiService.class);
 
-        Call<ResponseService> call = service.login(loginObj);
-        call.enqueue(new Callback<ResponseService>() {
+        Call<LoginResponse> call = service.login(loginObj);
+        call.enqueue(new Callback<LoginResponse>() {
             @Override
-            public void onResponse(Call<ResponseService> call, retrofit2.Response<ResponseService> response) {
+            public void onResponse(Call<LoginResponse> call, retrofit2.Response<LoginResponse> response) {
                 if (response.isSuccessful()) {
-                    Log.d(TAG, "SUCCESS LOGIN CODE="+response.body().getCode());
+                    Log.d(TAG, "SUCCESS LOGIN CODE="+response.body());
+                    LoginResponse loginResponse = response.body();
+                    addSearchDao(loginResponse.getSearching(), username);
                     finish();
                 } else {
                     Log.e(TAG, "ERROR" + response.message());
@@ -451,14 +457,22 @@ public class LoginActivity extends AccountAuthenticatorActivity {
             }
 
             @Override
-            public void onFailure(Call<ResponseService> call, Throwable t) {
+            public void onFailure(Call<LoginResponse> call, Throwable t) {
                 Log.d(TAG, "ERROR" + t.getMessage());
                 FirebaseAuth.getInstance().signOut();
             }
         });
+    }
 
-
-
+    private void addSearchDao(List<Searching> searchings, String username) {
+        for (Searching searching : searchings) {
+            ESearchWord search = new ESearchWord();
+            search.setDescription(searching.getDescription());
+            search.setSearch_type(searching.getSearchTypeCode());
+            search.setId(searching.getSearchingId());
+            search.setUsername(username);
+            dao.add(search);
+        }
     }
 
 

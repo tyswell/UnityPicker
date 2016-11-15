@@ -38,18 +38,16 @@ public class ESearchWordDAO {
                 " )";
     }
 
-    public int add(ESearchWord data) {
+    public void add(ESearchWord data) {
         SQLiteDatabase db = DatabaseManager.getInstance().openDatabase();
         ContentValues values = new ContentValues();
+        values.put(ID_FIELD, data.getId());
         values.put(USERNAME_FIELD, data.getUsername());
         values.put(DESCRIPTION_FIELD, data.getDescription());
         values.put(SEARCH_TYPE_FIELD, data.getSearch_type());
 
-        int id;
-        id = (int) db.insert(TABLE_E_SEARCH_WORD, null, values);
+        db.insert(TABLE_E_SEARCH_WORD, null, values);
         DatabaseManager.getInstance().closeDatabase();
-
-        return id;
     }
 
     public void delete(int id) {

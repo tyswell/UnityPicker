@@ -2,7 +2,6 @@ package com.eightunity.unitypicker.model.server.search;
 public class Searching {
 
 	private String tokenId;
-
 	private Integer searchingId;
 	private String description;
 	private Integer searchTypeCode;

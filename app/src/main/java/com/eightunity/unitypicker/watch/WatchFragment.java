@@ -3,6 +3,7 @@ package com.eightunity.unitypicker.watch;
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -16,16 +17,29 @@ import com.eightunity.unitypicker.R;
 import com.eightunity.unitypicker.commonpage.OptionDialog;
 import com.eightunity.unitypicker.database.ESearchWordDAO;
 import com.eightunity.unitypicker.model.dao.ESearchWord;
+import com.eightunity.unitypicker.model.search.Search;
+import com.eightunity.unitypicker.model.server.search.DeleteSearching;
 import com.eightunity.unitypicker.model.watch.Watch;
 import com.eightunity.unitypicker.search.SearchUtility;
+import com.eightunity.unitypicker.service.ApiService;
 import com.eightunity.unitypicker.ui.BaseActivity;
 import com.eightunity.unitypicker.ui.LinearLayoutManager;
 import com.eightunity.unitypicker.ui.recyclerview.DividerItemDecoration;
 import com.eightunity.unitypicker.ui.recyclerview.RecycleClickListener;
 import com.eightunity.unitypicker.utility.DateUtil;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.GetTokenResult;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Retrofit;
+import retrofit2.converter.jackson.JacksonConverterFactory;
 
 /**
  * Created by chokechaic on 8/26/2016.
@@ -125,8 +139,10 @@ public class WatchFragment extends Fragment {
             if (OptionDialog.STOP_WATCHING_MODE == mode) {
 
             } else if (OptionDialog.REMOVE_FROM_LIST_MODE == mode) {
-                dao.delete(watches.get(position).getId());
-                watchAdapter.removeAt(position);
+//                dao.delete(watches.get(position).getId());
+//                watchAdapter.removeAt(position);
+
+                deleteSearchService(watches.get(position).getId(), position);
             } else {
 
             }
@@ -189,6 +205,46 @@ public class WatchFragment extends Fragment {
         }
     };
 
+    private void deleteSearchService(final int searchingId, final int position) {
+        FirebaseUser fUser = FirebaseAuth.getInstance().getCurrentUser();
+        fUser.getToken(true).addOnCompleteListener(new OnCompleteListener<GetTokenResult>() {
+            @Override
+            public void onComplete(@NonNull Task<GetTokenResult> task) {
+                DeleteSearching deleteObj = new DeleteSearching();
+                deleteObj.setTokenId(task.getResult().getToken());
+                deleteObj.setSearchingId(searchingId);
 
+                Retrofit retrofit = new Retrofit.Builder()
+                        .baseUrl(getString(R.string.base_service_url))
+                        .addConverterFactory(JacksonConverterFactory.create())
+                        .build();
+
+                ApiService service = retrofit.create(ApiService.class);
+
+                Call<Boolean> call = service.deleteSearching(deleteObj);
+                call.enqueue(new Callback<Boolean>() {
+                    @Override
+                    public void onResponse(Call<Boolean> call, retrofit2.Response<Boolean> response) {
+                        if (response.isSuccessful()) {
+                            Log.d(TAG, "SUCCESS ADD SEARCH ID ="+response.body());
+                            deleteSearching(searchingId, position);
+                        } else {
+                            Log.e(TAG, "ERROR" + response.message());
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<Boolean> call, Throwable t) {
+                        Log.d(TAG, "ERROR" + t.getMessage());
+                    }
+                });
+            }
+        });
+    }
+
+    private void deleteSearching(int searchingId, int position) {
+        dao.delete(searchingId);
+        watchAdapter.removeAt(position);
+    }
 
 }
