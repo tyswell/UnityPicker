@@ -81,6 +81,7 @@ import java.util.concurrent.ExecutionException;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.converter.jackson.JacksonConverterFactory;
 
 /**
@@ -240,7 +241,9 @@ public class LoginActivity extends AccountAuthenticatorActivity {
         LoginReceive loginObj = new LoginReceive();
 
         loginObj.setTokenId(tokenId);
-        loginObj.setSearchingIds(dao.getAllId(fuser.getUid()));
+        List<Integer> uids = dao.getAllId(fuser.getUid());
+        Log.d(TAG, "uids.size())="+uids.size());
+        loginObj.setSearchingIds(uids);
         loginObj.setUserLoginType(UserLoginType.FACEBOOK_LOGIN_TYPE_CODE);
 
         Device device = new Device();
@@ -436,7 +439,7 @@ public class LoginActivity extends AccountAuthenticatorActivity {
         Log.d(TAG, "LOGIN SERVICE : " + loginObj.getTokenId());
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(getString(R.string.base_service_url))
-                .addConverterFactory(JacksonConverterFactory.create())
+                .addConverterFactory(GsonConverterFactory.create())
                 .build();
 
         ApiService service = retrofit.create(ApiService.class);
@@ -448,6 +451,7 @@ public class LoginActivity extends AccountAuthenticatorActivity {
                 if (response.isSuccessful()) {
                     Log.d(TAG, "SUCCESS LOGIN CODE="+response.body());
                     LoginResponse loginResponse = response.body();
+                    Log.d(TAG, "loginResponse.getSearching() = "+loginResponse.getSearching());
                     addSearchDao(loginResponse.getSearching(), username);
                     finish();
                 } else {
@@ -465,13 +469,15 @@ public class LoginActivity extends AccountAuthenticatorActivity {
     }
 
     private void addSearchDao(List<Searching> searchings, String username) {
-        for (Searching searching : searchings) {
-            ESearchWord search = new ESearchWord();
-            search.setDescription(searching.getDescription());
-            search.setSearch_type(searching.getSearchTypeCode());
-            search.setId(searching.getSearchingId());
-            search.setUsername(username);
-            dao.add(search);
+        if (searchings != null) {
+            for (Searching searching : searchings) {
+                ESearchWord search = new ESearchWord();
+                search.setDescription(searching.getDescription());
+                search.setSearch_type(searching.getSearchTypeCode());
+                search.setId(searching.getSearchingId());
+                search.setUsername(username);
+                dao.add(search);
+            }
         }
     }
 

@@ -1,5 +1,6 @@
 package com.eightunity.unitypicker.service;
 
+import com.eightunity.unitypicker.authenticator.Account;
 import com.eightunity.unitypicker.model.account.User;
 import com.eightunity.unitypicker.model.server.device.DeviceToken;
 import com.eightunity.unitypicker.model.server.search.DeleteSearching;
@@ -20,10 +21,13 @@ public interface ApiService {
     @POST("userservice/login")
     Call<LoginResponse> login(@Body LoginReceive loginReceive);
 
+    @POST("deviceservice/updatetoken")
     Call<Boolean> updateToken(@Body DeviceToken deviceToken);
 
+    @POST("searchingservice/addsearch")
     Call<Integer> addSearching(@Body Searching searching);
 
+    @POST("searchingservice/deletesearch")
     Call<Boolean> deleteSearching(@Body DeleteSearching deleteSearching);
 
 }

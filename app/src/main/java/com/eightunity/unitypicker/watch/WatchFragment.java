@@ -160,12 +160,13 @@ public class WatchFragment extends Fragment {
 
     private void setDataOnPageOpen() {
         List<Watch> watches = getDataFromDB();
+        Log.d(TAG, "watches = "+ watches.size());
         updateUI(watches);
     }
 
     private List<Watch> getDataFromDB() {
-        String username = ((BaseActivity)getActivity()).getUser().getUsername();
-        List<ESearchWord> eSearchWords = dao.getAllData(username);
+        String userId = ((BaseActivity)getActivity()).getUser().getUserId();
+        List<ESearchWord> eSearchWords = dao.getAllData(userId);
         List<Watch> datas = new ArrayList<>();
         for (ESearchWord eSearchWord : eSearchWords) {
             Watch data = new Watch();
