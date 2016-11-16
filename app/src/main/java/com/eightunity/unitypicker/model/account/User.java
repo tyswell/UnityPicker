@@ -9,21 +9,21 @@ import java.util.List;
  */
 public class User {
 
-    private String username;
-    private String displayName;
     private String userId;
+    private String email;
+    private String displayName;
     private String tokenUID;
     private String profileURL;
     private Integer userLoginType;
     private Device device;
     private FacebookUser facebookUser;
 
-    public String getUsername() {
-        return username;
+    public String getEmail() {
+        return email;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public String getDisplayName() {

@@ -101,14 +101,18 @@ public class FirebaseMsgService extends FirebaseMessagingService {
 
     private EMatching convertMsg(Map<String, String> map) {
         EMatching eMatching = new EMatching();
-        eMatching.setUsername(map.get("username"));
-        eMatching.setId(Integer.parseInt(map.get("id")));
+        eMatching.setUser_id(map.get("user_id"));
         eMatching.setMatching_date(DateUtil.stringToDate(map.get("matching_date")));
         eMatching.setSeacrh_word_id(Integer.parseInt(map.get("seacrh_word_id")));
         eMatching.setSearch_word_desc(map.get("search_word_desc"));
+        eMatching.setContent_id(Integer.parseInt(map.get("content_id")));
         eMatching.setTitle_content(map.get("title_content"));
         eMatching.setUrl(map.get("url"));
         eMatching.setWeb_name(map.get("web_name"));
+
+        for (String key : map.keySet()) {
+            Log.d(TAG, "KEY : "+key + " | value : "+map.get(key));
+        }
 
         return eMatching;
     }

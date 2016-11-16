@@ -74,6 +74,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -226,7 +227,8 @@ public class LoginActivity extends AccountAuthenticatorActivity {
                         Log.d(TAG, "UID="+fuser.getUid());
                         LoginReceive loginObj = setUserInfo(fuser, idToken);
 
-                        loginService(loginObj, fuser.getUid());
+//                        loginService(loginObj, fuser.getUid());
+                        loginServiceTemp(loginObj, fuser.getUid());
                     } else {
                         Log.d(TAG, "task.getException()="+task.getException());
                     }
@@ -435,7 +437,12 @@ public class LoginActivity extends AccountAuthenticatorActivity {
         mLoading.dismiss();
     }
 
-    private void loginService(final LoginReceive loginObj, final String username) {
+    private void loginServiceTemp(final LoginReceive loginObj, final String username) {
+        addSearchDao(new ArrayList<Searching>(), username);
+        finish();
+    }
+
+    private void loginService(final LoginReceive loginObj, final String userId) {
         Log.d(TAG, "LOGIN SERVICE : " + loginObj.getTokenId());
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(getString(R.string.base_service_url))
@@ -452,7 +459,7 @@ public class LoginActivity extends AccountAuthenticatorActivity {
                     Log.d(TAG, "SUCCESS LOGIN CODE="+response.body());
                     LoginResponse loginResponse = response.body();
                     Log.d(TAG, "loginResponse.getSearching() = "+loginResponse.getSearching());
-                    addSearchDao(loginResponse.getSearching(), username);
+                    addSearchDao(loginResponse.getSearching(), userId);
                     finish();
                 } else {
                     Log.e(TAG, "ERROR" + response.message());
@@ -468,14 +475,14 @@ public class LoginActivity extends AccountAuthenticatorActivity {
         });
     }
 
-    private void addSearchDao(List<Searching> searchings, String username) {
+    private void addSearchDao(List<Searching> searchings, String userId) {
         if (searchings != null) {
             for (Searching searching : searchings) {
                 ESearchWord search = new ESearchWord();
                 search.setDescription(searching.getDescription());
                 search.setSearch_type(searching.getSearchTypeCode());
-                search.setId(searching.getSearchingId());
-                search.setUsername(username);
+                search.setSearch_id(searching.getSearchingId());
+                search.setUser_id(userId);
                 dao.add(search);
             }
         }

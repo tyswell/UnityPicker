@@ -17,9 +17,10 @@ public class EMatchingDAO {
 
     public static final String TABLE_E_MATCHING = "E_MATCHING";
     public static final String ID_FIELD = "id";
-    public static final String USERNAME_FIELD = "username";
+    public static final String USERID_FIELD = "user_id";
     public static final String SEARCH_WORD_ID_FIELD = "seacrh_word_id";
     public static final String SEARCH_WORD_DESC_FIELD = "search_word_desc";
+    public static final String CONTENT_ID_FIELD = "content_id";
     public static final String TITLE_CONTENT_FIELD = "title_content";
     public static final String WEB_NAME_FIELD = "web_name";
     public static final String URL_FIELD = "url";
@@ -29,9 +30,10 @@ public class EMatchingDAO {
         return "CREATE TABLE " + TABLE_E_MATCHING +
                 " (" +
                     ID_FIELD              + " INTEGER PRIMARY KEY," +
-                    USERNAME_FIELD        + " TEXT," +
+                    USERID_FIELD          + " TEXT," +
                     SEARCH_WORD_ID_FIELD  + " INTEGER," +
                     SEARCH_WORD_DESC_FIELD+ " TEXT," +
+                    CONTENT_ID_FIELD      + " INTEGER," +
                     TITLE_CONTENT_FIELD   + " TEXT," +
                     WEB_NAME_FIELD        + " TEXT," +
                     URL_FIELD             + " TEXT," +
@@ -42,9 +44,10 @@ public class EMatchingDAO {
     public int add(EMatching data) {
         SQLiteDatabase db = DatabaseManager.getInstance().openDatabase();
         ContentValues values = new ContentValues();
-        values.put(USERNAME_FIELD, data.getUsername());
+        values.put(USERID_FIELD, data.getUser_id());
         values.put(SEARCH_WORD_ID_FIELD, data.getSeacrh_word_id());
         values.put(SEARCH_WORD_DESC_FIELD, data.getSearch_word_desc());
+        values.put(CONTENT_ID_FIELD, data.getContent_id());
         values.put(TITLE_CONTENT_FIELD, data.getTitle_content());
         values.put(WEB_NAME_FIELD, data.getWeb_name());
         values.put(URL_FIELD, data.getUrl());
@@ -64,12 +67,12 @@ public class EMatchingDAO {
         DatabaseManager.getInstance().closeDatabase();
     }
 
-    public EMatching getByKey(int id, String username) {
+    public EMatching getByKey(int id, String user_id) {
         String query =
                 "SELECT *" +
                         " FROM " + TABLE_E_MATCHING +
                         " WHERE " + ID_FIELD + " = " + id +
-                                    USERNAME_FIELD + " = '" + username + "'";
+                        USERID_FIELD + " = '" + user_id + "'";
 
         SQLiteDatabase db = DatabaseManager.getInstance().openDatabase();
         Cursor cursor = db.rawQuery(query, null);
@@ -89,11 +92,11 @@ public class EMatchingDAO {
         }
     }
 
-    public List<EMatching> getAllData(String username) {
+    public List<EMatching> getAllData(String user_id) {
         String query =
                 "SELECT *" +
                         " FROM " + TABLE_E_MATCHING +
-                        " WHERE " + USERNAME_FIELD + "='" + username + "'" +
+                        " WHERE " + USERID_FIELD + "='" + user_id + "'" +
                         " ORDER BY " + MATCHING_DATE_FIELD + " DESC";
         List<EMatching> datas = new ArrayList<>();
 
@@ -112,11 +115,11 @@ public class EMatchingDAO {
         return datas;
     }
 
-    public List<EMatching> getBySearchWord(String username, int searchWordId) {
+    public List<EMatching> getBySearchWord(String user_id, int searchWordId) {
         String query =
                 "SELECT *" +
                         " FROM " + TABLE_E_MATCHING +
-                        " WHERE " + USERNAME_FIELD + "='" + username + "'" +
+                        " WHERE " + USERID_FIELD + "='" + user_id + "'" +
                             " AND " +  SEARCH_WORD_ID_FIELD + "=" + searchWordId +
                         " ORDER BY " + MATCHING_DATE_FIELD + " DESC";
         List<EMatching> datas = new ArrayList<>();
@@ -139,9 +142,10 @@ public class EMatchingDAO {
     private EMatching getData(Cursor cursor) {
         EMatching data= new EMatching();
         data.setId(cursor.getInt(cursor.getColumnIndex(ID_FIELD)));
-        data.setUsername(cursor.getString(cursor.getColumnIndex(USERNAME_FIELD)));
+        data.setUser_id(cursor.getString(cursor.getColumnIndex(USERID_FIELD)));
         data.setSeacrh_word_id(cursor.getInt(cursor.getColumnIndex(SEARCH_WORD_ID_FIELD)));
         data.setSearch_word_desc(cursor.getString(cursor.getColumnIndex(SEARCH_WORD_DESC_FIELD)));
+        data.setContent_id(cursor.getInt(cursor.getColumnIndex(CONTENT_ID_FIELD)));
         data.setTitle_content(cursor.getString(cursor.getColumnIndex(TITLE_CONTENT_FIELD)));
         data.setUrl(cursor.getString(cursor.getColumnIndex(URL_FIELD)));
         data.setWeb_name(cursor.getString(cursor.getColumnIndex(WEB_NAME_FIELD)));

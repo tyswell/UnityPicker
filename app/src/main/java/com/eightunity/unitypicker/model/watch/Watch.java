@@ -10,19 +10,19 @@ import java.util.Date;
  */
 public class Watch implements Parcelable{
 
-    private int id;
+    private int searchId;
     private String searchWord;
     private String searchType;
     private String timeDesc;
 
     public Watch(){}
 
-    public int getId() {
-        return id;
+    public int getSearchId() {
+        return searchId;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public void setSearchId(int searchId) {
+        this.searchId = searchId;
     }
 
     public String getSearchWord() {
@@ -56,14 +56,14 @@ public class Watch implements Parcelable{
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(id);
+        dest.writeInt(searchId);
         dest.writeString(searchWord);
         dest.writeString(searchType);
         dest.writeString(timeDesc);
     }
 
     protected Watch(Parcel in) {
-        id = in.readInt();
+        searchId = in.readInt();
         searchWord = in.readString();
         searchType = in.readString();
         timeDesc = in.readString();

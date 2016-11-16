@@ -95,16 +95,17 @@ public class SearchFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 Searching search = getContent();
-                addSearchService(search);
+//                addSearchService(search);
+                addSearchServiceTemp(search);
             }
         };
     }
 
     private ESearchWord getDBData(Search search) {
-        String username = ((BaseActivity)getActivity()).getUser().getUsername();
+        String userId = ((BaseActivity)getActivity()).getUser().getUserId();
 
         ESearchWord data = new ESearchWord();
-        data.setUsername(username);
+        data.setUser_id(userId);
         data.setDescription(search.getSearchWord());
         data.setSearch_type(SearchUtility.searhTypeDescToCode(search.getSearchType()));
         return data;
@@ -117,6 +118,15 @@ public class SearchFragment extends Fragment {
         search.setSearchTypeCode(1);
 
         return search;
+    }
+
+    private void addSearchServiceTemp(final Searching search) {
+        Search searchDao = new Search();
+        searchDao.setSearchId(20);
+        searchDao.setSearchType(searchTypeSpinner.getSelectedItem().toString());
+        searchDao.setSearchWord(search.getDescription());
+
+        addSearchDao(searchDao);
     }
 
     private void addSearchService(final Searching search) {

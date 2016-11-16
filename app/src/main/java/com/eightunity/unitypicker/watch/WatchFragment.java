@@ -142,7 +142,8 @@ public class WatchFragment extends Fragment {
 //                dao.delete(watches.get(position).getId());
 //                watchAdapter.removeAt(position);
 
-                deleteSearchService(watches.get(position).getId(), position);
+//                deleteSearchService(watches.get(position).getId(), position);
+                deleteSearchServiceTemp(watches.get(position).getSearchId(), position);
             } else {
 
             }
@@ -170,7 +171,7 @@ public class WatchFragment extends Fragment {
         List<Watch> datas = new ArrayList<>();
         for (ESearchWord eSearchWord : eSearchWords) {
             Watch data = new Watch();
-            data.setId(eSearchWord.getId());
+            data.setSearchId(eSearchWord.getSearch_id());
             data.setSearchWord(eSearchWord.getDescription());
             data.setSearchType(SearchUtility.searchTypeCodeToDesc(eSearchWord.getSearch_type()));
             data.setTimeDesc(DateUtil.timeSpent(eSearchWord.getModified_date()));
@@ -189,11 +190,11 @@ public class WatchFragment extends Fragment {
     private RecycleClickListener recycleClick = new RecycleClickListener() {
         @Override
         public void onClick(View view, int position) {
-            String username = ((BaseActivity)getActivity()).getUser().getUsername();
+            String userId = ((BaseActivity)getActivity()).getUser().getUserId();
 
             mCallback.onArticleSelected(
-                    username,
-                    watches.get(position).getId(),
+                    userId,
+                    watches.get(position).getSearchId(),
                     watches.get(position).getSearchWord(),
                     watches.get(position).getSearchType());
         }
@@ -205,6 +206,10 @@ public class WatchFragment extends Fragment {
             dialog.show(position);
         }
     };
+
+    private void deleteSearchServiceTemp(final int searchingId, final int position) {
+        deleteSearching(searchingId, position);
+    }
 
     private void deleteSearchService(final int searchingId, final int position) {
         FirebaseUser fUser = FirebaseAuth.getInstance().getCurrentUser();

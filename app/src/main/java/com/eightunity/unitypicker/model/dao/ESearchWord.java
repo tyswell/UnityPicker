@@ -7,27 +7,26 @@ import java.util.Date;
  */
 public class ESearchWord {
 
-    private Integer id;
-    private String username;
+    private Integer search_id;
+    private String user_id;
     private String description;
     private Integer search_type;
     private Date modified_date;
 
-
-    public String getUsername() {
-        return username;
+    public Integer getSearch_id() {
+        return search_id;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public void setSearch_id(Integer search_id) {
+        this.search_id = search_id;
     }
 
-    public Integer getId() {
-        return id;
+    public String getUser_id() {
+        return user_id;
     }
 
-    public void setId(Integer id) {
-        this.id = id;
+    public void setUser_id(String user_id) {
+        this.user_id = user_id;
     }
 
     public String getDescription() {

@@ -24,7 +24,7 @@ public class BaseActivity extends AuthenticaterActivity {
 
         FirebaseUser fbUser = FirebaseAuth.getInstance().getCurrentUser();
 
-        user.setUsername(fbUser.getEmail());
+        user.setEmail(fbUser.getEmail());
         user.setUserId(fbUser.getUid());
         user.setDisplayName(fbUser.getDisplayName());
         user.setProfileURL(fbUser.getPhotoUrl().toString());

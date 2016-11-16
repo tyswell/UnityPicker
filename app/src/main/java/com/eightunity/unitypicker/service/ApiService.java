@@ -1,13 +1,10 @@
 package com.eightunity.unitypicker.service;
 
-import com.eightunity.unitypicker.authenticator.Account;
-import com.eightunity.unitypicker.model.account.User;
 import com.eightunity.unitypicker.model.server.device.DeviceToken;
 import com.eightunity.unitypicker.model.server.search.DeleteSearching;
 import com.eightunity.unitypicker.model.server.search.Searching;
 import com.eightunity.unitypicker.model.server.user.LoginReceive;
 import com.eightunity.unitypicker.model.server.user.LoginResponse;
-import com.eightunity.unitypicker.model.service.ResponseService;
 
 import retrofit2.Call;
 import retrofit2.http.Body;

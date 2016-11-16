@@ -183,8 +183,8 @@ public class NotificationFragment extends Fragment {
     }
 
     private List<Notification> getDataFromDB() {
-        String username = ((BaseActivity)getActivity()).getUser().getUsername();
-        List<EMatching> eMatchings = dao.getAllData(username);
+        String userId = ((BaseActivity)getActivity()).getUser().getUserId();
+        List<EMatching> eMatchings = dao.getAllData(userId);
         List<Notification> datas = new ArrayList<>();
         for (EMatching eMatching : eMatchings) {
             Notification data = new Notification();
