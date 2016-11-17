@@ -94,6 +94,7 @@ public class SearchFragment extends Fragment {
         return new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
                 Searching search = getContent();
 //                addSearchService(search);
                 addSearchServiceTemp(search);
@@ -130,6 +131,7 @@ public class SearchFragment extends Fragment {
     }
 
     private void addSearchService(final Searching search) {
+        ((BaseActivity)getActivity()).showLoading();
         FirebaseUser fUser = FirebaseAuth.getInstance().getCurrentUser();
         fUser.getToken(true).addOnCompleteListener(new OnCompleteListener<GetTokenResult>() {
             @Override
@@ -155,14 +157,17 @@ public class SearchFragment extends Fragment {
                             searchDao.setSearchWord(search.getDescription());
 
                             addSearchDao(searchDao);
+                            ((BaseActivity)getActivity()).hideLoading();
                         } else {
                             Log.e(TAG, "ERROR" + response.message());
+                            ((BaseActivity)getActivity()).hideLoading();
                         }
                     }
 
                     @Override
                     public void onFailure(Call<Integer> call, Throwable t) {
                         Log.d(TAG, "ERROR" + t.getMessage());
+                        ((BaseActivity)getActivity()).hideLoading();
                     }
                 });
             }
@@ -170,7 +175,9 @@ public class SearchFragment extends Fragment {
     }
 
     private void addSearchDao(Search search) {
+        ((BaseActivity)getActivity()).showLoading();
         dao.add(getDBData(search));
+        ((BaseActivity)getActivity()).hideLoading();
     }
 
 

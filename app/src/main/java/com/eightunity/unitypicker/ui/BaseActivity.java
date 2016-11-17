@@ -12,11 +12,30 @@ import com.google.firebase.auth.FirebaseUser;
  */
 public class BaseActivity extends AuthenticaterActivity {
 
-
+    private TransparentProgressDialog loadingDialog;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        loadingDialog = new TransparentProgressDialog(this);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        if (loadingDialog != null) {
+            try {
+                loadingDialog.dismiss();
+            } catch (Exception e) { }
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        loadingDialog.dismiss();
     }
 
     public User getUser() {
@@ -30,6 +49,14 @@ public class BaseActivity extends AuthenticaterActivity {
         user.setProfileURL(fbUser.getPhotoUrl().toString());
 
         return user;
+    }
+
+    public void showLoading() {
+        loadingDialog.show();
+    }
+
+    public void hideLoading() {
+        loadingDialog.dismiss();
     }
 
 

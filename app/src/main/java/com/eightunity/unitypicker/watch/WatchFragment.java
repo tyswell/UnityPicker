@@ -212,6 +212,7 @@ public class WatchFragment extends Fragment {
     }
 
     private void deleteSearchService(final int searchingId, final int position) {
+        ((BaseActivity)getActivity()).showLoading();
         FirebaseUser fUser = FirebaseAuth.getInstance().getCurrentUser();
         fUser.getToken(true).addOnCompleteListener(new OnCompleteListener<GetTokenResult>() {
             @Override
@@ -234,14 +235,17 @@ public class WatchFragment extends Fragment {
                         if (response.isSuccessful()) {
                             Log.d(TAG, "SUCCESS ADD SEARCH ID ="+response.body());
                             deleteSearching(searchingId, position);
+                            ((BaseActivity)getActivity()).hideLoading();
                         } else {
                             Log.e(TAG, "ERROR" + response.message());
+                            ((BaseActivity)getActivity()).hideLoading();
                         }
                     }
 
                     @Override
                     public void onFailure(Call<Boolean> call, Throwable t) {
                         Log.d(TAG, "ERROR" + t.getMessage());
+                        ((BaseActivity)getActivity()).hideLoading();
                     }
                 });
             }

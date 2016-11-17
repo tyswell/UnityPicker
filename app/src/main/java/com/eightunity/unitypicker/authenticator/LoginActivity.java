@@ -22,6 +22,7 @@ import com.eightunity.unitypicker.model.server.user.FacebookUser;
 import com.eightunity.unitypicker.model.server.user.LoginReceive;
 import com.eightunity.unitypicker.model.server.user.LoginResponse;
 import com.eightunity.unitypicker.service.ApiService;
+import com.eightunity.unitypicker.ui.TransparentProgressDialog;
 import com.eightunity.unitypicker.utility.DeviceUtil;
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
@@ -70,7 +71,8 @@ public class LoginActivity extends AccountAuthenticatorActivity {
 
     private GoogleApiClient mGoogleApiClient;
     private String mUsername;
-    protected ProgressDialog mLoading;
+//    protected ProgressDialog mLoading;
+    private TransparentProgressDialog mLoading;
     protected boolean mRequestNewAccount = false;
     private CallbackManager mCallbackManager;
     public final Handler mHandler = new Handler();
@@ -126,9 +128,7 @@ public class LoginActivity extends AccountAuthenticatorActivity {
             }
         });
 
-        mLoading = new ProgressDialog(this);
-        mLoading.setTitle("TEST FACEBBBOOOK");
-        mLoading.setMessage("Loading ... ");
+        mLoading = new TransparentProgressDialog(this);
         mLoading.setOnCancelListener(new DialogInterface.OnCancelListener() {
             @Override
             public void onCancel(DialogInterface dialog) {
@@ -233,7 +233,7 @@ public class LoginActivity extends AccountAuthenticatorActivity {
 
     private void handleFacebookAccessToken(AccessToken token) {
         Log.d(TAG, "handleFacebookAccessToken:" + token.getToken());
-
+        mLoading.show();
         AuthCredential credential = FacebookAuthProvider.getCredential(token.getToken());
         mAuth.signInWithCredential(credential).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
             @Override
@@ -264,7 +264,7 @@ public class LoginActivity extends AccountAuthenticatorActivity {
 
     private void firebaseAuthWithGoogle(GoogleSignInAccount acct) {
         Log.d(TAG, "firebaseAuthWithGoogle:" + acct.getId());
-
+        mLoading.show();
         AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
         mAuth.signInWithCredential(credential).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
             @Override
