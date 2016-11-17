@@ -23,6 +23,7 @@ import com.eightunity.unitypicker.model.service.ResponseService;
 import com.eightunity.unitypicker.service.ApiService;
 import com.eightunity.unitypicker.ui.AuthenticaterActivity;
 import com.eightunity.unitypicker.ui.BaseActivity;
+import com.eightunity.unitypicker.ui.ErrorDialog;
 import com.eightunity.unitypicker.utility.DeviceUtil;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -96,10 +97,24 @@ public class SearchFragment extends Fragment {
             public void onClick(View v) {
 
                 Searching search = getContent();
-//                addSearchService(search);
-                addSearchServiceTemp(search);
+                if (isValidCriteria(search)) {
+                    //                addSearchService(search);
+                    addSearchServiceTemp(search);
+                }
             }
         };
+    }
+
+    private boolean isValidCriteria(Searching search) {
+        ErrorDialog errorDialog = new ErrorDialog();
+
+        if (search.getDescription() == null ||
+                search.getDescription().trim().equals("")) {
+            errorDialog.showDialog(getActivity(), "DESCRIPTION IS WRONG");
+            return false;
+        }
+
+        return true;
     }
 
     private ESearchWord getDBData(Search search) {
