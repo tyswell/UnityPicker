@@ -6,6 +6,8 @@
     <EditText
         android:id="@+id/searchText"
         android:layout_width="match_parent"
+        android:maxLines="1"
+        android:maxLength="200"
         android:layout_height="wrap_content"/>
 
     <Spinner

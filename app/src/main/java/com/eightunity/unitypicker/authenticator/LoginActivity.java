@@ -16,12 +16,17 @@ import com.eightunity.unitypicker.database.ESearchWordDAO;
 import com.eightunity.unitypicker.model.account.OSType;
 import com.eightunity.unitypicker.model.account.UserLoginType;
 import com.eightunity.unitypicker.model.dao.ESearchWord;
+import com.eightunity.unitypicker.model.server.search.DeleteSearching;
 import com.eightunity.unitypicker.model.server.search.Searching;
 import com.eightunity.unitypicker.model.server.user.Device;
 import com.eightunity.unitypicker.model.server.user.FacebookUser;
 import com.eightunity.unitypicker.model.server.user.LoginReceive;
 import com.eightunity.unitypicker.model.server.user.LoginResponse;
 import com.eightunity.unitypicker.service.ApiService;
+import com.eightunity.unitypicker.service.CallBackAdaptor;
+import com.eightunity.unitypicker.service.ServiceAdaptor;
+import com.eightunity.unitypicker.ui.BaseActivity;
+import com.eightunity.unitypicker.ui.ErrorDialog;
 import com.eightunity.unitypicker.ui.TransparentProgressDialog;
 import com.eightunity.unitypicker.utility.DeviceUtil;
 import com.facebook.AccessToken;
@@ -161,7 +166,9 @@ public class LoginActivity extends AccountAuthenticatorActivity {
 //                        loginService(loginObj, fuser.getUid());
                         loginServiceTemp(loginObj, fuser.getUid());
                     } else {
+                        ErrorDialog errorDialog = new ErrorDialog();
                         Log.d(TAG, "task.getException()="+task.getException());
+                        errorDialog.showDialog(LoginActivity.this, task.getException().getMessage());
                     }
                 }
             });
@@ -319,6 +326,9 @@ public class LoginActivity extends AccountAuthenticatorActivity {
                 } else {
                     Log.e(TAG, "ERROR" + response.message());
                     FirebaseAuth.getInstance().signOut();
+
+                    ErrorDialog errorDialog = new ErrorDialog();
+                    errorDialog.showDialog(LoginActivity.this, response.message());
                 }
             }
 
@@ -326,6 +336,9 @@ public class LoginActivity extends AccountAuthenticatorActivity {
             public void onFailure(Call<LoginResponse> call, Throwable t) {
                 Log.d(TAG, "ERROR" + t.getMessage());
                 FirebaseAuth.getInstance().signOut();
+
+                ErrorDialog errorDialog = new ErrorDialog();
+                errorDialog.showDialog(LoginActivity.this, t.getMessage());
             }
         });
     }

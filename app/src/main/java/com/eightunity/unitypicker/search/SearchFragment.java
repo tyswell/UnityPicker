@@ -12,30 +12,23 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 
-import com.eightunity.unitypicker.MainActivity;
 import com.eightunity.unitypicker.R;
 import com.eightunity.unitypicker.database.ESearchWordDAO;
 import com.eightunity.unitypicker.model.dao.ESearchWord;
 import com.eightunity.unitypicker.model.search.Search;
-import com.eightunity.unitypicker.model.server.device.DeviceToken;
 import com.eightunity.unitypicker.model.server.search.Searching;
-import com.eightunity.unitypicker.model.service.ResponseService;
 import com.eightunity.unitypicker.service.ApiService;
-import com.eightunity.unitypicker.ui.AuthenticaterActivity;
+import com.eightunity.unitypicker.service.CallBackAdaptor;
+import com.eightunity.unitypicker.service.ServiceAdaptor;
 import com.eightunity.unitypicker.ui.BaseActivity;
 import com.eightunity.unitypicker.ui.ErrorDialog;
-import com.eightunity.unitypicker.utility.DeviceUtil;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
-import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GetTokenResult;
 
 import java.util.Arrays;
-import java.util.concurrent.ExecutionException;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -98,8 +91,9 @@ public class SearchFragment extends Fragment {
 
                 Searching search = getContent();
                 if (isValidCriteria(search)) {
-                    //                addSearchService(search);
-                    addSearchServiceTemp(search);
+//                                    addSearchService(search);
+//                    addSearchServiceTemp(search);
+                    addSearchServiceX(search);
                 }
             }
         };
@@ -108,9 +102,17 @@ public class SearchFragment extends Fragment {
     private boolean isValidCriteria(Searching search) {
         ErrorDialog errorDialog = new ErrorDialog();
 
-        if (search.getDescription() == null ||
-                search.getDescription().trim().equals("")) {
-            errorDialog.showDialog(getActivity(), "DESCRIPTION IS WRONG");
+        String word = search.getDescription();
+
+        if (word == null || word.trim().equals("")) {
+            errorDialog.showDialog(getActivity(), getString(R.string.validate_search_notinput));
+            return false;
+        }
+
+        word = word.trim();
+
+        if (word.length() < 3) {
+            errorDialog.showDialog(getActivity(), getString(R.string.validate_search_notinput));
             return false;
         }
 
@@ -145,46 +147,79 @@ public class SearchFragment extends Fragment {
         addSearchDao(searchDao);
     }
 
+    private void addSearchServiceX(final Searching search) {
+        new ServiceAdaptor(getActivity()) {
+            @Override
+            public void callService(String tokenId, ApiService service) {
+                search.setTokenId(tokenId);
+                Call<Integer> call = service.addSearching(search);
+                call.enqueue(new CallBackAdaptor<Integer>(getActivity()) {
+                    @Override
+                    public void onSuccess(Integer response) {
+                        Log.d(TAG, "SUCCESS ADD SEARCH ID ="+response);
+                        Search searchDao = new Search();
+                        searchDao.setSearchId(response);
+                        searchDao.setSearchType(searchTypeSpinner.getSelectedItem().toString());
+                        searchDao.setSearchWord(search.getDescription());
+
+                        addSearchDao(searchDao);
+                    }
+                });
+            }
+        };
+    }
+
     private void addSearchService(final Searching search) {
         ((BaseActivity)getActivity()).showLoading();
+
+        final ErrorDialog errorDialog = new ErrorDialog();
         FirebaseUser fUser = FirebaseAuth.getInstance().getCurrentUser();
         fUser.getToken(true).addOnCompleteListener(new OnCompleteListener<GetTokenResult>() {
             @Override
             public void onComplete(@NonNull Task<GetTokenResult> task) {
-                search.setTokenId(task.getResult().getToken());
+                if (task.isSuccessful()) {
+                    search.setTokenId(task.getResult().getToken());
 
-                Retrofit retrofit = new Retrofit.Builder()
-                        .baseUrl(getString(R.string.base_service_url))
-                        .addConverterFactory(JacksonConverterFactory.create())
-                        .build();
+                    Retrofit retrofit = new Retrofit.Builder()
+                            .baseUrl(getString(R.string.base_service_url))
+                            .addConverterFactory(JacksonConverterFactory.create())
+                            .build();
 
-                ApiService service = retrofit.create(ApiService.class);
+                    ApiService service = retrofit.create(ApiService.class);
 
-                Call<Integer> call = service.addSearching(search);
-                call.enqueue(new Callback<Integer>() {
-                    @Override
-                    public void onResponse(Call<Integer> call, retrofit2.Response<Integer> response) {
-                        if (response.isSuccessful()) {
-                            Log.d(TAG, "SUCCESS ADD SEARCH ID ="+response.body());
-                            Search searchDao = new Search();
-                            searchDao.setSearchId(response.body());
-                            searchDao.setSearchType(searchTypeSpinner.getSelectedItem().toString());
-                            searchDao.setSearchWord(search.getDescription());
+                    Call<Integer> call = service.addSearching(search);
+                    call.enqueue(new Callback<Integer>() {
+                        @Override
+                        public void onResponse(Call<Integer> call, retrofit2.Response<Integer> response) {
+                            if (response.isSuccessful()) {
+                                Log.d(TAG, "SUCCESS ADD SEARCH ID ="+response.body());
+                                Search searchDao = new Search();
+                                searchDao.setSearchId(response.body());
+                                searchDao.setSearchType(searchTypeSpinner.getSelectedItem().toString());
+                                searchDao.setSearchWord(search.getDescription());
 
-                            addSearchDao(searchDao);
-                            ((BaseActivity)getActivity()).hideLoading();
-                        } else {
-                            Log.e(TAG, "ERROR" + response.message());
+                                addSearchDao(searchDao);
+                                ((BaseActivity)getActivity()).hideLoading();
+                            } else {
+                                Log.e(TAG, "ERROR" + response.message());
+                                errorDialog.showDialog(getActivity(), response.message());
+                                ((BaseActivity)getActivity()).hideLoading();
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<Integer> call, Throwable t) {
+
+                            Log.d(TAG, "ERROR" + t.getMessage());
+                            errorDialog.showDialog(getActivity(), t.getMessage());
                             ((BaseActivity)getActivity()).hideLoading();
                         }
-                    }
-
-                    @Override
-                    public void onFailure(Call<Integer> call, Throwable t) {
-                        Log.d(TAG, "ERROR" + t.getMessage());
-                        ((BaseActivity)getActivity()).hideLoading();
-                    }
-                });
+                    });
+                } else {
+                    Log.e(TAG, task.getException().getMessage());
+                    errorDialog.showDialog(getActivity(), task.getException().getMessage());
+                    ((BaseActivity)getActivity()).hideLoading();
+                }
             }
         });
     }

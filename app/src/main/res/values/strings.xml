@@ -20,4 +20,7 @@
     <string name="stop_watching">Stop Watching</string>
     <string name="remove_from_List">Remove from list</string>
     <string name="cancel">Cancel</string>
+
+    <string name="validate_search_notinput">Please Input Something</string>
+    <string name="validate_search_minlength">Please Input Search Word More Than 2</string>
 </resources>

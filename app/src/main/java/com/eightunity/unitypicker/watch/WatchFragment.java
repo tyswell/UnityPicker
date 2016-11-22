@@ -19,9 +19,12 @@ import com.eightunity.unitypicker.database.ESearchWordDAO;
 import com.eightunity.unitypicker.model.dao.ESearchWord;
 import com.eightunity.unitypicker.model.search.Search;
 import com.eightunity.unitypicker.model.server.search.DeleteSearching;
+import com.eightunity.unitypicker.model.server.search.Searching;
 import com.eightunity.unitypicker.model.watch.Watch;
 import com.eightunity.unitypicker.search.SearchUtility;
 import com.eightunity.unitypicker.service.ApiService;
+import com.eightunity.unitypicker.service.CallBackAdaptor;
+import com.eightunity.unitypicker.service.ServiceAdaptor;
 import com.eightunity.unitypicker.ui.BaseActivity;
 import com.eightunity.unitypicker.ui.LinearLayoutManager;
 import com.eightunity.unitypicker.ui.recyclerview.DividerItemDecoration;
@@ -143,7 +146,8 @@ public class WatchFragment extends Fragment {
 //                watchAdapter.removeAt(position);
 
 //                deleteSearchService(watches.get(position).getId(), position);
-                deleteSearchServiceTemp(watches.get(position).getSearchId(), position);
+//                deleteSearchServiceTemp(watches.get(position).getSearchId(), position);
+                deleteSearchServiceX(watches.get(position).getSearchId(), position);
             } else {
 
             }
@@ -209,6 +213,26 @@ public class WatchFragment extends Fragment {
 
     private void deleteSearchServiceTemp(final int searchingId, final int position) {
         deleteSearching(searchingId, position);
+    }
+
+    private void deleteSearchServiceX(final int searchingId, final int position) {
+        new ServiceAdaptor(getActivity()) {
+            @Override
+            public void callService(String tokenId, ApiService service) {
+                DeleteSearching deleteObj = new DeleteSearching();
+                deleteObj.setTokenId(tokenId);
+                deleteObj.setSearchingId(searchingId);
+
+                Call<Boolean> call = service.deleteSearching(deleteObj);
+                call.enqueue(new CallBackAdaptor<Boolean>(getActivity()) {
+                    @Override
+                    public void onSuccess(Boolean response) {
+                        Log.d(TAG, "SUCCESS ADD SEARCH ID ="+response);
+                        deleteSearching(searchingId, position);
+                    }
+                });
+            }
+        };
     }
 
     private void deleteSearchService(final int searchingId, final int position) {
