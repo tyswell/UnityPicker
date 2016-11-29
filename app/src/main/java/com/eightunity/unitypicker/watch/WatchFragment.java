@@ -146,8 +146,8 @@ public class WatchFragment extends Fragment {
 //                watchAdapter.removeAt(position);
 
 //                deleteSearchService(watches.get(position).getId(), position);
-//                deleteSearchServiceTemp(watches.get(position).getSearchId(), position);
-                deleteSearchServiceX(watches.get(position).getSearchId(), position);
+                deleteSearchServiceTemp(watches.get(position).getSearchId(), position);
+//                deleteSearchServiceX(watches.get(position).getSearchId(), position);
             } else {
 
             }
@@ -174,6 +174,7 @@ public class WatchFragment extends Fragment {
         List<ESearchWord> eSearchWords = dao.getAllData(userId);
         List<Watch> datas = new ArrayList<>();
         for (ESearchWord eSearchWord : eSearchWords) {
+            Log.d(TAG, "eSearchWord.getSearch_id():"+eSearchWord.getSearch_id());
             Watch data = new Watch();
             data.setSearchId(eSearchWord.getSearch_id());
             data.setSearchWord(eSearchWord.getDescription());

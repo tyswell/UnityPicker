@@ -8,6 +8,7 @@ import com.eightunity.unitypicker.model.dao.EMatching;
 import com.eightunity.unitypicker.utility.DateUtil;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -37,7 +38,7 @@ public class EMatchingDAO {
                     TITLE_CONTENT_FIELD   + " TEXT," +
                     WEB_NAME_FIELD        + " TEXT," +
                     URL_FIELD             + " TEXT," +
-                    MATCHING_DATE_FIELD   + " DATETIME DEFAULT CURRENT_TIMESTAMP" +
+                    MATCHING_DATE_FIELD   + " DATETIME " +
                 " )";
     }
 
@@ -51,6 +52,7 @@ public class EMatchingDAO {
         values.put(TITLE_CONTENT_FIELD, data.getTitle_content());
         values.put(WEB_NAME_FIELD, data.getWeb_name());
         values.put(URL_FIELD, data.getUrl());
+        values.put(MATCHING_DATE_FIELD, DateUtil.dateToString(data.getMatching_date()));
 
         int id;
         id = (int) db.insert(TABLE_E_MATCHING, null, values);

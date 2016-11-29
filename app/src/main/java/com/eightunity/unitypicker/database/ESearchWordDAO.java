@@ -8,6 +8,7 @@ import com.eightunity.unitypicker.model.dao.ESearchWord;
 import com.eightunity.unitypicker.utility.DateUtil;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -31,7 +32,7 @@ public class ESearchWordDAO {
                     USER_ID_FIELD       +   " TEXT,"+
                     DESCRIPTION_FIELD   +   " TEXT,"+
                     SEARCH_TYPE_FIELD   +   " INTEGER," +
-                    MODIFIED_DATE_FIELD +   " DATETIME DEFAULT CURRENT_TIMESTAMP" +
+                    MODIFIED_DATE_FIELD +   " DATETIME " +
                 " )";
     }
 
@@ -42,6 +43,7 @@ public class ESearchWordDAO {
         values.put(USER_ID_FIELD, data.getUser_id());
         values.put(DESCRIPTION_FIELD, data.getDescription());
         values.put(SEARCH_TYPE_FIELD, data.getSearch_type());
+        values.put(MODIFIED_DATE_FIELD, DateUtil.dateToString(data.getModified_date()));
 
         db.insert(TABLE_E_SEARCH_WORD, null, values);
         DatabaseManager.getInstance().closeDatabase();

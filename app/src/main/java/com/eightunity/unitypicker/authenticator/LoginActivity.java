@@ -161,6 +161,7 @@ public class LoginActivity extends AccountAuthenticatorActivity {
                         Log.d(TAG, "UID="+fuser.getUid());
                         LoginReceive loginObj = setUserInfo(fuser, idToken);
 //                        loginService(loginObj, fuser.getUid());
+                        Log.d(TAG, "Notification token :"+loginObj.getDevice().getTokenNotification());
                         loginServiceTemp(loginObj, fuser.getUid());
                     } else {
                         ErrorDialog errorDialog = new ErrorDialog();
@@ -362,6 +363,7 @@ public class LoginActivity extends AccountAuthenticatorActivity {
                 search.setDescription(searching.getDescription());
                 search.setSearch_type(searching.getSearchTypeCode());
                 search.setSearch_id(searching.getSearchingId());
+                search.setModified_date(searching.getCreateDate());
                 search.setUser_id(userId);
                 dao.add(search);
             }

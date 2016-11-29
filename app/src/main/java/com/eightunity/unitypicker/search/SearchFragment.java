@@ -17,6 +17,7 @@ import com.eightunity.unitypicker.R;
 import com.eightunity.unitypicker.database.ESearchWordDAO;
 import com.eightunity.unitypicker.model.dao.ESearchWord;
 import com.eightunity.unitypicker.model.search.Search;
+import com.eightunity.unitypicker.model.server.search.AddSearchingResponse;
 import com.eightunity.unitypicker.model.server.search.Searching;
 import com.eightunity.unitypicker.service.ApiService;
 import com.eightunity.unitypicker.service.CallBackAdaptor;
@@ -30,6 +31,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GetTokenResult;
 
 import java.util.Arrays;
+import java.util.Date;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -125,8 +127,11 @@ public class SearchFragment extends Fragment {
 
         ESearchWord data = new ESearchWord();
         data.setUser_id(userId);
+        data.setSearch_id(search.getSearchId());
         data.setDescription(search.getSearchWord());
         data.setSearch_type(SearchUtility.searhTypeDescToCode(search.getSearchType()));
+        data.setModified_date(search.getCreateTime());
+
         return data;
     }
 
@@ -144,6 +149,7 @@ public class SearchFragment extends Fragment {
         searchDao.setSearchId(20);
         searchDao.setSearchType(searchTypeSpinner.getSelectedItem().toString());
         searchDao.setSearchWord(search.getDescription());
+        searchDao.setCreateTime(new Date());
 
         addSearchDao(searchDao);
         ((MainActivity)getActivity()).opentPage(MainActivity.WATCH_PAGE);
@@ -155,13 +161,14 @@ public class SearchFragment extends Fragment {
             @Override
             public void callService(FirebaseUser fUser, String tokenId, ApiService service) {
                 search.setTokenId(tokenId);
-                Call<Integer> call = service.addSearching(search);
-                call.enqueue(new CallBackAdaptor<Integer>(getActivity()) {
+                Call<AddSearchingResponse> call = service.addSearching(search);
+                call.enqueue(new CallBackAdaptor<AddSearchingResponse>(getActivity()) {
                     @Override
-                    public void onSuccess(Integer response) {
+                    public void onSuccess(AddSearchingResponse response) {
                         Log.d(TAG, "SUCCESS ADD SEARCH ID ="+response);
                         Search searchDao = new Search();
-                        searchDao.setSearchId(response);
+                        searchDao.setSearchId(response.getSearchingId());
+                        searchDao.setCreateTime(response.getCreateDate());
                         searchDao.setSearchType(searchTypeSpinner.getSelectedItem().toString());
                         searchDao.setSearchWord(search.getDescription());
 
@@ -192,14 +199,15 @@ public class SearchFragment extends Fragment {
 
                     ApiService service = retrofit.create(ApiService.class);
 
-                    Call<Integer> call = service.addSearching(search);
-                    call.enqueue(new Callback<Integer>() {
+                    Call<AddSearchingResponse> call = service.addSearching(search);
+                    call.enqueue(new Callback<AddSearchingResponse>() {
                         @Override
-                        public void onResponse(Call<Integer> call, retrofit2.Response<Integer> response) {
+                        public void onResponse(Call<AddSearchingResponse> call, retrofit2.Response<AddSearchingResponse> response) {
                             if (response.isSuccessful()) {
                                 Log.d(TAG, "SUCCESS ADD SEARCH ID ="+response.body());
                                 Search searchDao = new Search();
-                                searchDao.setSearchId(response.body());
+                                searchDao.setSearchId(response.body().getSearchingId());
+                                searchDao.setCreateTime(response.body().getCreateDate());
                                 searchDao.setSearchType(searchTypeSpinner.getSelectedItem().toString());
                                 searchDao.setSearchWord(search.getDescription());
 
@@ -213,7 +221,7 @@ public class SearchFragment extends Fragment {
                         }
 
                         @Override
-                        public void onFailure(Call<Integer> call, Throwable t) {
+                        public void onFailure(Call<AddSearchingResponse> call, Throwable t) {
 
                             Log.d(TAG, "ERROR" + t.getMessage());
                             errorDialog.showDialog(getActivity(), t.getMessage());
@@ -231,6 +239,7 @@ public class SearchFragment extends Fragment {
 
     private void addSearchDao(Search search) {
         ((BaseActivity)getActivity()).showLoading();
+        Log.d(TAG, "xxxx"+new Date());
         dao.add(getDBData(search));
         ((BaseActivity)getActivity()).hideLoading();
     }

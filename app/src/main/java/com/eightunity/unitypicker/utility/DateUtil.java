@@ -1,5 +1,6 @@
 package com.eightunity.unitypicker.utility;
 
+import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -23,6 +24,24 @@ public class DateUtil {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public static Timestamp stringToTimeStamp(String value) {
+        try {
+            Calendar t = new GregorianCalendar();
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            Date dt = sdf.parse(value);
+            Timestamp tm = new Timestamp(dt.getTime());
+            return tm;
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static String dateToString(Date date) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        return dateFormat.format(date);
     }
 
     public static String timeSpent(String value) {

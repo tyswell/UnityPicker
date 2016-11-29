@@ -1,5 +1,7 @@
 package com.eightunity.unitypicker.model.search;
 
+import java.util.Date;
+
 /**
  * Created by chokechaic on 8/26/2016.
  */
@@ -8,6 +10,7 @@ public class Search {
     private Integer searchId;
     private String searchWord;
     private String searchType;
+    private Date createTime;
 
     public Integer getSearchId() {
         return searchId;
@@ -31,5 +34,13 @@ public class Search {
 
     public void setSearchType(String searchType) {
         this.searchType = searchType;
+    }
+
+    public Date getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(Date createTime) {
+        this.createTime = createTime;
     }
 }
