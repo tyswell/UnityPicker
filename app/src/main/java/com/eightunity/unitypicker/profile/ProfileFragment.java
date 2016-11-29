@@ -34,10 +34,6 @@ public class ProfileFragment extends Fragment {
     private TextView usernameView;
     private Button logoutBtn;
 
-    public static ProfileFragment newInstance() {
-        return new ProfileFragment();
-    }
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -71,7 +67,6 @@ public class ProfileFragment extends Fragment {
                 Intent intent = new Intent(getContext(), LoginActivity.class);
                 startActivity(intent);
                 getActivity().finish();
-//                LoginManager.getInstance().logOut();
             }
         });
     }

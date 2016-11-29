@@ -179,7 +179,7 @@ public class MainActivity extends BaseActivity implements WatchFragment.OnHeadli
         });
     }
 
-    private void opentPage(int page) {
+    public void opentPage(int page) {
         Log.d(TAG, "opentPage is called {page : " + page);
 
         if (page == WATCH_PAGE) {

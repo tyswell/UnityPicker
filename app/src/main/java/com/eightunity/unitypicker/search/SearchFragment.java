@@ -12,6 +12,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 
+import com.eightunity.unitypicker.MainActivity;
 import com.eightunity.unitypicker.R;
 import com.eightunity.unitypicker.database.ESearchWordDAO;
 import com.eightunity.unitypicker.model.dao.ESearchWord;
@@ -92,8 +93,8 @@ public class SearchFragment extends Fragment {
                 Searching search = getContent();
                 if (isValidCriteria(search)) {
 //                                    addSearchService(search);
-//                    addSearchServiceTemp(search);
-                    addSearchServiceX(search);
+                    addSearchServiceTemp(search);
+//                    addSearchServiceX(search);
                 }
             }
         };
@@ -145,6 +146,8 @@ public class SearchFragment extends Fragment {
         searchDao.setSearchWord(search.getDescription());
 
         addSearchDao(searchDao);
+        ((MainActivity)getActivity()).opentPage(MainActivity.WATCH_PAGE);
+        searchText.setText("");
     }
 
     private void addSearchServiceX(final Searching search) {
@@ -163,6 +166,8 @@ public class SearchFragment extends Fragment {
                         searchDao.setSearchWord(search.getDescription());
 
                         addSearchDao(searchDao);
+                        ((MainActivity)getActivity()).opentPage(MainActivity.WATCH_PAGE);
+                        searchText.setText("");
                     }
                 });
             }

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Unity Picker</string>
+    <string name="app_name">Pick Piece</string>
     <string name="facebook_app_id">503896036486906</string>
 
     <string name="search_footer">Search</string>
@@ -9,6 +9,8 @@
     <string name="match_footer">Match</string>
 
     <string name="search_button">Search</string>
+
+    <string name="logout_button">Log Out</string>
 
     <string-array name="search_type">
         <item>Bicycle</item>

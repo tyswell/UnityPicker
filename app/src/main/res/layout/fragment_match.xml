@@ -4,6 +4,7 @@
     android:layout_height="match_parent">
 
     <TextView
+        android:layout_marginTop="10dp"
         android:id="@+id/searchWordView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
@@ -25,6 +26,7 @@
         />
 
     <android.support.v7.widget.RecyclerView
+        android:layout_marginTop="10dp"
         android:id="@+id/matchRecycler"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
