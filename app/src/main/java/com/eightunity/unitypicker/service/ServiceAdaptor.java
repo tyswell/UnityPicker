@@ -20,7 +20,7 @@ public abstract class ServiceAdaptor {
 
     private FirebaseUser fUser;
 
-    public abstract void callService(String tokenId, ApiService service);
+    public abstract void callService(FirebaseUser fUser, String tokenId, ApiService service);
 
     public ServiceAdaptor(final Activity activity) {
         ((BaseActivity)activity).showLoading();
@@ -41,7 +41,7 @@ public abstract class ServiceAdaptor {
                         .addConverterFactory(JacksonConverterFactory.create())
                         .build();
                 ApiService service = retrofit.create(ApiService.class);
-                callService(tokenId, service);
+                callService(fUser, tokenId, service);
             }
         });
     }

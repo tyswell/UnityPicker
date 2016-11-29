@@ -2,9 +2,19 @@ package com.eightunity.unitypicker.ui;
 
 import android.os.Bundle;
 
+import com.eightunity.unitypicker.model.account.Device;
+import com.eightunity.unitypicker.model.account.FacebookUser;
+import com.eightunity.unitypicker.model.account.GoogleUser;
+import com.eightunity.unitypicker.model.account.OSType;
 import com.eightunity.unitypicker.model.account.User;
+import com.eightunity.unitypicker.model.account.UserLoginType;
+import com.eightunity.unitypicker.utility.DeviceUtil;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.UserInfo;
+import com.google.firebase.iid.FirebaseInstanceId;
+
+import java.util.List;
 
 
 /**
@@ -36,19 +46,6 @@ public class BaseActivity extends AuthenticaterActivity {
     public void onDestroy() {
         super.onDestroy();
         loadingDialog.dismiss();
-    }
-
-    public User getUser() {
-        User user = new User();
-
-        FirebaseUser fbUser = FirebaseAuth.getInstance().getCurrentUser();
-
-        user.setEmail(fbUser.getEmail());
-        user.setUserId(fbUser.getUid());
-        user.setDisplayName(fbUser.getDisplayName());
-        user.setProfileURL(fbUser.getPhotoUrl().toString());
-
-        return user;
     }
 
     public void showLoading() {

@@ -1,7 +1,6 @@
 package com.eightunity.unitypicker.authenticator;
 
 import android.accounts.AccountAuthenticatorActivity;
-import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
@@ -14,18 +13,14 @@ import android.view.View;
 import com.eightunity.unitypicker.R;
 import com.eightunity.unitypicker.database.ESearchWordDAO;
 import com.eightunity.unitypicker.model.account.OSType;
-import com.eightunity.unitypicker.model.account.UserLoginType;
 import com.eightunity.unitypicker.model.dao.ESearchWord;
-import com.eightunity.unitypicker.model.server.search.DeleteSearching;
 import com.eightunity.unitypicker.model.server.search.Searching;
 import com.eightunity.unitypicker.model.server.user.Device;
-import com.eightunity.unitypicker.model.server.user.FacebookUser;
 import com.eightunity.unitypicker.model.server.user.LoginReceive;
 import com.eightunity.unitypicker.model.server.user.LoginResponse;
 import com.eightunity.unitypicker.service.ApiService;
 import com.eightunity.unitypicker.service.CallBackAdaptor;
 import com.eightunity.unitypicker.service.ServiceAdaptor;
-import com.eightunity.unitypicker.ui.BaseActivity;
 import com.eightunity.unitypicker.ui.ErrorDialog;
 import com.eightunity.unitypicker.ui.TransparentProgressDialog;
 import com.eightunity.unitypicker.utility.DeviceUtil;
@@ -42,6 +37,7 @@ import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
+import com.google.android.gms.auth.api.signin.GoogleSignInStatusCodes;
 import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -76,7 +72,7 @@ public class LoginActivity extends AccountAuthenticatorActivity {
 
     private GoogleApiClient mGoogleApiClient;
     private String mUsername;
-//    protected ProgressDialog mLoading;
+    //    protected ProgressDialog mLoading;
     private TransparentProgressDialog mLoading;
     protected boolean mRequestNewAccount = false;
     private CallbackManager mCallbackManager;
@@ -120,7 +116,9 @@ public class LoginActivity extends AccountAuthenticatorActivity {
 
             @Override
             public void onError(FacebookException error) {
+                ErrorDialog ed = new ErrorDialog();
                 Log.d(TAG, "facebook:onError", error);
+                ed.showDialog(LoginActivity.this, error.getMessage());
             }
         });
 
@@ -162,7 +160,6 @@ public class LoginActivity extends AccountAuthenticatorActivity {
                         Log.d(TAG, "idTokeAAAAA="+idToken);
                         Log.d(TAG, "UID="+fuser.getUid());
                         LoginReceive loginObj = setUserInfo(fuser, idToken);
-
 //                        loginService(loginObj, fuser.getUid());
                         loginServiceTemp(loginObj, fuser.getUid());
                     } else {
@@ -177,24 +174,19 @@ public class LoginActivity extends AccountAuthenticatorActivity {
         }
     }
 
-    private LoginReceive setUserInfo(FirebaseUser fuser, String tokenId) {
+    private LoginReceive setUserInfo(FirebaseUser fUser, String tokenId) {
         LoginReceive loginObj = new LoginReceive();
 
         loginObj.setTokenId(tokenId);
-        List<Integer> uids = dao.getAllId(fuser.getUid());
-        Log.d(TAG, "uids.size())="+uids.size());
-        loginObj.setSearchingIds(uids);
-        loginObj.setUserLoginType(UserLoginType.FACEBOOK_LOGIN_TYPE_CODE);
+        List<Integer> searchIds = dao.getAllId(fUser.getUid());
+        Log.d(TAG, "searchIds.size())="+searchIds.size());
+        loginObj.setSearchingIds(searchIds);
 
         Device device = new Device();
         device.setOsTypeCode(OSType.ANDROID_OS);
         device.setTokenNotification(FirebaseInstanceId.getInstance().getToken());
         device.setDeviceModel(DeviceUtil.getDeviceName());
         loginObj.setDevice(device);
-
-        FacebookUser fbUser = new FacebookUser();
-        fbUser.setFacebookID(fuser.getProviderId());
-        loginObj.setFacebookUser(fbUser);
 
         return loginObj;
     }
@@ -240,13 +232,13 @@ public class LoginActivity extends AccountAuthenticatorActivity {
 
     private void handleFacebookAccessToken(AccessToken token) {
         Log.d(TAG, "handleFacebookAccessToken:" + token.getToken());
-        mLoading.show();
         AuthCredential credential = FacebookAuthProvider.getCredential(token.getToken());
         mAuth.signInWithCredential(credential).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
                 Log.d(TAG, "signInWithCredential:onComplete:" + task.isSuccessful());
                 logined();
+//TODO                loginServiceX();
             }
         });
     }
@@ -255,29 +247,31 @@ public class LoginActivity extends AccountAuthenticatorActivity {
     private void handleSignInResult(GoogleSignInResult result) {
         Log.d(TAG, "handleSignInResult:" + result.isSuccess());
         if (result.isSuccess()) {
-            // Signed in successfully, show authenticated UI.
-            GoogleSignInAccount acct = result.getSignInAccount();
-            if (result.isSuccess()) {
-                // Google Sign In was successful, authenticate with Firebase
-                GoogleSignInAccount account = result.getSignInAccount();
-                firebaseAuthWithGoogle(account);
-            } else {
-            }
-
+            // Google Sign In was successful, authenticate with Firebase
+            GoogleSignInAccount account = result.getSignInAccount();
+            firebaseAuthWithGoogle(account);
         } else {
-            // Signed out, show unauthenticated UI.
+            ErrorDialog ed = new ErrorDialog();
+            Log.d(TAG, "GOOGLE SIGNIN NOT SUCCESS :" + GoogleSignInStatusCodes.getStatusCodeString(result.getStatus().getStatusCode()));
+            ed.showDialog(this, GoogleSignInStatusCodes.getStatusCodeString(result.getStatus().getStatusCode()));
         }
     }
 
     private void firebaseAuthWithGoogle(GoogleSignInAccount acct) {
         Log.d(TAG, "firebaseAuthWithGoogle:" + acct.getId());
-        mLoading.show();
         AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
         mAuth.signInWithCredential(credential).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
                 Log.d(TAG, "signInWithCredential:onComplete:" + task.isSuccessful());
-                logined();
+                if (task.isSuccessful()) {
+                    logined();
+//TODO          loginServiceX();
+                } else {
+                    ErrorDialog ed = new ErrorDialog();
+                    Log.d(TAG, "GOOGLE SIGNIN NOT SUCCESS :" + task.getException().getMessage());
+                    ed.showDialog(LoginActivity.this, task.getException().getMessage());
+                }
             }
         });
     }
@@ -302,6 +296,24 @@ public class LoginActivity extends AccountAuthenticatorActivity {
     private void loginServiceTemp(final LoginReceive loginObj, final String username) {
         addSearchDao(new ArrayList<Searching>(), username);
         finish();
+    }
+
+    private void loginServiceX() {
+        new ServiceAdaptor(this) {
+            @Override
+            public void callService(final FirebaseUser fUser, String tokenId, ApiService service) {
+                LoginReceive loginObj = setUserInfo(fUser, tokenId);
+                Call<LoginResponse> call = service.login(loginObj);
+                call.enqueue(new CallBackAdaptor<LoginResponse>(LoginActivity.this) {
+                    @Override
+                    public void onSuccess(LoginResponse response) {
+                        Log.d(TAG, "loginResponse.getSearching() = "+response.getSearching());
+                        addSearchDao(response.getSearching(), fUser.getUid());
+                        finish();
+                    }
+                });
+            }
+        };
     }
 
     private void loginService(final LoginReceive loginObj, final String userId) {

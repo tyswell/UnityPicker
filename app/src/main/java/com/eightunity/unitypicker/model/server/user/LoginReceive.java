@@ -6,9 +6,7 @@ public class LoginReceive {
 	
 	private String tokenId;
 	private List<Integer> searchingIds;
-	private Integer userLoginType; 
 	private Device device;
-	private FacebookUser facebookUser;
 		
 	public String getTokenId() {
 		return tokenId;
@@ -27,18 +25,6 @@ public class LoginReceive {
 	}
 	public void setDevice(Device device) {
 		this.device = device;
-	}
-	public FacebookUser getFacebookUser() {
-		return facebookUser;
-	}
-	public void setFacebookUser(FacebookUser facebookUser) {
-		this.facebookUser = facebookUser;
-	}
-	public Integer getUserLoginType() {
-		return userLoginType;
-	}
-	public void setUserLoginType(Integer userLoginType) {
-		this.userLoginType = userLoginType;
 	}
 	
 }

@@ -12,11 +12,19 @@ public class User {
     private String userId;
     private String email;
     private String displayName;
-    private String tokenUID;
     private String profileURL;
     private Integer userLoginType;
     private Device device;
     private FacebookUser facebookUser;
+    private GoogleUser googleUser;
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
 
     public String getEmail() {
         return email;
@@ -34,28 +42,20 @@ public class User {
         this.displayName = displayName;
     }
 
-    public String getUserId() {
-        return userId;
-    }
-
-    public void setUserId(String userId) {
-        this.userId = userId;
-    }
-
-    public String getTokenUID() {
-        return tokenUID;
-    }
-
-    public void setTokenUID(String tokenUID) {
-        this.tokenUID = tokenUID;
-    }
-
     public String getProfileURL() {
         return profileURL;
     }
 
     public void setProfileURL(String profileURL) {
         this.profileURL = profileURL;
+    }
+
+    public Integer getUserLoginType() {
+        return userLoginType;
+    }
+
+    public void setUserLoginType(Integer userLoginType) {
+        this.userLoginType = userLoginType;
     }
 
     public Device getDevice() {
@@ -74,11 +74,12 @@ public class User {
         this.facebookUser = facebookUser;
     }
 
-    public Integer getUserLoginType() {
-        return userLoginType;
+    public GoogleUser getGoogleUser() {
+        return googleUser;
     }
 
-    public void setUserLoginType(Integer userLoginType) {
-        this.userLoginType = userLoginType;
+    public void setGoogleUser(GoogleUser googleUser) {
+        this.googleUser = googleUser;
     }
+
 }

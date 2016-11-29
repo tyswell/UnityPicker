@@ -218,7 +218,7 @@ public class WatchFragment extends Fragment {
     private void deleteSearchServiceX(final int searchingId, final int position) {
         new ServiceAdaptor(getActivity()) {
             @Override
-            public void callService(String tokenId, ApiService service) {
+            public void callService(FirebaseUser fUser, String tokenId, ApiService service) {
                 DeleteSearching deleteObj = new DeleteSearching();
                 deleteObj.setTokenId(tokenId);
                 deleteObj.setSearchingId(searchingId);

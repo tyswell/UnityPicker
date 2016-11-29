@@ -7,16 +7,16 @@ import android.os.Build;
  */
 public class Device {
 
-    private int osType;
+    private int osTypeCode;
     private String tokenNotification;
     private String deviceModel;
 
-    public int getOsType() {
-        return osType;
+    public int getOsTypeCode() {
+        return osTypeCode;
     }
 
-    public void setOsType(int osType) {
-        this.osType = osType;
+    public void setOsTypeCode(int osTypeCode) {
+        this.osTypeCode = osTypeCode;
     }
 
     public String getTokenNotification() {

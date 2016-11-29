@@ -22,6 +22,7 @@ import com.eightunity.unitypicker.database.EMatchingDAO;
 import com.eightunity.unitypicker.model.dao.EMatching;
 import com.eightunity.unitypicker.model.Notificaiton.Notification;
 import com.eightunity.unitypicker.model.watch.Watch;
+import com.eightunity.unitypicker.ui.AuthenticaterActivity;
 import com.eightunity.unitypicker.ui.BaseActivity;
 import com.eightunity.unitypicker.ui.LinearLayoutManager;
 import com.eightunity.unitypicker.ui.recyclerview.DividerItemDecoration;
@@ -183,7 +184,7 @@ public class NotificationFragment extends Fragment {
     }
 
     private List<Notification> getDataFromDB() {
-        String userId = ((BaseActivity)getActivity()).getUser().getUserId();
+        String userId = ((AuthenticaterActivity)getActivity()).getUser().getUserId();
         List<EMatching> eMatchings = dao.getAllData(userId);
         List<Notification> datas = new ArrayList<>();
         for (EMatching eMatching : eMatchings) {

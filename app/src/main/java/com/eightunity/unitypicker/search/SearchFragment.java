@@ -150,7 +150,7 @@ public class SearchFragment extends Fragment {
     private void addSearchServiceX(final Searching search) {
         new ServiceAdaptor(getActivity()) {
             @Override
-            public void callService(String tokenId, ApiService service) {
+            public void callService(FirebaseUser fUser, String tokenId, ApiService service) {
                 search.setTokenId(tokenId);
                 Call<Integer> call = service.addSearching(search);
                 call.enqueue(new CallBackAdaptor<Integer>(getActivity()) {

@@ -7,10 +7,19 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
 import com.eightunity.unitypicker.authenticator.LoginActivity;
+import com.eightunity.unitypicker.model.account.Device;
+import com.eightunity.unitypicker.model.account.FacebookUser;
+import com.eightunity.unitypicker.model.account.GoogleUser;
+import com.eightunity.unitypicker.model.account.OSType;
+import com.eightunity.unitypicker.model.account.User;
+import com.eightunity.unitypicker.model.account.UserLoginType;
+import com.eightunity.unitypicker.utility.DeviceUtil;
+import com.facebook.login.LoginManager;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.iid.FirebaseInstanceId;
 
 
 /**
@@ -43,14 +52,6 @@ public class AuthenticaterActivity extends AppCompatActivity {
         }
     }
 
-    protected boolean isLogined() {
-        if (getAccount() == null) {
-            return false;
-        } else {
-            return true;
-        }
-    }
-
     private void checkGooglePlayService() {
         GoogleApiAvailability googleAPI = GoogleApiAvailability.getInstance();
         int result = googleAPI.isGooglePlayServicesAvailable(this);
@@ -68,6 +69,11 @@ public class AuthenticaterActivity extends AppCompatActivity {
     }
 
     public void logout() {
+        User user = getUser();
+        if (user.getUserLoginType() == UserLoginType.FACEBOOK_LOGIN_TYPE_CODE) {
+            LoginManager.getInstance().logOut();
+        }
+
         FirebaseAuth.getInstance().signOut();
     }
 
@@ -75,9 +81,32 @@ public class AuthenticaterActivity extends AppCompatActivity {
         return FirebaseAuth.getInstance().getCurrentUser();
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
+    public User getUser() {
+        User user = new User();
+
+        FirebaseUser fUser = getAccount();
+
+        user.setEmail(fUser.getEmail());
+        user.setUserId(fUser.getUid());
+        user.setDisplayName(fUser.getDisplayName());
+        user.setProfileURL(fUser.getPhotoUrl().toString());
+        user.setUserLoginType(UserLoginType.getCode(fUser.getProviders()));
+
+        if (user.getUserLoginType() == UserLoginType.FACEBOOK_LOGIN_TYPE_CODE) {
+            FacebookUser fbUser = new FacebookUser();
+            user.setFacebookUser(fbUser);
+        } else if (user.getUserLoginType() == UserLoginType.GOOGLE_LOGIN_TYPE_CODE) {
+            GoogleUser ggUser = new GoogleUser();
+            user.setGoogleUser(ggUser);
+        }
+
+        Device device = new Device();
+        device.setOsTypeCode(OSType.ANDROID_OS);
+        device.setTokenNotification(FirebaseInstanceId.getInstance().getToken());
+        device.setDeviceModel(DeviceUtil.getDeviceName());
+        user.setDevice(device);
+
+        return user;
     }
 
 }

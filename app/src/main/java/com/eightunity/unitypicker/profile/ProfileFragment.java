@@ -16,6 +16,7 @@ import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.eightunity.unitypicker.R;
 import com.eightunity.unitypicker.authenticator.LoginActivity;
+import com.eightunity.unitypicker.model.account.User;
 import com.eightunity.unitypicker.ui.AuthenticaterActivity;
 import com.eightunity.unitypicker.ui.BaseActivity;
 import com.facebook.login.LoginManager;
@@ -76,9 +77,10 @@ public class ProfileFragment extends Fragment {
     }
 
     private void callWSMytask() {
-        String name = ((BaseActivity)getActivity()).getUser().getDisplayName();
+        User user = ((AuthenticaterActivity)getActivity()).getUser();
+        String name = user.getDisplayName();
         usernameView.setText(name);
-        String imageURL = ((BaseActivity)getActivity()).getUser().getProfileURL();
+        String imageURL = user.getProfileURL();
 
         RequestManager rm = Glide.with(getContext());
         DrawableTypeRequest dr = null;
