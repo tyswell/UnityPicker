@@ -9,6 +9,7 @@ import android.os.Parcelable;
 public class Notification implements Parcelable{
 
     private int matchId;
+    private int searchId;
     private String searchWord;
     private String titleContent;
     private String webName;
@@ -16,6 +17,14 @@ public class Notification implements Parcelable{
     private String url;
 
     public Notification(){}
+
+    public int getSearchId() {
+        return searchId;
+    }
+
+    public void setSearchId(int searchId) {
+        this.searchId = searchId;
+    }
 
     public int getMatchId() {
         return matchId;

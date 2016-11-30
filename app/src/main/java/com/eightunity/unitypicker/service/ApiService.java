@@ -2,7 +2,7 @@ package com.eightunity.unitypicker.service;
 
 import com.eightunity.unitypicker.model.server.device.DeviceToken;
 import com.eightunity.unitypicker.model.server.search.AddSearchingResponse;
-import com.eightunity.unitypicker.model.server.search.DeleteSearching;
+import com.eightunity.unitypicker.model.server.search.InactiveSearching;
 import com.eightunity.unitypicker.model.server.search.Searching;
 import com.eightunity.unitypicker.model.server.user.LoginReceive;
 import com.eightunity.unitypicker.model.server.user.LoginResponse;
@@ -25,7 +25,7 @@ public interface ApiService {
     @POST("searchingservice/addsearch")
     Call<AddSearchingResponse> addSearching(@Body Searching searching);
 
-    @POST("searchingservice/deletesearch")
-    Call<Boolean> deleteSearching(@Body DeleteSearching deleteSearching);
+    @POST("searchingservice/inactivesearch")
+    Call<Boolean> deleteSearching(@Body InactiveSearching deleteSearching);
 
 }

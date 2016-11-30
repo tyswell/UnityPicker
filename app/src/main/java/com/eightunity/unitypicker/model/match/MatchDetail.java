@@ -11,6 +11,7 @@ import org.parceler.Parcel;
 public class MatchDetail implements Parcelable{
 
     private int matchID;
+    private int searchId;
     private String titleContent;
     private String webName;
     private String timeDesc;
@@ -22,6 +23,7 @@ public class MatchDetail implements Parcelable{
 
     protected MatchDetail(android.os.Parcel in) {
         matchID = in.readInt();
+        searchId = in.readInt();
         titleContent = in.readString();
         webName = in.readString();
         timeDesc = in.readString();
@@ -46,6 +48,14 @@ public class MatchDetail implements Parcelable{
 
     public void setMatchID(int matchID) {
         this.matchID = matchID;
+    }
+
+    public int getSearchId() {
+        return searchId;
+    }
+
+    public void setSearchId(int searchId) {
+        this.searchId = searchId;
     }
 
     public String getTitleContent() {
@@ -88,6 +98,7 @@ public class MatchDetail implements Parcelable{
     @Override
     public void writeToParcel(android.os.Parcel dest, int flags) {
         dest.writeInt(matchID);
+        dest.writeInt(searchId);
         dest.writeString(titleContent);
         dest.writeString(webName);
         dest.writeString(timeDesc);

@@ -20,16 +20,24 @@ import com.eightunity.unitypicker.database.EMatchingDAO;
 import com.eightunity.unitypicker.model.dao.EMatching;
 import com.eightunity.unitypicker.model.match.Match;
 import com.eightunity.unitypicker.model.match.MatchDetail;
+import com.eightunity.unitypicker.model.server.search.InactiveSearching;
 import com.eightunity.unitypicker.search.SearchUtility;
+import com.eightunity.unitypicker.service.ApiService;
+import com.eightunity.unitypicker.service.CallBackAdaptor;
+import com.eightunity.unitypicker.service.ServiceAdaptor;
+import com.eightunity.unitypicker.ui.ErrorDialog;
 import com.eightunity.unitypicker.ui.LinearLayoutManager;
 import com.eightunity.unitypicker.ui.recyclerview.DividerItemDecoration;
 import com.eightunity.unitypicker.ui.recyclerview.RecycleClickListener;
 import com.eightunity.unitypicker.utility.DateUtil;
+import com.google.firebase.auth.FirebaseUser;
 
 import org.parceler.Parcels;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import retrofit2.Call;
 
 /**
  * Created by chokechaic on 9/14/2016.
@@ -137,6 +145,7 @@ public class MatchFragment extends Fragment{
         for (EMatching eMatching : eMatchings) {
             MatchDetail data = new MatchDetail();
             data.setMatchID(eMatching.getId());
+            data.setSearchId(eMatching.getSeacrh_word_id());
             data.setTimeDesc(DateUtil.timeSpent(eMatching.getMatching_date()));
             data.setTitleContent(eMatching.getTitle_content());
             data.setWebName(eMatching.getWeb_name());
@@ -152,7 +161,8 @@ public class MatchFragment extends Fragment{
         @Override
         public void finish(int mode, int position) {
             if (OptionDialog.STOP_WATCHING_MODE == mode) {
-
+//   TODO             inactiveSearchServiceX(notifications.get(position).getSearchId(), position);
+                stopSearchServiceTemp(matchDetails.get(position).getSearchId(), position);
             } else if (OptionDialog.REMOVE_FROM_LIST_MODE == mode) {
                 dao.delete(matchDetails.get(position).getMatchID());
                 matchAdapter.removeAt(position);
@@ -193,6 +203,34 @@ public class MatchFragment extends Fragment{
         matchDetails.clear();
         matchDetails.addAll(match.getMatchDetails());
         matchAdapter.notifyDataSetChanged();
+    }
+
+    private void inactiveSearchServiceX(final int searchingId, final int position) {
+        new ServiceAdaptor(getActivity()) {
+            @Override
+            public void callService(FirebaseUser fUser, String tokenId, ApiService service) {
+                InactiveSearching deleteObj = new InactiveSearching();
+                deleteObj.setTokenId(tokenId);
+                deleteObj.setSearchingId(searchingId);
+
+                Call<Boolean> call = service.deleteSearching(deleteObj);
+                call.enqueue(new CallBackAdaptor<Boolean>(getActivity()) {
+                    @Override
+                    public void onSuccess(Boolean response) {
+                        Log.d(TAG, "SUCCESS ADD SEARCH ID ="+response);
+                        ErrorDialog er = new ErrorDialog();
+                        er.showDialog(getActivity(), getString(R.string.stop_watching_message));
+//                        deleteSearching(searchingId, position);
+                    }
+                });
+            }
+        };
+    }
+
+    private void stopSearchServiceTemp(final int searchingId, final int position) {
+//        deleteSearching(searchingId, position);
+        ErrorDialog er = new ErrorDialog();
+        er.showDialog(getActivity(), getString(R.string.stop_watching_message));
     }
 
 }

@@ -1,6 +1,6 @@
 package com.eightunity.unitypicker.model.server.search;
 
-public class DeleteSearching {
+public class InactiveSearching {
 	
 	private String tokenId;
 

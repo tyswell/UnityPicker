@@ -17,15 +17,14 @@ import com.eightunity.unitypicker.R;
 import com.eightunity.unitypicker.commonpage.OptionDialog;
 import com.eightunity.unitypicker.database.ESearchWordDAO;
 import com.eightunity.unitypicker.model.dao.ESearchWord;
-import com.eightunity.unitypicker.model.search.Search;
-import com.eightunity.unitypicker.model.server.search.DeleteSearching;
-import com.eightunity.unitypicker.model.server.search.Searching;
+import com.eightunity.unitypicker.model.server.search.InactiveSearching;
 import com.eightunity.unitypicker.model.watch.Watch;
 import com.eightunity.unitypicker.search.SearchUtility;
 import com.eightunity.unitypicker.service.ApiService;
 import com.eightunity.unitypicker.service.CallBackAdaptor;
 import com.eightunity.unitypicker.service.ServiceAdaptor;
 import com.eightunity.unitypicker.ui.BaseActivity;
+import com.eightunity.unitypicker.ui.ErrorDialog;
 import com.eightunity.unitypicker.ui.LinearLayoutManager;
 import com.eightunity.unitypicker.ui.recyclerview.DividerItemDecoration;
 import com.eightunity.unitypicker.ui.recyclerview.RecycleClickListener;
@@ -140,14 +139,14 @@ public class WatchFragment extends Fragment {
         @Override
         public void finish(int mode, int position) {
             if (OptionDialog.STOP_WATCHING_MODE == mode) {
-
+                deleteSearchServiceTemp(watches.get(position).getSearchId(), position);
+                //TODO                inactiveSearchServiceX(watches.get(position).getSearchId(), position);
             } else if (OptionDialog.REMOVE_FROM_LIST_MODE == mode) {
 //                dao.delete(watches.get(position).getId());
 //                watchAdapter.removeAt(position);
 
 //                deleteSearchService(watches.get(position).getId(), position);
-                deleteSearchServiceTemp(watches.get(position).getSearchId(), position);
-//                deleteSearchServiceX(watches.get(position).getSearchId(), position);
+                deleteSearching(watches.get(position).getSearchId(), position);
             } else {
 
             }
@@ -213,14 +212,16 @@ public class WatchFragment extends Fragment {
     };
 
     private void deleteSearchServiceTemp(final int searchingId, final int position) {
-        deleteSearching(searchingId, position);
+//        deleteSearching(searchingId, position);
+        ErrorDialog er = new ErrorDialog();
+        er.showDialog(getActivity(), getString(R.string.stop_watching_message));
     }
 
-    private void deleteSearchServiceX(final int searchingId, final int position) {
+    private void inactiveSearchServiceX(final int searchingId, final int position) {
         new ServiceAdaptor(getActivity()) {
             @Override
             public void callService(FirebaseUser fUser, String tokenId, ApiService service) {
-                DeleteSearching deleteObj = new DeleteSearching();
+                InactiveSearching deleteObj = new InactiveSearching();
                 deleteObj.setTokenId(tokenId);
                 deleteObj.setSearchingId(searchingId);
 
@@ -229,7 +230,9 @@ public class WatchFragment extends Fragment {
                     @Override
                     public void onSuccess(Boolean response) {
                         Log.d(TAG, "SUCCESS ADD SEARCH ID ="+response);
-                        deleteSearching(searchingId, position);
+                        ErrorDialog er = new ErrorDialog();
+                        er.showDialog(getActivity(), getString(R.string.stop_watching_message));
+//                        deleteSearching(searchingId, position);
                     }
                 });
             }
@@ -242,7 +245,7 @@ public class WatchFragment extends Fragment {
         fUser.getToken(true).addOnCompleteListener(new OnCompleteListener<GetTokenResult>() {
             @Override
             public void onComplete(@NonNull Task<GetTokenResult> task) {
-                DeleteSearching deleteObj = new DeleteSearching();
+                InactiveSearching deleteObj = new InactiveSearching();
                 deleteObj.setTokenId(task.getResult().getToken());
                 deleteObj.setSearchingId(searchingId);
 

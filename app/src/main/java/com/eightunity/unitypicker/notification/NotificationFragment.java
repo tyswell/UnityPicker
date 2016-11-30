@@ -21,17 +21,25 @@ import com.eightunity.unitypicker.commonpage.OptionDialog;
 import com.eightunity.unitypicker.database.EMatchingDAO;
 import com.eightunity.unitypicker.model.dao.EMatching;
 import com.eightunity.unitypicker.model.Notificaiton.Notification;
+import com.eightunity.unitypicker.model.server.search.InactiveSearching;
 import com.eightunity.unitypicker.model.watch.Watch;
+import com.eightunity.unitypicker.service.ApiService;
+import com.eightunity.unitypicker.service.CallBackAdaptor;
+import com.eightunity.unitypicker.service.ServiceAdaptor;
 import com.eightunity.unitypicker.ui.AuthenticaterActivity;
 import com.eightunity.unitypicker.ui.BaseActivity;
+import com.eightunity.unitypicker.ui.ErrorDialog;
 import com.eightunity.unitypicker.ui.LinearLayoutManager;
 import com.eightunity.unitypicker.ui.recyclerview.DividerItemDecoration;
 import com.eightunity.unitypicker.ui.recyclerview.RecycleClickListener;
 import com.eightunity.unitypicker.utility.DateUtil;
 import com.eightunity.unitypicker.utility.notification.FirebaseMsgService;
+import com.google.firebase.auth.FirebaseUser;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import retrofit2.Call;
 
 /**
  * Created by chokechaic on 8/26/2016.
@@ -138,7 +146,8 @@ public class NotificationFragment extends Fragment {
         @Override
         public void finish(int mode, int position) {
             if (OptionDialog.STOP_WATCHING_MODE == mode) {
-
+//   TODO             inactiveSearchServiceX(notifications.get(position).getSearchId(), position);
+                stopSearchServiceTemp(notifications.get(position).getSearchId(), position);
             } else if (OptionDialog.REMOVE_FROM_LIST_MODE == mode) {
                 dao.delete(notifications.get(position).getMatchId());
                 notificationAdapter.removeAt(position);
@@ -190,6 +199,7 @@ public class NotificationFragment extends Fragment {
         for (EMatching eMatching : eMatchings) {
             Notification data = new Notification();
             data.setMatchId(eMatching.getId());
+            data.setSearchId(eMatching.getSeacrh_word_id());
             data.setSearchWord(eMatching.getSearch_word_desc());
             data.setTimeDesc(DateUtil.timeSpent(eMatching.getMatching_date()));
             data.setTitleContent(eMatching.getTitle_content());
@@ -218,6 +228,34 @@ public class NotificationFragment extends Fragment {
     private void unregisterReceiver() {
         LocalBroadcastManager.getInstance(getContext()).unregisterReceiver(mRegistrationBroadcastReceiver);
         isReceiverRegistered = false;
+    }
+
+    private void stopSearchServiceTemp(final int searchingId, final int position) {
+//        deleteSearching(searchingId, position);
+        ErrorDialog er = new ErrorDialog();
+        er.showDialog(getActivity(), getString(R.string.stop_watching_message));
+    }
+
+    private void inactiveSearchServiceX(final int searchingId, final int position) {
+        new ServiceAdaptor(getActivity()) {
+            @Override
+            public void callService(FirebaseUser fUser, String tokenId, ApiService service) {
+                InactiveSearching deleteObj = new InactiveSearching();
+                deleteObj.setTokenId(tokenId);
+                deleteObj.setSearchingId(searchingId);
+
+                Call<Boolean> call = service.deleteSearching(deleteObj);
+                call.enqueue(new CallBackAdaptor<Boolean>(getActivity()) {
+                    @Override
+                    public void onSuccess(Boolean response) {
+                        Log.d(TAG, "SUCCESS ADD SEARCH ID ="+response);
+                        ErrorDialog er = new ErrorDialog();
+                        er.showDialog(getActivity(), getString(R.string.stop_watching_message));
+//                        deleteSearching(searchingId, position);
+                    }
+                });
+            }
+        };
     }
 
 }
