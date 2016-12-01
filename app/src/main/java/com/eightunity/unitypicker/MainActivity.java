@@ -158,9 +158,10 @@ public class MainActivity extends BaseActivity implements WatchFragment.OnHeadli
     }
 
     private void setTabListner() {
-        tabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
+                Log.d(TAG, "TEMP A currentPage : " + currentPage);
                 opentPage(tab.getPosition());
                 hideBackActionBar();
             }
@@ -172,6 +173,7 @@ public class MainActivity extends BaseActivity implements WatchFragment.OnHeadli
 
             @Override
             public void onTabReselected(TabLayout.Tab tab) {
+                Log.d(TAG, "TEMP B currentPage : " + currentPage);
                 if (currentPage == MATCH_PAGE) {
                     onBackPressed();
                 }
