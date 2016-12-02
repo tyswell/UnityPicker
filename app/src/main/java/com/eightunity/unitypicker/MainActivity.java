@@ -162,6 +162,10 @@ public class MainActivity extends BaseActivity implements WatchFragment.OnHeadli
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
                 Log.d(TAG, "TEMP A currentPage : " + currentPage);
+                if (currentPage == MATCH_PAGE) {
+                    onBackPressed();
+                }
+
                 opentPage(tab.getPosition());
                 hideBackActionBar();
             }
