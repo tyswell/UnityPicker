@@ -7,6 +7,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 
@@ -21,6 +22,7 @@ import com.eightunity.unitypicker.model.server.user.LoginResponse;
 import com.eightunity.unitypicker.service.ApiService;
 import com.eightunity.unitypicker.service.CallBackAdaptor;
 import com.eightunity.unitypicker.service.ServiceAdaptor;
+import com.eightunity.unitypicker.ui.BaseActivity;
 import com.eightunity.unitypicker.ui.ErrorDialog;
 import com.eightunity.unitypicker.ui.TransparentProgressDialog;
 import com.eightunity.unitypicker.utility.DeviceUtil;
@@ -54,15 +56,19 @@ import com.google.firebase.iid.FirebaseInstanceId;
 import java.util.ArrayList;
 import java.util.List;
 
+import okhttp3.OkHttpClient;
+import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Call;
 import retrofit2.Callback;
+import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
+import retrofit2.converter.jackson.JacksonConverterFactory;
 
 /**
  * Created by deksen on 8/12/16 AD.
  */
-public class LoginActivity extends AccountAuthenticatorActivity {
+public class LoginActivity extends AppCompatActivity {
 
     private String TAG = "LoginActivity";
 
@@ -300,21 +306,60 @@ public class LoginActivity extends AccountAuthenticatorActivity {
     }
 
     private void loginServiceX() {
-        new ServiceAdaptor(this) {
+        mLoading.show();
+        final FirebaseUser fUser = FirebaseAuth.getInstance().getCurrentUser();
+        fUser.getToken(true).addOnCompleteListener(this, new OnCompleteListener<GetTokenResult>() {
             @Override
-            public void callService(final FirebaseUser fUser, String tokenId, ApiService service) {
-                LoginReceive loginObj = setUserInfo(fUser, tokenId);
-                Call<LoginResponse> call = service.login(loginObj);
-                call.enqueue(new CallBackAdaptor<LoginResponse>(LoginActivity.this) {
-                    @Override
-                    public void onSuccess(LoginResponse response) {
-                        Log.d(TAG, "loginResponse.getSearching() = "+response.getSearching());
-                        addSearchDao(response.getSearching(), fUser.getUid());
-                        finish();
-                    }
-                });
+            public void onComplete(@NonNull Task<GetTokenResult> task) {
+
+                if (task.isSuccessful()) {
+                    HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
+                    logging.setLevel(HttpLoggingInterceptor.Level.BODY);
+
+                    OkHttpClient okHttpClient = new OkHttpClient.Builder()
+                            .addInterceptor(logging)
+                            .build();
+
+                    Retrofit retrofit = new Retrofit.Builder()
+                            .baseUrl(LoginActivity.this.getResources().getString(R.string.base_service_url))
+                            .client(okHttpClient)
+                            .addConverterFactory(JacksonConverterFactory.create())
+                            .build();
+                    ApiService service = retrofit.create(ApiService.class);
+
+                    LoginReceive loginObj = setUserInfo(fUser, task.getResult().getToken());
+                    Call<LoginResponse> call = service.login(loginObj);
+                    call.enqueue(new Callback<LoginResponse>() {
+                        @Override
+                        public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
+                            if (response.isSuccessful()) {
+                                Log.d(TAG, "loginResponse.getSearching() = "+response.body().getSearching());
+                                addSearchDao(response.body().getSearching(), fUser.getUid());
+                                finish();
+                                mLoading.dismiss();
+                            } else {
+                                Log.e(TAG, "ERROR" + response.message());
+                                ErrorDialog errorDialog = new ErrorDialog();
+                                errorDialog.showDialog(LoginActivity.this, response.errorBody().toString());
+                                mLoading.dismiss();
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<LoginResponse> call, Throwable t) {
+                            Log.d(TAG, "ERROR" + t.getMessage());
+                            ErrorDialog errorDialog = new ErrorDialog();
+                            errorDialog.showDialog(LoginActivity.this, t.getMessage());
+                            mLoading.dismiss();
+                        }
+                    });
+                } else {
+                    ErrorDialog errorDialog = new ErrorDialog();
+                    errorDialog.showDialog(LoginActivity.this, task.getException().getMessage());
+                    mLoading.dismiss();
+                }
             }
-        };
+        });
     }
 
     private void loginService(final LoginReceive loginObj, final String userId) {
