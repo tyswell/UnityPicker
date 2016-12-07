@@ -94,9 +94,8 @@ public class SearchFragment extends Fragment {
 
                 Searching search = getContent();
                 if (isValidCriteria(search)) {
-//                                    addSearchService(search);
-                    addSearchServiceTemp(search);
-//                    addSearchServiceX(search);
+//                    addSearchServiceTemp(search);
+                    addSearchServiceX(search);
                 }
             }
         };
@@ -179,62 +178,6 @@ public class SearchFragment extends Fragment {
                 });
             }
         };
-    }
-
-    private void addSearchService(final Searching search) {
-        ((BaseActivity)getActivity()).showLoading();
-
-        final ErrorDialog errorDialog = new ErrorDialog();
-        FirebaseUser fUser = FirebaseAuth.getInstance().getCurrentUser();
-        fUser.getToken(true).addOnCompleteListener(new OnCompleteListener<GetTokenResult>() {
-            @Override
-            public void onComplete(@NonNull Task<GetTokenResult> task) {
-                if (task.isSuccessful()) {
-                    search.setTokenId(task.getResult().getToken());
-
-                    Retrofit retrofit = new Retrofit.Builder()
-                            .baseUrl(getString(R.string.base_service_url))
-                            .addConverterFactory(JacksonConverterFactory.create())
-                            .build();
-
-                    ApiService service = retrofit.create(ApiService.class);
-
-                    Call<AddSearchingResponse> call = service.addSearching(search);
-                    call.enqueue(new Callback<AddSearchingResponse>() {
-                        @Override
-                        public void onResponse(Call<AddSearchingResponse> call, retrofit2.Response<AddSearchingResponse> response) {
-                            if (response.isSuccessful()) {
-                                Log.d(TAG, "SUCCESS ADD SEARCH ID ="+response.body());
-                                Search searchDao = new Search();
-                                searchDao.setSearchId(response.body().getSearchingId());
-                                searchDao.setCreateTime(response.body().getCreateDate());
-                                searchDao.setSearchType(searchTypeSpinner.getSelectedItem().toString());
-                                searchDao.setSearchWord(search.getDescription());
-
-                                addSearchDao(searchDao);
-                                ((BaseActivity)getActivity()).hideLoading();
-                            } else {
-                                Log.e(TAG, "ERROR" + response.message());
-                                errorDialog.showDialog(getActivity(), response.message());
-                                ((BaseActivity)getActivity()).hideLoading();
-                            }
-                        }
-
-                        @Override
-                        public void onFailure(Call<AddSearchingResponse> call, Throwable t) {
-
-                            Log.d(TAG, "ERROR" + t.getMessage());
-                            errorDialog.showDialog(getActivity(), t.getMessage());
-                            ((BaseActivity)getActivity()).hideLoading();
-                        }
-                    });
-                } else {
-                    Log.e(TAG, task.getException().getMessage());
-                    errorDialog.showDialog(getActivity(), task.getException().getMessage());
-                    ((BaseActivity)getActivity()).hideLoading();
-                }
-            }
-        });
     }
 
     private void addSearchDao(Search search) {

@@ -89,8 +89,8 @@ public class LoginActivity extends AppCompatActivity {
     private ESearchWordDAO dao;
 
     @Override
-    protected void onCreate(Bundle icicle) {
-        super.onCreate(icicle);
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
         FacebookSdk.sdkInitialize(this);
 
         dao = new ESearchWordDAO();
@@ -166,9 +166,9 @@ public class LoginActivity extends AppCompatActivity {
                         Log.d(TAG, "idTokeAAAAA="+idToken);
                         Log.d(TAG, "UID="+fuser.getUid());
                         LoginReceive loginObj = setUserInfo(fuser, idToken);
-//                        loginService(loginObj, fuser.getUid());
+                        loginService(loginObj, fuser.getUid());
                         Log.d(TAG, "Notification token :"+loginObj.getDevice().getTokenNotification());
-                        loginServiceTemp(loginObj, fuser.getUid());
+//                        loginServiceTemp(loginObj, fuser.getUid());
                     } else {
                         ErrorDialog errorDialog = new ErrorDialog();
                         Log.d(TAG, "task.getException()="+task.getException());
@@ -239,13 +239,14 @@ public class LoginActivity extends AppCompatActivity {
 
     private void handleFacebookAccessToken(AccessToken token) {
         Log.d(TAG, "handleFacebookAccessToken:" + token.getToken());
+        mLoading.show();
         AuthCredential credential = FacebookAuthProvider.getCredential(token.getToken());
         mAuth.signInWithCredential(credential).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
                 Log.d(TAG, "signInWithCredential:onComplete:" + task.isSuccessful());
-                logined();
-//TODO                loginServiceX();
+//                logined();
+                loginServiceX();
             }
         });
     }
@@ -259,22 +260,24 @@ public class LoginActivity extends AppCompatActivity {
             firebaseAuthWithGoogle(account);
         } else {
             ErrorDialog ed = new ErrorDialog();
-            Log.d(TAG, "GOOGLE SIGNIN NOT SUCCESS :" + GoogleSignInStatusCodes.getStatusCodeString(result.getStatus().getStatusCode()));
-            ed.showDialog(this, GoogleSignInStatusCodes.getStatusCodeString(result.getStatus().getStatusCode()));
+            Log.e(TAG, "GOOGLE SIGNIN NOT SUCCESS :" + GoogleSignInStatusCodes.getStatusCodeString(result.getStatus().getStatusCode()));
+            ed.showDialog(this, getResources().getString(R.string.google_signin_error_message));
         }
     }
 
     private void firebaseAuthWithGoogle(GoogleSignInAccount acct) {
         Log.d(TAG, "firebaseAuthWithGoogle:" + acct.getId());
+        mLoading.show();
         AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
         mAuth.signInWithCredential(credential).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
                 Log.d(TAG, "signInWithCredential:onComplete:" + task.isSuccessful());
                 if (task.isSuccessful()) {
-                    logined();
-//TODO          loginServiceX();
+//                    logined();
+          loginServiceX();
                 } else {
+                    mLoading.dismiss();
                     ErrorDialog ed = new ErrorDialog();
                     Log.d(TAG, "GOOGLE SIGNIN NOT SUCCESS :" + task.getException().getMessage());
                     ed.showDialog(LoginActivity.this, task.getException().getMessage());
@@ -306,7 +309,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void loginServiceX() {
-        mLoading.show();
+
         final FirebaseUser fUser = FirebaseAuth.getInstance().getCurrentUser();
         fUser.getToken(true).addOnCompleteListener(this, new OnCompleteListener<GetTokenResult>() {
             @Override

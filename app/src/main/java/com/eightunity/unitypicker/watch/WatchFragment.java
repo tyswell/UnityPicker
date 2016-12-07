@@ -16,6 +16,7 @@ import android.view.ViewGroup;
 import com.eightunity.unitypicker.R;
 import com.eightunity.unitypicker.commonpage.OptionDialog;
 import com.eightunity.unitypicker.database.ESearchWordDAO;
+import com.eightunity.unitypicker.model.account.User;
 import com.eightunity.unitypicker.model.dao.ESearchWord;
 import com.eightunity.unitypicker.model.server.search.InactiveSearching;
 import com.eightunity.unitypicker.model.watch.Watch;
@@ -139,8 +140,8 @@ public class WatchFragment extends Fragment {
         @Override
         public void finish(int mode, int position) {
             if (OptionDialog.STOP_WATCHING_MODE == mode) {
-                deleteSearchServiceTemp(watches.get(position).getSearchId(), position);
-                //TODO                inactiveSearchServiceX(watches.get(position).getSearchId(), position);
+//                deleteSearchServiceTemp(watches.get(position).getSearchId(), position);
+                inactiveSearchServiceX(watches.get(position).getSearchId(), position);
             } else if (OptionDialog.REMOVE_FROM_LIST_MODE == mode) {
 //                dao.delete(watches.get(position).getId());
 //                watchAdapter.removeAt(position);
@@ -169,20 +170,25 @@ public class WatchFragment extends Fragment {
     }
 
     private List<Watch> getDataFromDB() {
-        String userId = ((BaseActivity)getActivity()).getUser().getUserId();
-        List<ESearchWord> eSearchWords = dao.getAllData(userId);
-        List<Watch> datas = new ArrayList<>();
-        for (ESearchWord eSearchWord : eSearchWords) {
-            Log.d(TAG, "eSearchWord.getSearch_id():"+eSearchWord.getSearch_id());
-            Watch data = new Watch();
-            data.setSearchId(eSearchWord.getSearch_id());
-            data.setSearchWord(eSearchWord.getDescription());
-            data.setSearchType(SearchUtility.searchTypeCodeToDesc(eSearchWord.getSearch_type()));
-            data.setTimeDesc(DateUtil.timeSpent(eSearchWord.getModified_date()));
-            datas.add(data);
-        }
+        User user = ((BaseActivity)getActivity()).getUser();
+        if (user != null) {
+            String userId = user.getUserId();
+            List<ESearchWord> eSearchWords = dao.getAllData(userId);
+            List<Watch> datas = new ArrayList<>();
+            for (ESearchWord eSearchWord : eSearchWords) {
+                Log.d(TAG, "eSearchWord.getSearch_id():"+eSearchWord.getSearch_id());
+                Watch data = new Watch();
+                data.setSearchId(eSearchWord.getSearch_id());
+                data.setSearchWord(eSearchWord.getDescription());
+                data.setSearchType(SearchUtility.searchTypeCodeToDesc(eSearchWord.getSearch_type()));
+                data.setTimeDesc(DateUtil.timeSpent(eSearchWord.getModified_date()));
+                datas.add(data);
+            }
 
-        return datas;
+            return datas;
+        } else {
+            return new ArrayList<>();
+        }
     }
 
     private void updateUI(List<Watch> datas) {
@@ -212,7 +218,6 @@ public class WatchFragment extends Fragment {
     };
 
     private void deleteSearchServiceTemp(final int searchingId, final int position) {
-//        deleteSearching(searchingId, position);
         ErrorDialog er = new ErrorDialog();
         er.showDialog(getActivity(), getString(R.string.stop_watching_message));
     }
@@ -232,52 +237,10 @@ public class WatchFragment extends Fragment {
                         Log.d(TAG, "SUCCESS ADD SEARCH ID ="+response);
                         ErrorDialog er = new ErrorDialog();
                         er.showDialog(getActivity(), getString(R.string.stop_watching_message));
-//                        deleteSearching(searchingId, position);
                     }
                 });
             }
         };
-    }
-
-    private void deleteSearchService(final int searchingId, final int position) {
-        ((BaseActivity)getActivity()).showLoading();
-        FirebaseUser fUser = FirebaseAuth.getInstance().getCurrentUser();
-        fUser.getToken(true).addOnCompleteListener(new OnCompleteListener<GetTokenResult>() {
-            @Override
-            public void onComplete(@NonNull Task<GetTokenResult> task) {
-                InactiveSearching deleteObj = new InactiveSearching();
-                deleteObj.setTokenId(task.getResult().getToken());
-                deleteObj.setSearchingId(searchingId);
-
-                Retrofit retrofit = new Retrofit.Builder()
-                        .baseUrl(getString(R.string.base_service_url))
-                        .addConverterFactory(JacksonConverterFactory.create())
-                        .build();
-
-                ApiService service = retrofit.create(ApiService.class);
-
-                Call<Boolean> call = service.deleteSearching(deleteObj);
-                call.enqueue(new Callback<Boolean>() {
-                    @Override
-                    public void onResponse(Call<Boolean> call, retrofit2.Response<Boolean> response) {
-                        if (response.isSuccessful()) {
-                            Log.d(TAG, "SUCCESS ADD SEARCH ID ="+response.body());
-                            deleteSearching(searchingId, position);
-                            ((BaseActivity)getActivity()).hideLoading();
-                        } else {
-                            Log.e(TAG, "ERROR" + response.message());
-                            ((BaseActivity)getActivity()).hideLoading();
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(Call<Boolean> call, Throwable t) {
-                        Log.d(TAG, "ERROR" + t.getMessage());
-                        ((BaseActivity)getActivity()).hideLoading();
-                    }
-                });
-            }
-        });
     }
 
     private void deleteSearching(int searchingId, int position) {

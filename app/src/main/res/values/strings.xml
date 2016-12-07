@@ -27,4 +27,6 @@
 
     <string name="validate_search_notinput">Please Input Something</string>
     <string name="validate_search_minlength">Please Input Search Word More Than 2</string>
+
+    <string name="google_signin_error_message">Google Signin has problem.</string>
 </resources>

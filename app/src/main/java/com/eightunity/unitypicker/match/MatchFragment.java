@@ -161,8 +161,8 @@ public class MatchFragment extends Fragment{
         @Override
         public void finish(int mode, int position) {
             if (OptionDialog.STOP_WATCHING_MODE == mode) {
-//   TODO             inactiveSearchServiceX(notifications.get(position).getSearchId(), position);
-                stopSearchServiceTemp(matchDetails.get(position).getSearchId(), position);
+                 inactiveSearchServiceX(matchDetails.get(position).getSearchId(), position);
+//                stopSearchServiceTemp(matchDetails.get(position).getSearchId(), position);
             } else if (OptionDialog.REMOVE_FROM_LIST_MODE == mode) {
                 dao.delete(matchDetails.get(position).getMatchID());
                 matchAdapter.removeAt(position);

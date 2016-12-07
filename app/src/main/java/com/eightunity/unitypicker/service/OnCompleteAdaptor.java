@@ -2,6 +2,7 @@ package com.eightunity.unitypicker.service;
 
 import android.app.Activity;
 import android.support.annotation.NonNull;
+import android.util.Log;
 
 import com.eightunity.unitypicker.ui.BaseActivity;
 import com.eightunity.unitypicker.ui.ErrorDialog;
@@ -14,6 +15,8 @@ import com.google.firebase.auth.GetTokenResult;
  */
 
 public abstract class OnCompleteAdaptor implements OnCompleteListener<GetTokenResult> {
+
+    private static final String TAG = "OnCompleteAdaptor";
 
     public abstract void doSuccess(String tokenId);
 
@@ -30,6 +33,7 @@ public abstract class OnCompleteAdaptor implements OnCompleteListener<GetTokenRe
             doSuccess(task.getResult().getToken());
         } else {
             errorDialog.showDialog(mActivity, task.getException().getMessage());
+            Log.e(TAG, task.getException().getMessage());
             ((BaseActivity)mActivity).hideLoading();
         }
     }

@@ -20,6 +20,7 @@ import com.eightunity.unitypicker.model.account.User;
 import com.eightunity.unitypicker.ui.AuthenticaterActivity;
 import com.eightunity.unitypicker.ui.BaseActivity;
 import com.facebook.login.LoginManager;
+import com.google.firebase.auth.FirebaseAuth;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -73,22 +74,24 @@ public class ProfileFragment extends Fragment {
 
     private void callWSMytask() {
         User user = ((AuthenticaterActivity)getActivity()).getUser();
-        String name = user.getDisplayName();
-        usernameView.setText(name);
-        String imageURL = user.getProfileURL();
+        if (user != null) {
+            String name = user.getDisplayName();
+            usernameView.setText(name);
+            String imageURL = user.getProfileURL();
 
-        RequestManager rm = Glide.with(getContext());
-        DrawableTypeRequest dr = null;
-        if (imageURL != null) {
-            dr = rm.load(imageURL);
-        } else {
-            dr = rm.load(R.mipmap.ic_default_profile);
+            RequestManager rm = Glide.with(getContext());
+            DrawableTypeRequest dr = null;
+            if (imageURL != null) {
+                dr = rm.load(imageURL);
+            } else {
+                dr = rm.load(R.mipmap.ic_default_profile);
+            }
+            dr.crossFade()
+                    .thumbnail(0.5f)
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .placeholder(R.mipmap.ic_default_profile)
+                    .error(R.mipmap.ic_default_profile)
+                    .into(profileImage);
         }
-        dr.crossFade()
-                .thumbnail(0.5f)
-                .diskCacheStrategy(DiskCacheStrategy.ALL)
-                .placeholder(R.mipmap.ic_default_profile)
-                .error(R.mipmap.ic_default_profile)
-                .into(profileImage);
     }
 }

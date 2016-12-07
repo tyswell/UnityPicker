@@ -146,8 +146,8 @@ public class NotificationFragment extends Fragment {
         @Override
         public void finish(int mode, int position) {
             if (OptionDialog.STOP_WATCHING_MODE == mode) {
-//   TODO             inactiveSearchServiceX(notifications.get(position).getSearchId(), position);
-                stopSearchServiceTemp(notifications.get(position).getSearchId(), position);
+                inactiveSearchServiceX(notifications.get(position).getSearchId(), position);
+//                stopSearchServiceTemp(notifications.get(position).getSearchId(), position);
             } else if (OptionDialog.REMOVE_FROM_LIST_MODE == mode) {
                 dao.delete(notifications.get(position).getMatchId());
                 notificationAdapter.removeAt(position);

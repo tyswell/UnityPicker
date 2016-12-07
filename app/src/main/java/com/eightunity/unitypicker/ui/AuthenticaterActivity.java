@@ -14,6 +14,7 @@ import com.eightunity.unitypicker.model.account.OSType;
 import com.eightunity.unitypicker.model.account.User;
 import com.eightunity.unitypicker.model.account.UserLoginType;
 import com.eightunity.unitypicker.utility.DeviceUtil;
+import com.facebook.FacebookSdk;
 import com.facebook.login.LoginManager;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
@@ -71,6 +72,7 @@ public class AuthenticaterActivity extends AppCompatActivity {
     public void logout() {
         User user = getUser();
         if (user.getUserLoginType() == UserLoginType.FACEBOOK_LOGIN_TYPE_CODE) {
+            FacebookSdk.sdkInitialize(getApplicationContext());
             LoginManager.getInstance().logOut();
         }
 
@@ -85,28 +87,39 @@ public class AuthenticaterActivity extends AppCompatActivity {
         User user = new User();
 
         FirebaseUser fUser = getAccount();
+        if (fUser != null) {
+            user.setEmail(fUser.getEmail());
+            user.setUserId(fUser.getUid());
+            user.setDisplayName(fUser.getDisplayName());
+            user.setProfileURL(fUser.getPhotoUrl().toString());
+            user.setUserLoginType(UserLoginType.getCode(fUser.getProviders()));
 
-        user.setEmail(fUser.getEmail());
-        user.setUserId(fUser.getUid());
-        user.setDisplayName(fUser.getDisplayName());
-        user.setProfileURL(fUser.getPhotoUrl().toString());
-        user.setUserLoginType(UserLoginType.getCode(fUser.getProviders()));
+            if (user.getUserLoginType() == UserLoginType.FACEBOOK_LOGIN_TYPE_CODE) {
+                FacebookUser fbUser = new FacebookUser();
+                user.setFacebookUser(fbUser);
+            } else if (user.getUserLoginType() == UserLoginType.GOOGLE_LOGIN_TYPE_CODE) {
+                GoogleUser ggUser = new GoogleUser();
+                user.setGoogleUser(ggUser);
+            }
 
-        if (user.getUserLoginType() == UserLoginType.FACEBOOK_LOGIN_TYPE_CODE) {
-            FacebookUser fbUser = new FacebookUser();
-            user.setFacebookUser(fbUser);
-        } else if (user.getUserLoginType() == UserLoginType.GOOGLE_LOGIN_TYPE_CODE) {
-            GoogleUser ggUser = new GoogleUser();
-            user.setGoogleUser(ggUser);
+            Device device = new Device();
+            device.setOsTypeCode(OSType.ANDROID_OS);
+            device.setTokenNotification(FirebaseInstanceId.getInstance().getToken());
+            device.setDeviceModel(DeviceUtil.getDeviceName());
+            user.setDevice(device);
+
+            return user;
+        } else {
+            Log.d(TAG, "GET CURRENT USER IS NULL");
+
+            FacebookSdk.sdkInitialize(getApplicationContext());
+            LoginManager.getInstance().logOut();
+
+            Intent intent = new Intent(this, LoginActivity.class);
+            startActivityForResult(intent, 1);
+
+            return null;
         }
-
-        Device device = new Device();
-        device.setOsTypeCode(OSType.ANDROID_OS);
-        device.setTokenNotification(FirebaseInstanceId.getInstance().getToken());
-        device.setDeviceModel(DeviceUtil.getDeviceName());
-        user.setDevice(device);
-
-        return user;
     }
 
 }

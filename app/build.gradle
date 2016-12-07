@@ -4,7 +4,7 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 23
-    buildToolsVersion "21.1.2"
+    buildToolsVersion "24.0.1"
 
     defaultConfig {
         applicationId "com.eightunity.unitypicker"
@@ -61,3 +61,4 @@ dependencies {
 }
 
 apply plugin: 'com.google.gms.google-services'
+

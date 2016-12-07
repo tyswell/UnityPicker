@@ -7,6 +7,11 @@ import com.eightunity.unitypicker.model.search.Search;
 import com.eightunity.unitypicker.ui.BaseActivity;
 import com.eightunity.unitypicker.ui.ErrorDialog;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 
@@ -32,16 +37,28 @@ public abstract class CallBackAdaptor<T> implements Callback<T> {
             onSuccess(response.body());
             ((BaseActivity)activity).hideLoading();
         } else {
-            Log.e(TAG, "ERROR" + response.message());
+
             ErrorDialog errorDialog = new ErrorDialog();
-            errorDialog.showDialog(activity, response.message());
+            try {
+                JSONObject jObjError = new JSONObject(response.errorBody().string());
+                String statusCode = jObjError.getString("statusCode");
+                String errorDesc = jObjError.getString("errorMessage");
+                Log.e(TAG, "statusCode : "+statusCode + " || ERROR MESSAGE : "+errorDesc);
+                errorDialog.showDialog(activity, "statusCode : "+statusCode + " || ERROR MESSAGE : "+errorDesc);
+            } catch (JSONException e) {
+                Log.e(TAG, "JSONException e : "+e.getMessage());
+                errorDialog.showDialog(activity, "JSONException e : "+e.getMessage());
+            } catch (IOException e) {
+                Log.e(TAG, "IOException : "+e.getMessage());
+                errorDialog.showDialog(activity, "IOException : "+e.getMessage());
+            }
             ((BaseActivity)activity).hideLoading();
         }
     }
 
     @Override
     public void onFailure(Call<T> call, Throwable t) {
-        Log.d(TAG, "ERROR" + t.getMessage());
+        Log.e(TAG, "ERROR onFailure =" + t.getMessage());
         ErrorDialog errorDialog = new ErrorDialog();
         errorDialog.showDialog(activity, t.getMessage());
         ((BaseActivity)activity).hideLoading();
