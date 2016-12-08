@@ -166,9 +166,9 @@ public class LoginActivity extends AppCompatActivity {
                         Log.d(TAG, "idTokeAAAAA="+idToken);
                         Log.d(TAG, "UID="+fuser.getUid());
                         LoginReceive loginObj = setUserInfo(fuser, idToken);
-                        loginService(loginObj, fuser.getUid());
+//                        loginService(loginObj, fuser.getUid());
                         Log.d(TAG, "Notification token :"+loginObj.getDevice().getTokenNotification());
-//                        loginServiceTemp(loginObj, fuser.getUid());
+                        loginServiceTemp(loginObj, fuser.getUid());
                     } else {
                         ErrorDialog errorDialog = new ErrorDialog();
                         Log.d(TAG, "task.getException()="+task.getException());
@@ -245,8 +245,8 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
                 Log.d(TAG, "signInWithCredential:onComplete:" + task.isSuccessful());
-//                logined();
-                loginServiceX();
+                logined();
+//                loginServiceX();
             }
         });
     }
@@ -274,8 +274,8 @@ public class LoginActivity extends AppCompatActivity {
             public void onComplete(@NonNull Task<AuthResult> task) {
                 Log.d(TAG, "signInWithCredential:onComplete:" + task.isSuccessful());
                 if (task.isSuccessful()) {
-//                    logined();
-          loginServiceX();
+                    logined();
+//          loginServiceX();
                 } else {
                     mLoading.dismiss();
                     ErrorDialog ed = new ErrorDialog();
@@ -361,45 +361,6 @@ public class LoginActivity extends AppCompatActivity {
                     errorDialog.showDialog(LoginActivity.this, task.getException().getMessage());
                     mLoading.dismiss();
                 }
-            }
-        });
-    }
-
-    private void loginService(final LoginReceive loginObj, final String userId) {
-        Log.d(TAG, "LOGIN SERVICE : " + loginObj.getTokenId());
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(getString(R.string.base_service_url))
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-
-        ApiService service = retrofit.create(ApiService.class);
-
-        Call<LoginResponse> call = service.login(loginObj);
-        call.enqueue(new Callback<LoginResponse>() {
-            @Override
-            public void onResponse(Call<LoginResponse> call, retrofit2.Response<LoginResponse> response) {
-                if (response.isSuccessful()) {
-                    Log.d(TAG, "SUCCESS LOGIN CODE="+response.body());
-                    LoginResponse loginResponse = response.body();
-                    Log.d(TAG, "loginResponse.getSearching() = "+loginResponse.getSearching());
-                    addSearchDao(loginResponse.getSearching(), userId);
-                    finish();
-                } else {
-                    Log.e(TAG, "ERROR" + response.message());
-                    FirebaseAuth.getInstance().signOut();
-
-                    ErrorDialog errorDialog = new ErrorDialog();
-                    errorDialog.showDialog(LoginActivity.this, response.message());
-                }
-            }
-
-            @Override
-            public void onFailure(Call<LoginResponse> call, Throwable t) {
-                Log.d(TAG, "ERROR" + t.getMessage());
-                FirebaseAuth.getInstance().signOut();
-
-                ErrorDialog errorDialog = new ErrorDialog();
-                errorDialog.showDialog(LoginActivity.this, t.getMessage());
             }
         });
     }

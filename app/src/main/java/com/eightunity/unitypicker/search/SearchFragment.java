@@ -73,6 +73,7 @@ public class SearchFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         searchText = (EditText)view.findViewById(R.id.searchText);
+        searchText.setSingleLine();
         searchTypeSpinner = (Spinner)view.findViewById(R.id.searchTypeSpinner);
         configSpinner(searchTypeSpinner);
         searchButton = (Button) view.findViewById(R.id.searchBtn);

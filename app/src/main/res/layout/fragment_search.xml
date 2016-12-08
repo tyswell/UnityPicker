@@ -7,7 +7,7 @@
         android:id="@+id/searchText"
         android:layout_marginTop="10dp"
         android:layout_width="match_parent"
-        android:maxLines="1"
+        android:maxHeight="20dp"
         android:maxLength="200"
         android:layout_height="wrap_content"/>
 
