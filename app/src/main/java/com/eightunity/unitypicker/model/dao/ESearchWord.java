@@ -11,6 +11,7 @@ public class ESearchWord {
     private String user_id;
     private String description;
     private Integer search_type;
+    private Boolean watchingStatus;
     private Date modified_date;
 
     public Integer getSearch_id() {
@@ -51,5 +52,13 @@ public class ESearchWord {
 
     public void setModified_date(Date modified_date) {
         this.modified_date = modified_date;
+    }
+
+    public Boolean getWatchingStatus() {
+        return watchingStatus;
+    }
+
+    public void setWatchingStatus(Boolean watchingStatus) {
+        this.watchingStatus = watchingStatus;
     }
 }

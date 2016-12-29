@@ -10,6 +10,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.eightunity.unitypicker.R;
+import com.eightunity.unitypicker.model.watch.Watch;
 
 /**
  * Created by chokechaic on 9/15/2016.
@@ -25,15 +26,26 @@ public class OptionDialog extends Dialog {
     public static final int REMOVE_FROM_LIST_MODE = 2;
     public static final int CACEL_MODE = 0;
 
-    private int position;
+    public Integer searchId;
+    public Integer matchingId;
+    public boolean watchingStatus;
 
     public OptionDialog(Context context) {
         super(context/*, R.style.MaterialDialogSheet*/);
     }
 
-    public void show(int position) {
-        this.position = position;
+    public void show(Integer searchId, Integer matchingId, boolean watchingStatus) {
         super.show();
+
+        this.searchId = searchId;
+        this.matchingId = matchingId;
+        this.watchingStatus = watchingStatus;
+
+        if (watchingStatus) {
+            stopWatchingView.setVisibility(View.VISIBLE);
+        } else  {
+            stopWatchingView.setVisibility(View.GONE);
+        }
     }
 
     @Override
@@ -57,7 +69,7 @@ public class OptionDialog extends Dialog {
             @Override
             public void onClick(View v) {
                 if( mDialogResult != null ){
-                    mDialogResult.finish(STOP_WATCHING_MODE, position);
+                    mDialogResult.finish(STOP_WATCHING_MODE, searchId, matchingId, watchingStatus);
                 }
                 dismiss();
             }
@@ -69,7 +81,7 @@ public class OptionDialog extends Dialog {
             public void onClick(View v) {
 
                 if( mDialogResult != null ){
-                    mDialogResult.finish(REMOVE_FROM_LIST_MODE, position);
+                    mDialogResult.finish(REMOVE_FROM_LIST_MODE, searchId, matchingId, watchingStatus);
                 }
                 dismiss();
             }
@@ -80,7 +92,7 @@ public class OptionDialog extends Dialog {
             @Override
             public void onClick(View v) {
                 if( mDialogResult != null ){
-                    mDialogResult.finish(CACEL_MODE, position);
+                    mDialogResult.finish(CACEL_MODE, searchId, matchingId,watchingStatus);
                 }
                 dismiss();
             }
@@ -92,6 +104,6 @@ public class OptionDialog extends Dialog {
     }
 
     public interface OnOptionDialogResult{
-        void finish(int mode, int position);
+        void finish(int mode, Integer searchingId, Integer matchingId, boolean watchingStatus);
     }
 }

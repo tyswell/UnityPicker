@@ -15,6 +15,7 @@ public class MatchDetail implements Parcelable{
     private String titleContent;
     private String webName;
     private String timeDesc;
+    private Boolean watchingStatus;
     private String url;
 
     public MatchDetail(){
@@ -28,6 +29,7 @@ public class MatchDetail implements Parcelable{
         webName = in.readString();
         timeDesc = in.readString();
         url = in.readString();
+        watchingStatus = in.readByte() != 0;
     }
 
     public static final Creator<MatchDetail> CREATOR = new Creator<MatchDetail>() {
@@ -90,6 +92,14 @@ public class MatchDetail implements Parcelable{
         this.url = url;
     }
 
+    public Boolean getWatchingStatus() {
+        return watchingStatus;
+    }
+
+    public void setWatchingStatus(Boolean watchingStatus) {
+        this.watchingStatus = watchingStatus;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -103,5 +113,6 @@ public class MatchDetail implements Parcelable{
         dest.writeString(webName);
         dest.writeString(timeDesc);
         dest.writeString(url);
+        dest.writeByte((byte) (watchingStatus ? 1 : 0));
     }
 }

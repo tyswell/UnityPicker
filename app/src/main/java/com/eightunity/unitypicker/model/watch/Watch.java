@@ -3,19 +3,26 @@ package com.eightunity.unitypicker.model.watch;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.eightunity.unitypicker.ui.recyclerview.BaseRecyclerViewType;
+import com.eightunity.unitypicker.watch.adapter.WatchDetailType;
+
 import java.util.Date;
 
 /**
  * Created by chokechaic on 9/6/2016.
  */
-public class Watch implements Parcelable{
+public class Watch implements Parcelable {
 
     private int searchId;
     private String searchWord;
     private String searchType;
     private String timeDesc;
+    private int countFound;
+    private boolean watchingStatus;
 
-    public Watch(){}
+    public Watch(){
+
+    }
 
     public int getSearchId() {
         return searchId;
@@ -49,6 +56,22 @@ public class Watch implements Parcelable{
         this.timeDesc = timeDesc;
     }
 
+    public boolean getwatchingStatus() {
+        return watchingStatus;
+    }
+
+    public void setWatchingStatus(boolean watchingStatus) {
+        this.watchingStatus = watchingStatus;
+    }
+
+    public int getCountFound() {
+        return countFound;
+    }
+
+    public void setCountFound(int countFound) {
+        this.countFound = countFound;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -60,6 +83,8 @@ public class Watch implements Parcelable{
         dest.writeString(searchWord);
         dest.writeString(searchType);
         dest.writeString(timeDesc);
+        dest.writeInt(countFound);
+        dest.writeByte((byte) (watchingStatus ? 1 : 0));
     }
 
     protected Watch(Parcel in) {
@@ -67,6 +92,8 @@ public class Watch implements Parcelable{
         searchWord = in.readString();
         searchType = in.readString();
         timeDesc = in.readString();
+        countFound = in.readInt();
+        watchingStatus = in.readByte() != 0;
     }
 
     public static final Creator<Watch> CREATOR = new Creator<Watch>() {
@@ -80,5 +107,4 @@ public class Watch implements Parcelable{
             return new Watch[size];
         }
     };
-
 }

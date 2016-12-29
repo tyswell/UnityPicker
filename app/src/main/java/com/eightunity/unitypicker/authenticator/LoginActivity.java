@@ -373,6 +373,7 @@ public class LoginActivity extends AppCompatActivity {
                 search.setSearch_type(searching.getSearchTypeCode());
                 search.setSearch_id(searching.getSearchingId());
                 search.setModified_date(searching.getCreateDate());
+                search.setWatchingStatus(true);
                 search.setUser_id(userId);
                 dao.add(search);
             }

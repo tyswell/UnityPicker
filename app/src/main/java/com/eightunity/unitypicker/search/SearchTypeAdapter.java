@@ -57,15 +57,7 @@ public class SearchTypeAdapter extends BaseAdapter {
             holder = (ViewHolder) convertView.getTag();
         }
 
-        int imgResourceId;
-        switch (position) {
-            case 0:
-                imgResourceId = R.drawable.ic_action_bike;
-                break;
-            default:
-                imgResourceId = android.R.drawable.ic_menu_zoom;
-                break;
-        }
+        int imgResourceId = SearchUtility.searchTypeLogo(position);
 
         holder.name.setText(mDatas.get(position));
         holder.logo.setImageResource(imgResourceId);

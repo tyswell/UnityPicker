@@ -14,12 +14,14 @@
 
     <string-array name="search_type">
         <item>Bicycle</item>
+        <item>Amulets</item>
     </string-array>
 
     <string name="server_client_id">124874219817-6c41juoe7aerqljrfava34teprvle9ka.apps.googleusercontent.com</string>
     <string name="base_service_url">http://10.0.3.2:8080/</string>
 
     <string name="stop_watching">Stop Watching</string>
+    <string name="delete">Delete</string>
     <string name="remove_from_List">Remove from list</string>
     <string name="cancel">Cancel</string>
 
@@ -29,4 +31,14 @@
     <string name="validate_search_minlength">Please Input Search Word More Than 2</string>
 
     <string name="google_signin_error_message">Google Signin has problem.</string>
+
+    <string name="no_watch_row">Please Pick Some Word</string>
+    <string name="found_desc">found</string>
+    <string name="follow_desc">follow</string>
+    <string name="unfollow_desc">unfollow</string>
+
+    <string name="no_notification_row">Not found something yet brother.</string>
+
+    <string name="no_match_row">Not found something yet brother.</string>
+
 </resources>

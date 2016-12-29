@@ -3,9 +3,9 @@ package com.eightunity.unitypicker.watch;
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -15,6 +15,7 @@ import android.view.ViewGroup;
 
 import com.eightunity.unitypicker.R;
 import com.eightunity.unitypicker.commonpage.OptionDialog;
+import com.eightunity.unitypicker.database.EMatchingDAO;
 import com.eightunity.unitypicker.database.ESearchWordDAO;
 import com.eightunity.unitypicker.model.account.User;
 import com.eightunity.unitypicker.model.dao.ESearchWord;
@@ -27,27 +28,26 @@ import com.eightunity.unitypicker.service.ServiceAdaptor;
 import com.eightunity.unitypicker.ui.BaseActivity;
 import com.eightunity.unitypicker.ui.ErrorDialog;
 import com.eightunity.unitypicker.ui.LinearLayoutManager;
+import com.eightunity.unitypicker.ui.recyclerview.BaseRecyclerViewType;
 import com.eightunity.unitypicker.ui.recyclerview.DividerItemDecoration;
 import com.eightunity.unitypicker.ui.recyclerview.RecycleClickListener;
 import com.eightunity.unitypicker.utility.DateUtil;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.FirebaseAuth;
+import com.eightunity.unitypicker.watch.adapter.WatchAdapter;
+import com.eightunity.unitypicker.watch.adapter.model.WatchItem;
+import com.eightunity.unitypicker.watch.adapter.model.WatchSectionItem;
+import com.eightunity.unitypicker.watch.adapter.utility.WatchAdapterConverter;
+import com.eightunity.unitypicker.watch.adapter.utility.WatchDiffCallback;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.auth.GetTokenResult;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Retrofit;
-import retrofit2.converter.jackson.JacksonConverterFactory;
 
 /**
  * Created by chokechaic on 8/26/2016.
  */
-public class WatchFragment extends Fragment {
+public class WatchFragment extends Fragment implements WatchAdapter.OnItemClickListener{
 
     public interface OnHeadlineSelectedListener{
         public void onArticleSelected(String username, int searchWordID, String searchWordDetail, String searchTypeDesc) ;
@@ -61,12 +61,13 @@ public class WatchFragment extends Fragment {
     private WatchAdapter watchAdapter;
 
     private ESearchWordDAO dao;
+    private EMatchingDAO matchingDAO;
 
     private OptionDialog dialog;
 
     private OnHeadlineSelectedListener mCallback;
 
-    List<Watch> watches = new ArrayList<>();
+    List<Watch> watches;
 
     @Override
     public void onAttach(Context context) {
@@ -96,6 +97,7 @@ public class WatchFragment extends Fragment {
         initView(rootView);
 
         dao = new ESearchWordDAO();
+        matchingDAO = new EMatchingDAO();
 
         return rootView;
     }
@@ -124,12 +126,14 @@ public class WatchFragment extends Fragment {
 
     private void restoreInstanceState(Bundle savedInstanceState) {
         List<Watch> watches = savedInstanceState.getParcelableArrayList(PARACEL_WATCHFRAGMENT);
-        updateUI(watches);
+        List<BaseRecyclerViewType> emptyList = new ArrayList<>();
+        updateDetailList(emptyList, createDetailList(watches));
     }
 
     private void initView(View rootView) {
         watchRecycler = (RecyclerView) rootView.findViewById(R.id.watchRecycler);
-        watchAdapter = new WatchAdapter(rootView.getContext(), watches, recycleClick, optionClick);
+        watchAdapter = new WatchAdapter();
+        watchAdapter.setOnItemClickListener(this);
         configRecyclerView(watchRecycler, watchAdapter, rootView.getContext());
 
         dialog = new OptionDialog(getContext());
@@ -138,21 +142,41 @@ public class WatchFragment extends Fragment {
 
     private OptionDialog.OnOptionDialogResult optionDialogResult = new OptionDialog.OnOptionDialogResult() {
         @Override
-        public void finish(int mode, int position) {
+        public void finish(int mode, Integer searchId, Integer matchingId, boolean watchingStatus) {
+            int position = getPositionDatas(searchId);
             if (OptionDialog.STOP_WATCHING_MODE == mode) {
 //                deleteSearchServiceTemp(watches.get(position).getSearchId(), position);
-                inactiveSearchServiceX(watches.get(position).getSearchId(), position);
+                inactiveDao(watches.get(position).getSearchId());
+//                inactiveSearchServiceX(watches.get(position).getSearchId(), position);
             } else if (OptionDialog.REMOVE_FROM_LIST_MODE == mode) {
+
 //                dao.delete(watches.get(position).getId());
 //                watchAdapter.removeAt(position);
 
 //                deleteSearchService(watches.get(position).getId(), position);
-                deleteSearching(watches.get(position).getSearchId(), position);
+                if (watchingStatus) {
+                    //inactiveSearchServiceX(watches.get(position).getSearchId(), position);
+                    deleteSearching(watches.get(position).getSearchId(), position);
+                } else {
+                    deleteSearching(watches.get(position).getSearchId(), position);
+                }
+
             } else {
 
             }
         }
     };
+
+    private int getPositionDatas(int searchId) {
+        int i = 0;
+        for (Watch w : watches) {
+            if (w.getSearchId() == searchId) {
+                return i;
+            }
+            i++;
+        }
+        return -1;
+    }
 
     private void configRecyclerView(RecyclerView recyclerView, RecyclerView.Adapter adapter, Context context) {
         recyclerView.setLayoutManager(new LinearLayoutManager(context));
@@ -164,9 +188,11 @@ public class WatchFragment extends Fragment {
     }
 
     private void setDataOnPageOpen() {
-        List<Watch> watches = getDataFromDB();
+        watches = getDataFromDB();
         Log.d(TAG, "watches = "+ watches.size());
-        updateUI(watches);
+        List<BaseRecyclerViewType> emptyList = new ArrayList<>();
+        updateDetailList(emptyList, WatchAdapterConverter.getWatchDetail(watches, getResources()));
+//        updateUI(watches);
     }
 
     private List<Watch> getDataFromDB() {
@@ -181,6 +207,8 @@ public class WatchFragment extends Fragment {
                 data.setSearchId(eSearchWord.getSearch_id());
                 data.setSearchWord(eSearchWord.getDescription());
                 data.setSearchType(SearchUtility.searchTypeCodeToDesc(eSearchWord.getSearch_type()));
+                data.setWatchingStatus(eSearchWord.getWatchingStatus());
+                data.setCountFound(countMatchingFound(userId, eSearchWord.getSearch_id()));
                 data.setTimeDesc(DateUtil.timeSpent(eSearchWord.getModified_date()));
                 datas.add(data);
             }
@@ -191,38 +219,32 @@ public class WatchFragment extends Fragment {
         }
     }
 
-    private void updateUI(List<Watch> datas) {
-        watches.clear();
-        watches.addAll(datas);
-        watchAdapter.notifyDataSetChanged();
-    }
-
-    private RecycleClickListener recycleClick = new RecycleClickListener() {
-        @Override
-        public void onClick(View view, int position) {
-            String userId = ((BaseActivity)getActivity()).getUser().getUserId();
-
-            mCallback.onArticleSelected(
-                    userId,
-                    watches.get(position).getSearchId(),
-                    watches.get(position).getSearchWord(),
-                    watches.get(position).getSearchType());
-        }
-    };
-
-    private RecycleClickListener optionClick = new RecycleClickListener() {
-        @Override
-        public void onClick(View view, int position) {
-            dialog.show(position);
-        }
-    };
-
     private void deleteSearchServiceTemp(final int searchingId, final int position) {
         ErrorDialog er = new ErrorDialog();
         er.showDialog(getActivity(), getString(R.string.stop_watching_message));
     }
 
-    private void inactiveSearchServiceX(final int searchingId, final int position) {
+    private void inactiveDao(final int searchingId) {
+        String userId = ((BaseActivity)getActivity()).getUser().getUserId();
+        dao.updateWatchingStatus(searchingId, userId, false);
+        List<BaseRecyclerViewType> oldList = createDetailList(watches);
+        watches.get(getPositionWatches(searchingId)).setWatchingStatus(false);
+        List<BaseRecyclerViewType> newList = createDetailList(watches);
+        updateDetailList(oldList, newList);
+    }
+
+    private int getPositionWatches(Integer searchId) {
+        int i = 0;
+        for (Watch watch : watches) {
+            if (watch.getSearchId() == searchId) {
+                return i;
+            }
+            i++;
+        }
+        return -1;
+    }
+
+    private void inactiveSearchServiceX(final int searchingId, final int position, final boolean isDeleteRow) {
         new ServiceAdaptor(getActivity()) {
             @Override
             public void callService(FirebaseUser fUser, String tokenId, ApiService service) {
@@ -235,6 +257,12 @@ public class WatchFragment extends Fragment {
                     @Override
                     public void onSuccess(Boolean response) {
                         Log.d(TAG, "SUCCESS ADD SEARCH ID ="+response);
+                        if (isDeleteRow) {
+                            deleteSearching(searchingId, position);
+                        } else {
+                            inactiveDao(searchingId);
+                        }
+
                         ErrorDialog er = new ErrorDialog();
                         er.showDialog(getActivity(), getString(R.string.stop_watching_message));
                     }
@@ -245,7 +273,43 @@ public class WatchFragment extends Fragment {
 
     private void deleteSearching(int searchingId, int position) {
         dao.delete(searchingId);
-        watchAdapter.removeAt(position);
+        matchingDAO.deleteBySearchId(searchingId);
+        List<BaseRecyclerViewType> oldList = createDetailList(watches);
+        watches.remove(position);
+        List<BaseRecyclerViewType> newList = createDetailList(watches);
+        updateDetailList(oldList, newList);
+    }
+
+    @Override
+    public void onRowItemClickListener(WatchItem item) {
+        String userId = ((BaseActivity)getActivity()).getUser().getUserId();
+
+        mCallback.onArticleSelected(
+                userId,
+                item.getSearchId(),
+                item.getSearchWord(),
+                item.getSearchType());
+    }
+
+    @Override
+    public void onOptionItemClickListener(WatchItem item) {
+        dialog.show(item.getSearchId(), null, item.getWatchingStatus());
+    }
+
+    private List<BaseRecyclerViewType> createDetailList(List<Watch> watches) {
+        List<BaseRecyclerViewType> itemList = new ArrayList<>();
+        itemList.addAll(WatchAdapterConverter.getWatchDetail(watches, getResources()));
+        return itemList;
+    }
+
+    private void updateDetailList(List<BaseRecyclerViewType> oldItemList, List<BaseRecyclerViewType> newItemList) {
+        watchAdapter.setWatchDetails(newItemList);
+        DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new WatchDiffCallback(oldItemList, newItemList));
+        diffResult.dispatchUpdatesTo(watchAdapter);
+    }
+
+    private int countMatchingFound(String userId, int searchingId) {
+        return matchingDAO.getCountBySearchWord(userId, searchingId);
     }
 
 }

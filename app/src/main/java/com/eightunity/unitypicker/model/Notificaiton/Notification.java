@@ -14,6 +14,7 @@ public class Notification implements Parcelable{
     private String titleContent;
     private String webName;
     private String timeDesc;
+    private boolean watchingStatus;
     private String url;
 
     public Notification(){}
@@ -74,6 +75,14 @@ public class Notification implements Parcelable{
         this.url = url;
     }
 
+    public boolean getWatchingStatus() {
+        return watchingStatus;
+    }
+
+    public void setWatchingStatus(boolean watchingStatus) {
+        this.watchingStatus = watchingStatus;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -87,6 +96,7 @@ public class Notification implements Parcelable{
         dest.writeString(webName);
         dest.writeString(timeDesc);
         dest.writeString(url);
+        dest.writeByte((byte) (watchingStatus ? 1 : 0));
     }
 
     protected Notification(Parcel in) {
@@ -96,6 +106,7 @@ public class Notification implements Parcelable{
         webName = in.readString();
         timeDesc = in.readString();
         url = in.readString();
+        watchingStatus = in.readByte() != 0;
     }
 
     public static final Creator<Notification> CREATOR = new Creator<Notification>() {

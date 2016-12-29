@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -14,19 +15,33 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.eightunity.unitypicker.MainActivity;
 import com.eightunity.unitypicker.R;
 import com.eightunity.unitypicker.commonpage.OptionDialog;
 import com.eightunity.unitypicker.database.EMatchingDAO;
+import com.eightunity.unitypicker.database.ESearchWordDAO;
+import com.eightunity.unitypicker.match.adapter.MatchAdapter;
+import com.eightunity.unitypicker.match.adapter.model.MatchHeaderItem;
+import com.eightunity.unitypicker.match.adapter.model.MatchItem;
+import com.eightunity.unitypicker.match.adapter.utility.MatchAdapterConverter;
+import com.eightunity.unitypicker.match.adapter.utility.MatchDiffCallback;
+import com.eightunity.unitypicker.model.Notificaiton.Notification;
 import com.eightunity.unitypicker.model.dao.EMatching;
+import com.eightunity.unitypicker.model.dao.ESearchWord;
 import com.eightunity.unitypicker.model.match.Match;
 import com.eightunity.unitypicker.model.match.MatchDetail;
 import com.eightunity.unitypicker.model.server.search.InactiveSearching;
+import com.eightunity.unitypicker.notification.adapter.utility.NotificationAdapterConverter;
+import com.eightunity.unitypicker.notification.adapter.utility.NotificationDiffCallback;
 import com.eightunity.unitypicker.search.SearchUtility;
 import com.eightunity.unitypicker.service.ApiService;
 import com.eightunity.unitypicker.service.CallBackAdaptor;
 import com.eightunity.unitypicker.service.ServiceAdaptor;
+import com.eightunity.unitypicker.ui.BaseActivity;
 import com.eightunity.unitypicker.ui.ErrorDialog;
 import com.eightunity.unitypicker.ui.LinearLayoutManager;
+import com.eightunity.unitypicker.ui.WrapContentLinearLayoutManager;
+import com.eightunity.unitypicker.ui.recyclerview.BaseRecyclerViewType;
 import com.eightunity.unitypicker.ui.recyclerview.DividerItemDecoration;
 import com.eightunity.unitypicker.ui.recyclerview.RecycleClickListener;
 import com.eightunity.unitypicker.utility.DateUtil;
@@ -42,17 +57,15 @@ import retrofit2.Call;
 /**
  * Created by chokechaic on 9/14/2016.
  */
-public class MatchFragment extends Fragment{
+public class MatchFragment extends Fragment implements MatchAdapter.OnItemClickListener{
 
     private static final String TAG = "MatchFragment";
 
-    private TextView searchWordView;
-    private ImageView logo;
-    private TextView searchTypeView;
     private RecyclerView matchRecycler;
     private MatchAdapter matchAdapter;
     private OptionDialog dialog;
 
+    private ESearchWordDAO searchDao;
     private EMatchingDAO dao;
 
     private Match match;
@@ -78,7 +91,9 @@ public class MatchFragment extends Fragment{
         if (savedInstanceState != null) {
             Log.d(TAG, "onActivityCreated is called and don't load data again");
             match = Parcels.unwrap(savedInstanceState.getParcelable(PARAM_MATCH_FRAGMENT_DATA));
-            setDataUI();
+
+            List<BaseRecyclerViewType> emptyList = new ArrayList<>();
+            updateDetailList(emptyList, createDetailList(match));
         }
     }
 
@@ -86,15 +101,13 @@ public class MatchFragment extends Fragment{
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_match, container, false);
 
-        searchWordView = (TextView) rootView.findViewById(R.id.searchWordView);
-        logo = (ImageView) rootView.findViewById(R.id.logo);
-        searchTypeView = (TextView) rootView.findViewById(R.id.searchTypeView);
-
         matchRecycler = (RecyclerView) rootView.findViewById(R.id.matchRecycler);
-        matchAdapter = new MatchAdapter(getContext(), matchDetails, recycleClick, optionClick);
+        matchAdapter = new MatchAdapter();
+        matchAdapter.setOnItemClickListener(this);
         configRecyclerView(matchRecycler, matchAdapter, getContext());
 
         dao = new EMatchingDAO();
+        searchDao = new ESearchWordDAO();
 
         dialog = new OptionDialog(getContext());
         dialog.setDialogResult(optionDialogResult);
@@ -125,7 +138,7 @@ public class MatchFragment extends Fragment{
     }
 
     private void configRecyclerView(RecyclerView recyclerView, RecyclerView.Adapter adapter, Context context) {
-        recyclerView.setLayoutManager(new LinearLayoutManager(context));
+        recyclerView.setLayoutManager(new WrapContentLinearLayoutManager(context));
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.addItemDecoration(new DividerItemDecoration(context, LinearLayoutManager.VERTICAL));
         recyclerView.setAdapter(adapter);
@@ -133,13 +146,19 @@ public class MatchFragment extends Fragment{
         recyclerView.hasFixedSize();
     }
 
-    private void setMatchData(Match match) {
-        searchWordView.setText(match.getSearchWord());
-        searchTypeView.setText(match.getSearchType());
-        logo.setImageResource(SearchUtility.searchTypeLogo(match.getSearchType()));
+    private Match getHeaderDataFromDB(String userId, int searchId) {
+        ESearchWord searchWord = searchDao.getByKey(searchId, userId);
+        Match match = new Match();
+        match.setWatchingStatus(searchWord.getWatchingStatus());
+        match.setCountFound(dao.getCountBySearchWord(userId, searchId));
+        match.setSearchId(searchWord.getSearch_id());
+        match.setSearchType(SearchUtility.searchTypeCodeToDesc(searchWord.getSearch_type()));
+        match.setSearchWord(searchWord.getDescription());
+        match.setTimeDesc(DateUtil.timeSpent(searchWord.getModified_date()));
+        return match;
     }
 
-    private List<MatchDetail> getMatchDetailFromDB(String username, int searchWordId) {
+    private List<MatchDetail> getMatchDetailFromDB(String username, int searchWordId, boolean watchStatus) {
         List<EMatching> eMatchings = dao.getBySearchWord(username, searchWordId);
         List<MatchDetail> datas = new ArrayList<>();
         for (EMatching eMatching : eMatchings) {
@@ -149,6 +168,7 @@ public class MatchFragment extends Fragment{
             data.setTimeDesc(DateUtil.timeSpent(eMatching.getMatching_date()));
             data.setTitleContent(eMatching.getTitle_content());
             data.setWebName(eMatching.getWeb_name());
+            data.setWatchingStatus(watchStatus);
             data.setUrl(eMatching.getUrl());
             datas.add(data);
         }
@@ -159,50 +179,26 @@ public class MatchFragment extends Fragment{
 
     private OptionDialog.OnOptionDialogResult optionDialogResult = new OptionDialog.OnOptionDialogResult() {
         @Override
-        public void finish(int mode, int position) {
+        public void finish(int mode, Integer searchId, Integer matchingId, boolean watchingStatus) {
+            int positionMatching = getPositionMatchDetail(matchingId);
             if (OptionDialog.STOP_WATCHING_MODE == mode) {
-                 inactiveSearchServiceX(matchDetails.get(position).getSearchId(), position);
-//                stopSearchServiceTemp(matchDetails.get(position).getSearchId(), position);
+                inactiveDao(searchId);
+//                inactiveSearchServiceX(notifications.get(position).getSearchId(), position);
             } else if (OptionDialog.REMOVE_FROM_LIST_MODE == mode) {
-                dao.delete(matchDetails.get(position).getMatchID());
-                matchAdapter.removeAt(position);
+                deleteMatching(matchingId, positionMatching);
             } else {
 
             }
         }
     };
 
-    private RecycleClickListener recycleClick = new RecycleClickListener() {
-        @Override
-        public void onClick(View view, int position) {
-            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(matchDetails.get(position).getUrl()));
-            startActivity(browserIntent);
-        }
-    };
-
-    private RecycleClickListener optionClick = new RecycleClickListener() {
-        @Override
-        public void onClick(View view, int position) {
-            dialog.show(position);
-        }
-    };
-
     public void startArtical(String username, int searchWordID, String searchWordDetail, String searchTypeDesc) {
-        List<MatchDetail> list = getMatchDetailFromDB(username, searchWordID);
-        match = new Match();
-        match.setSearchType(searchTypeDesc);
-        match.setSearchWord(searchWordDetail);
+        match = getHeaderDataFromDB(username, searchWordID);
+        List<MatchDetail> list = getMatchDetailFromDB(username, searchWordID, match.getWatchingStatus());
         match.setMatchDetails(list);
 
-        setDataUI();
-    }
-
-    public void setDataUI() {
-        setMatchData(match);
-
-        matchDetails.clear();
-        matchDetails.addAll(match.getMatchDetails());
-        matchAdapter.notifyDataSetChanged();
+        List<BaseRecyclerViewType> emptyList = new ArrayList<>();
+        updateDetailList(emptyList, createDetailList(match));
     }
 
     private void inactiveSearchServiceX(final int searchingId, final int position) {
@@ -218,6 +214,7 @@ public class MatchFragment extends Fragment{
                     @Override
                     public void onSuccess(Boolean response) {
                         Log.d(TAG, "SUCCESS ADD SEARCH ID ="+response);
+                        inactiveDao(searchingId);
                         ErrorDialog er = new ErrorDialog();
                         er.showDialog(getActivity(), getString(R.string.stop_watching_message));
 //                        deleteSearching(searchingId, position);
@@ -227,10 +224,82 @@ public class MatchFragment extends Fragment{
         };
     }
 
-    private void stopSearchServiceTemp(final int searchingId, final int position) {
-//        deleteSearching(searchingId, position);
-        ErrorDialog er = new ErrorDialog();
-        er.showDialog(getActivity(), getString(R.string.stop_watching_message));
+    @Override
+    public void onStopWatchClickListener(MatchHeaderItem item) {
+        inactiveDao(item.getSearchId());
+//                inactiveSearchServiceX(notifications.get(position).getSearchId(), position);
     }
 
+    @Override
+    public void onDeleteClickListener(MatchHeaderItem item) {
+        if (item.getWatchStatus()) {
+            //inactiveSearchServiceX(watches.get(position).getSearchId(), position);
+            deleteSearching(item.getSearchId());
+        } else {
+            deleteSearching(item.getSearchId());
+        }
+        ((MainActivity)getActivity()).opentPage(MainActivity.WATCH_PAGE);
+    }
+
+    @Override
+    public void onRowItemClickListener(MatchItem item) {
+        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(item.getUrl()));
+        startActivity(browserIntent);
+    }
+
+    @Override
+    public void onOptionItemClickListener(MatchItem item) {
+        dialog.show(item.getSearchId(), item.getMatchID(), item.getWatchingStatus());
+    }
+
+    private List<BaseRecyclerViewType> createDetailList(Match match) {
+        List<BaseRecyclerViewType> itemList = new ArrayList<>();
+        itemList.add(MatchAdapterConverter.getMatchHeaderItem(match, getResources()));
+        itemList.addAll(MatchAdapterConverter.getMatchItem(match.getMatchDetails()));
+        return itemList;
+    }
+
+    private void updateDetailList(List<BaseRecyclerViewType> oldItemList, List<BaseRecyclerViewType> newItemList) {
+        matchAdapter.setMatchDetails(newItemList);
+        DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new MatchDiffCallback(oldItemList, newItemList));
+        diffResult.dispatchUpdatesTo(matchAdapter);
+    }
+
+    private void deleteSearching(int searchingId) {
+        searchDao.delete(searchingId);
+        dao.deleteBySearchId(searchingId);
+    }
+
+    private void deleteMatching(Integer matchingId, int position) {
+        dao.delete(matchingId);
+        List<BaseRecyclerViewType> oldList = createDetailList(match);
+        match.getMatchDetails().remove(position);
+        List<BaseRecyclerViewType> newList = createDetailList(match);
+        updateDetailList(oldList, newList);
+    }
+
+    private void inactiveDao(final int searchingId) {
+        String userId = ((BaseActivity)getActivity()).getUser().getUserId();
+        searchDao.updateWatchingStatus(searchingId, userId, false);
+        List<BaseRecyclerViewType> oldList = createDetailList(match);
+        match.setWatchingStatus(false);
+
+        for (MatchDetail detail : match.getMatchDetails()) {
+            detail.setWatchingStatus(false);
+        }
+
+        List<BaseRecyclerViewType> newList = createDetailList(match);
+        updateDetailList(oldList, newList);
+    }
+
+    private int getPositionMatchDetail(Integer matchingId) {
+        int i = 0;
+        for (MatchDetail detail : match.getMatchDetails()) {
+            if (detail.getMatchID() == matchingId) {
+                return i;
+            }
+            i++;
+        }
+        return -1;
+    }
 }

@@ -69,6 +69,14 @@ public class EMatchingDAO {
         DatabaseManager.getInstance().closeDatabase();
     }
 
+    public void deleteBySearchId(int searchId) {
+        SQLiteDatabase db = DatabaseManager.getInstance().openDatabase();
+        db.delete(TABLE_E_MATCHING,
+                SEARCH_WORD_ID_FIELD + " = ?",
+                new String[] { String.valueOf(searchId) });
+        DatabaseManager.getInstance().closeDatabase();
+    }
+
     public EMatching getByKey(int id, String user_id) {
         String query =
                 "SELECT *" +
@@ -139,6 +147,27 @@ public class EMatchingDAO {
         DatabaseManager.getInstance().closeDatabase();
 
         return datas;
+    }
+
+    public int getCountBySearchWord(String user_id, int searchWordId) {
+        String query =
+                "SELECT count(*)" +
+                        " FROM " + TABLE_E_MATCHING +
+                        " WHERE " + USERID_FIELD + "='" + user_id + "'" +
+                        " AND " +  SEARCH_WORD_ID_FIELD + "=" + searchWordId;
+        List<EMatching> datas = new ArrayList<>();
+
+        SQLiteDatabase db = DatabaseManager.getInstance().openDatabase();
+        Cursor cursor = db.rawQuery(query, null);
+
+        cursor.moveToFirst();
+        int count = cursor.getInt(0);
+
+
+        cursor.close();
+        DatabaseManager.getInstance().closeDatabase();
+
+        return count;
     }
 
     private EMatching getData(Cursor cursor) {

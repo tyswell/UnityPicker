@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <TextView
+        android:id="@+id/searchWordView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"/>
+    <ImageView
+        android:id="@+id/imageSearchType"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/searchWordView"/>
+    <TextView
+        android:id="@+id/descSearchType"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@+id/imageSearchType"
+        android:layout_below="@+id/searchWordView"
+        android:gravity="center"
+        android:textSize="16sp"/>
+    <ImageView
+        android:id="@+id/watchStatusImage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/imageSearchType"/>
+    <TextView
+        android:id="@+id/watchStatusView"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/imageSearchType"
+        android:layout_toRightOf="@+id/watchStatusImage"/>
+    <TextView
+        android:id="@+id/countFoundView"
+        android:textSize="16dp"
+        android:textStyle="bold"
+        android:layout_below="@+id/watchStatusImage"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+    <TextView
+        android:id="@+id/timeDescView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/countFoundView"/>
+
+    <Button
+        android:id="@+id/stopWatchBtn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/timeDescView"
+        android:text="@string/stop_watching"/>
+    <Button
+        android:id="@+id/deleteWatchingBtn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/stopWatchBtn"
+        android:text="@string/delete"/>
+
+
+</RelativeLayout>

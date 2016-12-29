@@ -6,6 +6,7 @@ import android.database.sqlite.SQLiteDatabase;
 
 import com.eightunity.unitypicker.model.dao.ESearchWord;
 import com.eightunity.unitypicker.utility.DateUtil;
+import com.eightunity.unitypicker.utility.StringUtil;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -23,16 +24,18 @@ public class ESearchWordDAO {
     public static final String USER_ID_FIELD = "username";
     public static final String DESCRIPTION_FIELD = "description";
     public static final String SEARCH_TYPE_FIELD = "SEARCH_TYPE";
+    public static final String WATCHING_STATUS_FIELD = "watching_status";
     public static final String MODIFIED_DATE_FIELD = "modified_date";
 
     public static String createTable() {
         return "CREATE TABLE " + TABLE_E_SEARCH_WORD +
                 " (" +
-                    SEARCH_ID_FIELD     +   " INTEGER PRIMARY KEY," +
-                    USER_ID_FIELD       +   " TEXT,"+
-                    DESCRIPTION_FIELD   +   " TEXT,"+
-                    SEARCH_TYPE_FIELD   +   " INTEGER," +
-                    MODIFIED_DATE_FIELD +   " DATETIME " +
+                    SEARCH_ID_FIELD         +   " INTEGER PRIMARY KEY," +
+                    USER_ID_FIELD           +   " TEXT,"+
+                    DESCRIPTION_FIELD       +   " TEXT,"+
+                    SEARCH_TYPE_FIELD       +   " INTEGER," +
+                    WATCHING_STATUS_FIELD   +   " TEXT," +
+                    MODIFIED_DATE_FIELD     +   " DATETIME " +
                 " )";
     }
 
@@ -43,6 +46,7 @@ public class ESearchWordDAO {
         values.put(USER_ID_FIELD, data.getUser_id());
         values.put(DESCRIPTION_FIELD, data.getDescription());
         values.put(SEARCH_TYPE_FIELD, data.getSearch_type());
+        values.put(WATCHING_STATUS_FIELD, StringUtil.activeCode(data.getWatchingStatus()));
         values.put(MODIFIED_DATE_FIELD, DateUtil.dateToString(data.getModified_date()));
 
         db.insert(TABLE_E_SEARCH_WORD, null, values);
@@ -57,11 +61,20 @@ public class ESearchWordDAO {
         DatabaseManager.getInstance().closeDatabase();
     }
 
+    public void updateWatchingStatus(int search_id, String user_id, boolean watchingStatus) {
+        ContentValues values = new ContentValues();
+        values.put(WATCHING_STATUS_FIELD, StringUtil.activeCode(watchingStatus));
+
+        SQLiteDatabase db = DatabaseManager.getInstance().openDatabase();
+        db.update(TABLE_E_SEARCH_WORD, values, SEARCH_ID_FIELD + " = " + search_id + " and " +
+                USER_ID_FIELD + " = '" + user_id +"'", null);
+    }
+
     public ESearchWord getByKey(int search_id, String user_id) {
         String query =
                 "SELECT *" +
                         " FROM " + TABLE_E_SEARCH_WORD +
-                        " WHERE " + SEARCH_ID_FIELD + " = " + search_id +
+                        " WHERE " + SEARCH_ID_FIELD + " = " + search_id + " and " +
                         USER_ID_FIELD + " = '" + user_id +"'";
 
         SQLiteDatabase db = DatabaseManager.getInstance().openDatabase();
@@ -87,7 +100,7 @@ public class ESearchWordDAO {
                 "SELECT *" +
                         " FROM " + TABLE_E_SEARCH_WORD+
                         " WHERE " + USER_ID_FIELD + "='" + user_id + "'" +
-                        " ORDER BY " + MODIFIED_DATE_FIELD + " DESC";
+                        " ORDER BY " + SEARCH_TYPE_FIELD + ", "+ MODIFIED_DATE_FIELD + " DESC";
         List<ESearchWord> datas = new ArrayList<>();
 
         SQLiteDatabase db = DatabaseManager.getInstance().openDatabase();
@@ -134,6 +147,7 @@ public class ESearchWordDAO {
         data.setUser_id(cursor.getString(cursor.getColumnIndex(USER_ID_FIELD)));
         data.setDescription(cursor.getString(cursor.getColumnIndex(DESCRIPTION_FIELD)));
         data.setSearch_type(cursor.getInt(cursor.getColumnIndex(SEARCH_TYPE_FIELD)));
+        data.setWatchingStatus(StringUtil.activeConvert(cursor.getString(cursor.getColumnIndex(WATCHING_STATUS_FIELD))));
         data.setModified_date(DateUtil.stringToDate(cursor.getString(cursor.getColumnIndex(MODIFIED_DATE_FIELD))));
 
         return data;

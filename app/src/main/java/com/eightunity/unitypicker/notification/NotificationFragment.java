@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -19,10 +20,16 @@ import android.view.ViewGroup;
 import com.eightunity.unitypicker.R;
 import com.eightunity.unitypicker.commonpage.OptionDialog;
 import com.eightunity.unitypicker.database.EMatchingDAO;
+import com.eightunity.unitypicker.database.ESearchWordDAO;
 import com.eightunity.unitypicker.model.dao.EMatching;
 import com.eightunity.unitypicker.model.Notificaiton.Notification;
+import com.eightunity.unitypicker.model.dao.ESearchWord;
 import com.eightunity.unitypicker.model.server.search.InactiveSearching;
 import com.eightunity.unitypicker.model.watch.Watch;
+import com.eightunity.unitypicker.notification.adapter.NotificationAdapter;
+import com.eightunity.unitypicker.notification.adapter.model.NotificationItem;
+import com.eightunity.unitypicker.notification.adapter.utility.NotificationAdapterConverter;
+import com.eightunity.unitypicker.notification.adapter.utility.NotificationDiffCallback;
 import com.eightunity.unitypicker.service.ApiService;
 import com.eightunity.unitypicker.service.CallBackAdaptor;
 import com.eightunity.unitypicker.service.ServiceAdaptor;
@@ -30,10 +37,14 @@ import com.eightunity.unitypicker.ui.AuthenticaterActivity;
 import com.eightunity.unitypicker.ui.BaseActivity;
 import com.eightunity.unitypicker.ui.ErrorDialog;
 import com.eightunity.unitypicker.ui.LinearLayoutManager;
+import com.eightunity.unitypicker.ui.recyclerview.BaseRecyclerViewType;
 import com.eightunity.unitypicker.ui.recyclerview.DividerItemDecoration;
 import com.eightunity.unitypicker.ui.recyclerview.RecycleClickListener;
 import com.eightunity.unitypicker.utility.DateUtil;
 import com.eightunity.unitypicker.utility.notification.FirebaseMsgService;
+import com.eightunity.unitypicker.watch.adapter.WatchAdapter;
+import com.eightunity.unitypicker.watch.adapter.utility.WatchAdapterConverter;
+import com.eightunity.unitypicker.watch.adapter.utility.WatchDiffCallback;
 import com.google.firebase.auth.FirebaseUser;
 
 import java.util.ArrayList;
@@ -44,7 +55,7 @@ import retrofit2.Call;
 /**
  * Created by chokechaic on 8/26/2016.
  */
-public class NotificationFragment extends Fragment {
+public class NotificationFragment extends Fragment implements NotificationAdapter.OnItemClickListener {
 
     private static final String TAG = "NotificationFragment";
 
@@ -53,12 +64,13 @@ public class NotificationFragment extends Fragment {
     private RecyclerView notificationRecycler;
     private NotificationAdapter notificationAdapter;
     private EMatchingDAO dao;
+    private ESearchWordDAO searchDao;
 
     private OptionDialog dialog;
 
     private boolean isReceiverRegistered;
 
-    List<Notification> notifications = new ArrayList<>();
+    List<Notification> notifications;
 
     public static NotificationFragment newInstance() {
         return new NotificationFragment();
@@ -80,6 +92,7 @@ public class NotificationFragment extends Fragment {
         initView(rootView);
 
         dao = new EMatchingDAO();
+        searchDao = new ESearchWordDAO();
 
         return rootView;
     }
@@ -88,13 +101,14 @@ public class NotificationFragment extends Fragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        if (savedInstanceState == null) {
-            Log.d(TAG, "onActivityCreated is called with init data");
-            setDataOnPageOpen();
-        } else {
-            Log.d(TAG, "onActivityCreated is called and don't load data again");
-            restoreInstanceState(savedInstanceState);
-        }
+//        if (savedInstanceState == null) {
+//            Log.d(TAG, "onActivityCreated is called with init data");
+//            setDataOnPageOpen();
+//        } else {
+//            Log.d(TAG, "onActivityCreated is called and don't load data again");
+//            restoreInstanceState(savedInstanceState);
+//        }
+        setDataOnPageOpen();
     }
 
     @Override
@@ -129,13 +143,15 @@ public class NotificationFragment extends Fragment {
     }
 
     private void restoreInstanceState(Bundle savedInstanceState) {
-        List<Notification> watches = savedInstanceState.getParcelableArrayList(PARACEL_NOTIFICATIONFRAGMENT);
-        updateUI(watches);
+        List<Notification> notifications = savedInstanceState.getParcelableArrayList(PARACEL_NOTIFICATIONFRAGMENT);
+        List<BaseRecyclerViewType> emptyList = new ArrayList<>();
+        updateDetailList(emptyList, createDetailList(notifications));
     }
 
     private void initView(View rootView) {
         notificationRecycler = (RecyclerView) rootView.findViewById(R.id.notificationRecycler);
-        notificationAdapter = new NotificationAdapter(rootView.getContext(), notifications, recycleClick, optionClick);
+        notificationAdapter = new NotificationAdapter();
+        notificationAdapter.setOnItemClickListener(this);
         configRecyclerView(notificationRecycler, notificationAdapter, rootView.getContext());
 
         dialog = new OptionDialog(getContext());
@@ -144,18 +160,27 @@ public class NotificationFragment extends Fragment {
 
     private OptionDialog.OnOptionDialogResult optionDialogResult = new OptionDialog.OnOptionDialogResult() {
         @Override
-        public void finish(int mode, int position) {
+        public void finish(int mode, Integer searchId, Integer matchingId, boolean watchingStatus) {
+            int positionMatching = getPositionNotification(matchingId);
             if (OptionDialog.STOP_WATCHING_MODE == mode) {
-                inactiveSearchServiceX(notifications.get(position).getSearchId(), position);
+                inactiveDao(searchId);
+//                inactiveSearchServiceX(notifications.get(position).getSearchId(), position);
 //                stopSearchServiceTemp(notifications.get(position).getSearchId(), position);
             } else if (OptionDialog.REMOVE_FROM_LIST_MODE == mode) {
-                dao.delete(notifications.get(position).getMatchId());
-                notificationAdapter.removeAt(position);
+                deleteMatching(matchingId, positionMatching);
             } else {
 
             }
         }
     };
+
+    private void deleteMatching(Integer matchingId, int position) {
+        dao.delete(matchingId);
+        List<BaseRecyclerViewType> oldList = createDetailList(notifications);
+        notifications.remove(position);
+        List<BaseRecyclerViewType> newList = createDetailList(notifications);
+        updateDetailList(oldList, newList);
+    }
 
     private void configRecyclerView(RecyclerView recyclerView, RecyclerView.Adapter adapter, Context context) {
         recyclerView.setLayoutManager(new LinearLayoutManager(context));
@@ -166,30 +191,10 @@ public class NotificationFragment extends Fragment {
         recyclerView.hasFixedSize();
     }
 
-    private RecycleClickListener recycleClick = new RecycleClickListener() {
-        @Override
-        public void onClick(View view, int position) {
-            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(notifications.get(position).getUrl()));
-            startActivity(browserIntent);
-        }
-    };
-
-    private RecycleClickListener optionClick = new RecycleClickListener() {
-        @Override
-        public void onClick(View view, int position) {
-            dialog.show(position);
-        }
-    };
-
     private void setDataOnPageOpen() {
-        List<Notification> datas = getDataFromDB();
-        updateUI(datas);
-    }
-
-    private void updateUI(List<Notification> datas) {
-        notifications.clear();
-        notifications.addAll(datas);
-        notificationAdapter.notifyDataSetChanged();
+        notifications = getDataFromDB();
+        List<BaseRecyclerViewType> emptyList = new ArrayList<>();
+        updateDetailList(emptyList, NotificationAdapterConverter.getNotificationDetail(notifications));
     }
 
     private List<Notification> getDataFromDB() {
@@ -204,11 +209,18 @@ public class NotificationFragment extends Fragment {
             data.setTimeDesc(DateUtil.timeSpent(eMatching.getMatching_date()));
             data.setTitleContent(eMatching.getTitle_content());
             data.setWebName(eMatching.getWeb_name());
+            data.setWatchingStatus(getWatchingStatus(eMatching.getSeacrh_word_id(), userId));
             data.setUrl(eMatching.getUrl());
             datas.add(data);
         }
 
         return datas;
+    }
+
+    private boolean getWatchingStatus(int searchingId, String userId) {
+        ESearchWord value = searchDao.getByKey(searchingId, userId);
+        Log.d(TAG, "value.getWatchingStatus()="+value.getWatchingStatus());
+        return value.getWatchingStatus();
     }
 
     private BroadcastReceiver mRegistrationBroadcastReceiver = new BroadcastReceiver() {
@@ -249,6 +261,7 @@ public class NotificationFragment extends Fragment {
                     @Override
                     public void onSuccess(Boolean response) {
                         Log.d(TAG, "SUCCESS ADD SEARCH ID ="+response);
+                        inactiveDao(searchingId);
                         ErrorDialog er = new ErrorDialog();
                         er.showDialog(getActivity(), getString(R.string.stop_watching_message));
 //                        deleteSearching(searchingId, position);
@@ -258,4 +271,51 @@ public class NotificationFragment extends Fragment {
         };
     }
 
+    private void inactiveDao(final int searchingId) {
+        String userId = ((BaseActivity)getActivity()).getUser().getUserId();
+        searchDao.updateWatchingStatus(searchingId, userId, false);
+        List<BaseRecyclerViewType> oldList = createDetailList(notifications);
+
+        for (Notification notification : notifications) {
+            if (notification.getSearchId() == searchingId) {
+                notification.setWatchingStatus(false);
+            }
+        }
+        List<BaseRecyclerViewType> newList = createDetailList(notifications);
+        updateDetailList(oldList, newList);
+    }
+
+    @Override
+    public void onRowItemClickListener(NotificationItem item) {
+        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(item.getUrl()));
+        startActivity(browserIntent);
+    }
+
+    @Override
+    public void onOptionItemClickListener(NotificationItem item) {
+        dialog.show(item.getSearchId(), item.getMatchId(), item.getWatchingStatus());
+    }
+
+    private List<BaseRecyclerViewType> createDetailList(List<Notification> notifications) {
+        List<BaseRecyclerViewType> itemList = new ArrayList<>();
+        itemList.addAll(NotificationAdapterConverter.getNotificationDetail(notifications));
+        return itemList;
+    }
+
+    private void updateDetailList(List<BaseRecyclerViewType> oldItemList, List<BaseRecyclerViewType> newItemList) {
+        notificationAdapter.setNotifications(newItemList);
+        DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new NotificationDiffCallback(oldItemList, newItemList));
+        diffResult.dispatchUpdatesTo(notificationAdapter);
+    }
+
+    private int getPositionNotification(Integer matchingId) {
+        int i = 0;
+        for (Notification notification : notifications) {
+            if (notification.getMatchId() == matchingId) {
+                return i;
+            }
+            i++;
+        }
+        return -1;
+    }
 }

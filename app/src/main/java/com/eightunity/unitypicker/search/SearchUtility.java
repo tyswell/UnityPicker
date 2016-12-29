@@ -1,5 +1,7 @@
 package com.eightunity.unitypicker.search;
 
+import android.util.Log;
+
 import com.eightunity.unitypicker.R;
 import com.eightunity.unitypicker.UnityPicker;
 
@@ -10,7 +12,7 @@ public class SearchUtility {
 
     public static int searhTypeDescToCode(String desc) {
         String[] searchTypeDatas = UnityPicker.getContext().getResources().getStringArray(R.array.search_type);
-        int code = 1;
+        int code = 0;
         for (int i = 0; i < searchTypeDatas.length; i++) {
             if (searchTypeDatas[i].equals(desc)) {
                 return code;
@@ -18,29 +20,29 @@ public class SearchUtility {
             code++;
         }
 
-        return 0;
+        return -1;
     }
 
     public static String searchTypeCodeToDesc(int code) {
         String[] searchTypeDatas = UnityPicker.getContext().getResources().getStringArray(R.array.search_type);
 
-        return searchTypeDatas[code - 1];
+        return searchTypeDatas[code];
     }
 
     public static int searchTypeLogo(String desc) {
-        String[] searchTypeDatas = UnityPicker.getContext().getResources().getStringArray(R.array.search_type);
-        for (int i = 0; i < searchTypeDatas.length; i++) {
-            if (searchTypeDatas[i].equals(desc)) {
-                switch (i) {
-                    case 0:
-                        return R.drawable.ic_action_bike;
-                    default:
-                        return android.R.drawable.ic_menu_zoom;
-                }
-            }
-        }
+        int code = searhTypeDescToCode(desc);
+        return searchTypeLogo(code);
+    }
 
-        return android.R.drawable.ic_menu_zoom;
+    public static int searchTypeLogo(int code) {
+        switch (code) {
+            case 0:
+                return R.drawable.ic_action_bike;
+            case 1:
+                return R.drawable.ic_tag_faces;
+            default:
+                return android.R.drawable.ic_menu_zoom;
+        }
     }
 
 }

@@ -32,6 +32,7 @@ import com.google.firebase.auth.GetTokenResult;
 
 import java.util.Arrays;
 import java.util.Date;
+import java.util.Random;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -95,8 +96,8 @@ public class SearchFragment extends Fragment {
 
                 Searching search = getContent();
                 if (isValidCriteria(search)) {
-//                    addSearchServiceTemp(search);
-                    addSearchServiceX(search);
+                    addSearchServiceTemp(search);
+//                    addSearchServiceX(search);
                 }
             }
         };
@@ -130,6 +131,7 @@ public class SearchFragment extends Fragment {
         data.setSearch_id(search.getSearchId());
         data.setDescription(search.getSearchWord());
         data.setSearch_type(SearchUtility.searhTypeDescToCode(search.getSearchType()));
+        data.setWatchingStatus(true);
         data.setModified_date(search.getCreateTime());
 
         return data;
@@ -146,7 +148,8 @@ public class SearchFragment extends Fragment {
 
     private void addSearchServiceTemp(final Searching search) {
         Search searchDao = new Search();
-        searchDao.setSearchId(20);
+        Random rn = new Random();
+        searchDao.setSearchId(rn.nextInt());
         searchDao.setSearchType(searchTypeSpinner.getSelectedItem().toString());
         searchDao.setSearchWord(search.getDescription());
         searchDao.setCreateTime(new Date());
@@ -183,7 +186,6 @@ public class SearchFragment extends Fragment {
 
     private void addSearchDao(Search search) {
         ((BaseActivity)getActivity()).showLoading();
-        Log.d(TAG, "xxxx"+new Date());
         dao.add(getDBData(search));
         ((BaseActivity)getActivity()).hideLoading();
     }
