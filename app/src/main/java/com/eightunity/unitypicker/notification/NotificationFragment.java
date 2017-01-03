@@ -164,8 +164,7 @@ public class NotificationFragment extends Fragment implements NotificationAdapte
             int positionMatching = getPositionNotification(matchingId);
             if (OptionDialog.STOP_WATCHING_MODE == mode) {
                 inactiveDao(searchId);
-//                inactiveSearchServiceX(notifications.get(position).getSearchId(), position);
-//                stopSearchServiceTemp(notifications.get(position).getSearchId(), position);
+//                inactiveSearchServiceX(searchId, positionMatching);
             } else if (OptionDialog.REMOVE_FROM_LIST_MODE == mode) {
                 deleteMatching(matchingId, positionMatching);
             } else {
@@ -264,7 +263,6 @@ public class NotificationFragment extends Fragment implements NotificationAdapte
                         inactiveDao(searchingId);
                         ErrorDialog er = new ErrorDialog();
                         er.showDialog(getActivity(), getString(R.string.stop_watching_message));
-//                        deleteSearching(searchingId, position);
                     }
                 });
             }

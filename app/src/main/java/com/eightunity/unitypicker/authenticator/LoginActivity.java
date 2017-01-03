@@ -274,8 +274,8 @@ public class LoginActivity extends AppCompatActivity {
             public void onComplete(@NonNull Task<AuthResult> task) {
                 Log.d(TAG, "signInWithCredential:onComplete:" + task.isSuccessful());
                 if (task.isSuccessful()) {
-                    logined();
-//          loginServiceX();
+//                    logined();
+          loginServiceX();
                 } else {
                     mLoading.dismiss();
                     ErrorDialog ed = new ErrorDialog();

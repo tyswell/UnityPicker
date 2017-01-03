@@ -145,17 +145,11 @@ public class WatchFragment extends Fragment implements WatchAdapter.OnItemClickL
         public void finish(int mode, Integer searchId, Integer matchingId, boolean watchingStatus) {
             int position = getPositionDatas(searchId);
             if (OptionDialog.STOP_WATCHING_MODE == mode) {
-//                deleteSearchServiceTemp(watches.get(position).getSearchId(), position);
                 inactiveDao(watches.get(position).getSearchId());
-//                inactiveSearchServiceX(watches.get(position).getSearchId(), position);
+//                inactiveSearchServiceX(searchId, position, false);
             } else if (OptionDialog.REMOVE_FROM_LIST_MODE == mode) {
-
-//                dao.delete(watches.get(position).getId());
-//                watchAdapter.removeAt(position);
-
-//                deleteSearchService(watches.get(position).getId(), position);
                 if (watchingStatus) {
-                    //inactiveSearchServiceX(watches.get(position).getSearchId(), position);
+//                    inactiveSearchServiceX(watches.get(position).getSearchId(), position, true);
                     deleteSearching(watches.get(position).getSearchId(), position);
                 } else {
                     deleteSearching(watches.get(position).getSearchId(), position);

@@ -183,7 +183,7 @@ public class MatchFragment extends Fragment implements MatchAdapter.OnItemClickL
             int positionMatching = getPositionMatchDetail(matchingId);
             if (OptionDialog.STOP_WATCHING_MODE == mode) {
                 inactiveDao(searchId);
-//                inactiveSearchServiceX(notifications.get(position).getSearchId(), position);
+//                inactiveSearchServiceX(searchId, false);
             } else if (OptionDialog.REMOVE_FROM_LIST_MODE == mode) {
                 deleteMatching(matchingId, positionMatching);
             } else {
@@ -201,7 +201,7 @@ public class MatchFragment extends Fragment implements MatchAdapter.OnItemClickL
         updateDetailList(emptyList, createDetailList(match));
     }
 
-    private void inactiveSearchServiceX(final int searchingId, final int position) {
+    private void inactiveSearchServiceX(final int searchingId, final boolean isDelete) {
         new ServiceAdaptor(getActivity()) {
             @Override
             public void callService(FirebaseUser fUser, String tokenId, ApiService service) {
@@ -214,9 +214,14 @@ public class MatchFragment extends Fragment implements MatchAdapter.OnItemClickL
                     @Override
                     public void onSuccess(Boolean response) {
                         Log.d(TAG, "SUCCESS ADD SEARCH ID ="+response);
-                        inactiveDao(searchingId);
-                        ErrorDialog er = new ErrorDialog();
-                        er.showDialog(getActivity(), getString(R.string.stop_watching_message));
+                        if (isDelete) {
+                            deleteSearching(searchingId);
+                        } else {
+                            inactiveDao(searchingId);
+                            ErrorDialog er = new ErrorDialog();
+                            er.showDialog(getActivity(), getString(R.string.stop_watching_message));
+                        }
+
 //                        deleteSearching(searchingId, position);
                     }
                 });
@@ -227,18 +232,18 @@ public class MatchFragment extends Fragment implements MatchAdapter.OnItemClickL
     @Override
     public void onStopWatchClickListener(MatchHeaderItem item) {
         inactiveDao(item.getSearchId());
-//                inactiveSearchServiceX(notifications.get(position).getSearchId(), position);
+//                inactiveSearchServiceX(item.getSearchId(), false);
     }
 
     @Override
     public void onDeleteClickListener(MatchHeaderItem item) {
         if (item.getWatchStatus()) {
-            //inactiveSearchServiceX(watches.get(position).getSearchId(), position);
+//            inactiveSearchServiceX(item.getSearchId(), true);
             deleteSearching(item.getSearchId());
         } else {
             deleteSearching(item.getSearchId());
         }
-        ((MainActivity)getActivity()).opentPage(MainActivity.WATCH_PAGE);
+
     }
 
     @Override
@@ -268,6 +273,7 @@ public class MatchFragment extends Fragment implements MatchAdapter.OnItemClickL
     private void deleteSearching(int searchingId) {
         searchDao.delete(searchingId);
         dao.deleteBySearchId(searchingId);
+        ((MainActivity)getActivity()).opentPage(MainActivity.WATCH_PAGE);
     }
 
     private void deleteMatching(Integer matchingId, int position) {
