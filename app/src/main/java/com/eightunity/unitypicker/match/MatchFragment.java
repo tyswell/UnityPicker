@@ -260,6 +260,7 @@ public class MatchFragment extends Fragment implements MatchAdapter.OnItemClickL
     private List<BaseRecyclerViewType> createDetailList(Match match) {
         List<BaseRecyclerViewType> itemList = new ArrayList<>();
         itemList.add(MatchAdapterConverter.getMatchHeaderItem(match, getResources()));
+        itemList.add(MatchAdapterConverter.getMatchCountItem(match, getResources()));
         itemList.addAll(MatchAdapterConverter.getMatchItem(match.getMatchDetails()));
         return itemList;
     }
@@ -280,6 +281,7 @@ public class MatchFragment extends Fragment implements MatchAdapter.OnItemClickL
         dao.delete(matchingId);
         List<BaseRecyclerViewType> oldList = createDetailList(match);
         match.getMatchDetails().remove(position);
+        match.setCountFound(match.getMatchDetails().size());
         List<BaseRecyclerViewType> newList = createDetailList(match);
         updateDetailList(oldList, newList);
     }

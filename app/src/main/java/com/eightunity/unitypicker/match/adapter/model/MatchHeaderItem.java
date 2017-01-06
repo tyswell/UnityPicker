@@ -17,7 +17,6 @@ public class MatchHeaderItem extends BaseRecyclerViewType {
     private Boolean watchStatus;
     private Integer imageWatchStatus;
     private String watchStatusDesc;
-    private String countFound;
     private String timeDesc;
 
     public MatchHeaderItem() {
@@ -86,14 +85,6 @@ public class MatchHeaderItem extends BaseRecyclerViewType {
 
     public void setWatchStatusDesc(String watchStatusDesc) {
         this.watchStatusDesc = watchStatusDesc;
-    }
-
-    public String getCountFound() {
-        return countFound;
-    }
-
-    public void setCountFound(String countFound) {
-        this.countFound = countFound;
     }
 
     public String getTimeDesc() {

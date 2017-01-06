@@ -6,9 +6,11 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.eightunity.unitypicker.R;
+import com.eightunity.unitypicker.match.adapter.holder.MatchCountHolder;
 import com.eightunity.unitypicker.match.adapter.holder.MatchHeaderHolder;
 import com.eightunity.unitypicker.match.adapter.holder.MatchNoHolder;
 import com.eightunity.unitypicker.match.adapter.holder.MatchViewHolder;
+import com.eightunity.unitypicker.match.adapter.model.MatchCountItem;
 import com.eightunity.unitypicker.match.adapter.model.MatchHeaderItem;
 import com.eightunity.unitypicker.match.adapter.model.MatchItem;
 import com.eightunity.unitypicker.match.adapter.model.MatchNoItem;
@@ -37,6 +39,9 @@ public class MatchAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         } else if (viewType == MatchDetailType.TYPE_DETAIL) {
             View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.recycler_row_match, parent, false);
             return new MatchViewHolder(view);
+        } else if (viewType == MatchDetailType.TYPE_COUNT) {
+            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.recycler_row_count_match, parent, false);
+            return new MatchCountHolder(view);
         } else if (viewType == MatchDetailType.TYPE_NO_ROW) {
             View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.recycler_row_no_match, parent, false);
             return new MatchNoHolder(view);
@@ -56,11 +61,19 @@ public class MatchAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
             MatchViewHolder viewHolder = (MatchViewHolder)holder;
             MatchItem viewItem = (MatchItem)viewType;
             setUpView(viewHolder, viewItem);
+        } else if (holder instanceof MatchCountHolder) {
+            MatchCountHolder viewHolder = (MatchCountHolder)holder;
+            MatchCountItem viewItem = (MatchCountItem)viewType;
+            setUpCount(viewHolder, viewItem);
         } else if (holder instanceof MatchNoHolder) {
             MatchNoHolder viewHolder = (MatchNoHolder)holder;
             MatchNoItem viewItem = (MatchNoItem)viewType;
             setUpNoRow(viewHolder, viewItem);
         }
+    }
+
+    private void setUpCount(MatchCountHolder viewHolder, MatchCountItem item) {
+        viewHolder.countFoundView.setText(item.getCountFound());
     }
 
     private void setUpHeader(MatchHeaderHolder viewHolder, final MatchHeaderItem item) {
@@ -69,7 +82,6 @@ public class MatchAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         viewHolder.descSearchType.setText(item.getSearchType());
         viewHolder.watchStatusImage.setImageResource(item.getImageWatchStatus());
         viewHolder.watchStatusView.setText(item.getWatchStatusDesc());
-        viewHolder.countFoundView.setText(item.getCountFound());
         viewHolder.timeDescView.setText(item.getTimeDesc());
 
         if (!item.getWatchStatus()) {

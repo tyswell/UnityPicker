@@ -78,19 +78,19 @@ public class NotificationAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                 onItemClickListener.onRowItemClickListener(viewItem);
             }
         });
-        viewHolder.searchWordView.setOnClickListener(new View.OnClickListener() {
+        viewHolder.titleContentView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 onItemClickListener.onRowItemClickListener(viewItem);
             }
         });
-        viewHolder.searchWordView.setOnClickListener(new View.OnClickListener() {
+        viewHolder.webNameView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 onItemClickListener.onRowItemClickListener(viewItem);
             }
         });
-        viewHolder.searchWordView.setOnClickListener(new View.OnClickListener() {
+        viewHolder.timeDescView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 onItemClickListener.onRowItemClickListener(viewItem);

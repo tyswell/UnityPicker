@@ -10,5 +10,6 @@ public class MatchDetailType {
     public static final int TYPE_HEADER = 1;
     public static final int TYPE_DETAIL = 2;
     public static final int TYPE_NO_ROW = 3;
+    public static final int TYPE_COUNT = 4;
 
 }

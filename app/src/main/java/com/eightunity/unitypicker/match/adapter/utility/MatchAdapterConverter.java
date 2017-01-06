@@ -3,6 +3,7 @@ package com.eightunity.unitypicker.match.adapter.utility;
 import android.content.res.Resources;
 import android.util.Log;
 
+import com.eightunity.unitypicker.match.adapter.model.MatchCountItem;
 import com.eightunity.unitypicker.match.adapter.model.MatchHeaderItem;
 import com.eightunity.unitypicker.match.adapter.model.MatchItem;
 import com.eightunity.unitypicker.match.adapter.model.MatchNoItem;
@@ -25,7 +26,7 @@ public class MatchAdapterConverter {
     public static MatchHeaderItem getMatchHeaderItem(Match match, Resources resources) {
         MatchHeaderItem item = new MatchHeaderItem();
         item.setTimeDesc(match.getTimeDesc());
-        item.setCountFound(WatchAdapterConverter.formatCountFound(match.getCountFound(), resources));
+
         item.setImageSearchType(SearchUtility.searchTypeLogo(match.getSearchType()));
         item.setImageWatchStatus(WatchAdapterConverter.formatWatchStatusImage(match.getWatchingStatus()));
         item.setSearchId(match.getSearchId());
@@ -34,6 +35,12 @@ public class MatchAdapterConverter {
         item.setSearchWord(match.getSearchWord());
         item.setWatchStatus(match.getWatchingStatus());
         item.setWatchStatusDesc(WatchAdapterConverter.formatWatchStatusDesc(match.getWatchingStatus(), resources));
+        return item;
+    }
+
+    public static MatchCountItem getMatchCountItem(Match match, Resources resources) {
+        MatchCountItem item = new MatchCountItem();
+        item.setCountFound(WatchAdapterConverter.formatCountFound(match.getCountFound(), resources));
         return item;
     }
 

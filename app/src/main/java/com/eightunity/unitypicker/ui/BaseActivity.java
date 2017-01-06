@@ -1,5 +1,6 @@
 package com.eightunity.unitypicker.ui;
 
+import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 
 import com.eightunity.unitypicker.model.account.Device;
@@ -50,10 +51,12 @@ public class BaseActivity extends AuthenticaterActivity {
 
     public void showLoading() {
         loadingDialog.show();
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
     }
 
     public void hideLoading() {
         loadingDialog.dismiss();
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
     }
 
 

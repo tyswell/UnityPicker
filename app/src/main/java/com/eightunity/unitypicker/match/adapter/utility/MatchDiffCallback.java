@@ -2,6 +2,7 @@ package com.eightunity.unitypicker.match.adapter.utility;
 
 import android.support.v7.util.DiffUtil;
 
+import com.eightunity.unitypicker.match.adapter.model.MatchCountItem;
 import com.eightunity.unitypicker.match.adapter.model.MatchHeaderItem;
 import com.eightunity.unitypicker.match.adapter.model.MatchItem;
 import com.eightunity.unitypicker.ui.recyclerview.BaseRecyclerViewType;
@@ -48,6 +49,11 @@ public class MatchDiffCallback extends DiffUtil.Callback {
                 MatchItem oldSectionItem = (MatchItem)oldItem;
 
                 return newSectionItem.getMatchID() == oldSectionItem.getMatchID();
+            } else if (newItem instanceof MatchCountItem) {
+                MatchCountItem newSectionItem = (MatchCountItem)newItem;
+                MatchCountItem oldSectionItem = (MatchCountItem)oldItem;
+
+                return newSectionItem.getCountFound() == oldSectionItem.getCountFound();
             } else {
                 return false;
             }
@@ -73,7 +79,6 @@ public class MatchDiffCallback extends DiffUtil.Callback {
                         newSectionItem.getWatchStatus()== oldSectionItem.getWatchStatus() &&
                         newSectionItem.getImageWatchStatus()== oldSectionItem.getImageWatchStatus() &&
                         newSectionItem.getWatchStatusDesc().equals(oldSectionItem.getWatchStatusDesc()) &&
-                        newSectionItem.getCountFound()== oldSectionItem.getCountFound() &&
                         newSectionItem.getTimeDesc().equals( oldSectionItem.getTimeDesc());
             } else if (newItem instanceof MatchItem) {
                 MatchItem newSectionItem = (MatchItem)newItem;
@@ -86,6 +91,11 @@ public class MatchDiffCallback extends DiffUtil.Callback {
                         newSectionItem.getTimeDesc().equals(oldSectionItem.getTimeDesc()) &&
                         newSectionItem.getWatchingStatus()== oldSectionItem.getWatchingStatus() &&
                         newSectionItem.getUrl().equals(oldSectionItem.getUrl());
+            } else if (newItem instanceof MatchCountItem) {
+                MatchCountItem newSectionItem = (MatchCountItem)newItem;
+                MatchCountItem oldSectionItem = (MatchCountItem)oldItem;
+
+                return newSectionItem.getCountFound() == oldSectionItem.getCountFound();
             } else {
                 return false;
             }

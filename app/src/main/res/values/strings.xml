@@ -34,8 +34,8 @@
 
     <string name="no_watch_row">Please Pick Some Word</string>
     <string name="found_desc">found</string>
-    <string name="follow_desc">follow</string>
-    <string name="unfollow_desc">unfollow</string>
+    <string name="follow_desc">Follow</string>
+    <string name="unfollow_desc">Unfollow</string>
 
     <string name="no_notification_row">Not found something yet brother.</string>
 

@@ -19,7 +19,7 @@ public class MatchHeaderHolder extends RecyclerView.ViewHolder {
     public TextView descSearchType;
     public ImageView watchStatusImage;
     public TextView watchStatusView;
-    public TextView countFoundView;
+
     public TextView timeDescView;
     public Button stopWatchBtn;
     public Button deleteWatchingBtn;
@@ -32,7 +32,7 @@ public class MatchHeaderHolder extends RecyclerView.ViewHolder {
         descSearchType = (TextView) item.findViewById(R.id.descSearchType);
         watchStatusImage = (ImageView) item.findViewById(R.id.watchStatusImage);
         watchStatusView = (TextView) item.findViewById(R.id.watchStatusView);
-        countFoundView = (TextView) item.findViewById(R.id.countFoundView);
+
         timeDescView = (TextView) item.findViewById(R.id.timeDescView);
         stopWatchBtn = (Button) item.findViewById(R.id.stopWatchBtn);
         deleteWatchingBtn = (Button) item.findViewById(R.id.deleteWatchingBtn);

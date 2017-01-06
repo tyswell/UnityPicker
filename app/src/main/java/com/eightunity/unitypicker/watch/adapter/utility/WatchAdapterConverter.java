@@ -53,7 +53,7 @@ public class WatchAdapterConverter {
         item.setCountFound(formatCountFound(watch.getCountFound(), resources));
         item.setSearchId(watch.getSearchId());
         item.setSearchType(watch.getSearchType());
-        item.setSearchWord(""+watch.getSearchId());
+        item.setSearchWord(watch.getSearchWord());
         item.setTimeDesc(watch.getTimeDesc());
         item.setWatchStatusDesc(formatWatchStatusDesc(watch.getwatchingStatus(), resources));
         item.setWatchStatusImage(formatWatchStatusImage(watch.getwatchingStatus()));

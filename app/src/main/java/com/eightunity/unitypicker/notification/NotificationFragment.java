@@ -37,6 +37,7 @@ import com.eightunity.unitypicker.ui.AuthenticaterActivity;
 import com.eightunity.unitypicker.ui.BaseActivity;
 import com.eightunity.unitypicker.ui.ErrorDialog;
 import com.eightunity.unitypicker.ui.LinearLayoutManager;
+import com.eightunity.unitypicker.ui.WrapContentLinearLayoutManager;
 import com.eightunity.unitypicker.ui.recyclerview.BaseRecyclerViewType;
 import com.eightunity.unitypicker.ui.recyclerview.DividerItemDecoration;
 import com.eightunity.unitypicker.ui.recyclerview.RecycleClickListener;
@@ -182,7 +183,7 @@ public class NotificationFragment extends Fragment implements NotificationAdapte
     }
 
     private void configRecyclerView(RecyclerView recyclerView, RecyclerView.Adapter adapter, Context context) {
-        recyclerView.setLayoutManager(new LinearLayoutManager(context));
+        recyclerView.setLayoutManager(new WrapContentLinearLayoutManager(context));
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.addItemDecoration(new DividerItemDecoration(context, LinearLayoutManager.VERTICAL));
         recyclerView.setAdapter(adapter);
