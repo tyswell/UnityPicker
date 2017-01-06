@@ -12,7 +12,7 @@ public class SearchUtility {
 
     public static int searhTypeDescToCode(String desc) {
         String[] searchTypeDatas = UnityPicker.getContext().getResources().getStringArray(R.array.search_type);
-        int code = 0;
+        int code = 1;
         for (int i = 0; i < searchTypeDatas.length; i++) {
             if (searchTypeDatas[i].equals(desc)) {
                 return code;
@@ -23,10 +23,18 @@ public class SearchUtility {
         return -1;
     }
 
+    public static int indexToCode(int index) {
+        return index + 1;
+    }
+
+    public static int codeToIndex(int code) {
+        return code - 1;
+    }
+
     public static String searchTypeCodeToDesc(int code) {
         String[] searchTypeDatas = UnityPicker.getContext().getResources().getStringArray(R.array.search_type);
 
-        return searchTypeDatas[code];
+        return searchTypeDatas[codeToIndex(code)];
     }
 
     public static int searchTypeLogo(String desc) {
@@ -36,9 +44,9 @@ public class SearchUtility {
 
     public static int searchTypeLogo(int code) {
         switch (code) {
-            case 0:
-                return R.drawable.ic_action_bike;
             case 1:
+                return R.drawable.ic_action_bike;
+            case 2:
                 return R.drawable.ic_tag_faces;
             default:
                 return android.R.drawable.ic_menu_zoom;

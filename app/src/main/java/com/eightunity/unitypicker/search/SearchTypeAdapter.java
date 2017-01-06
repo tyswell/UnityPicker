@@ -57,7 +57,7 @@ public class SearchTypeAdapter extends BaseAdapter {
             holder = (ViewHolder) convertView.getTag();
         }
 
-        int imgResourceId = SearchUtility.searchTypeLogo(position);
+        int imgResourceId = SearchUtility.searchTypeLogo(SearchUtility.indexToCode(position));
 
         holder.name.setText(mDatas.get(position));
         holder.logo.setImageResource(imgResourceId);

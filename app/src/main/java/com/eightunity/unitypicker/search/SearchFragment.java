@@ -140,8 +140,7 @@ public class SearchFragment extends Fragment {
     private Searching getContent() {
         Searching search = new Searching();
         search.setDescription(searchText.getText().toString());
-//        search.setSearchTypeCode(searchTypeSpinner.getSelectedItem().toString());
-        search.setSearchTypeCode(1);
+        search.setSearchTypeCode(SearchUtility.searhTypeDescToCode(searchTypeSpinner.getSelectedItem().toString()));
 
         return search;
     }

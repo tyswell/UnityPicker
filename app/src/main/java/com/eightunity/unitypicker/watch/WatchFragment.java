@@ -200,6 +200,7 @@ public class WatchFragment extends Fragment implements WatchAdapter.OnItemClickL
                 Watch data = new Watch();
                 data.setSearchId(eSearchWord.getSearch_id());
                 data.setSearchWord(eSearchWord.getDescription());
+                Log.d(TAG, "eSearchWord.getSearch_type()="+eSearchWord.getSearch_type());
                 data.setSearchType(SearchUtility.searchTypeCodeToDesc(eSearchWord.getSearch_type()));
                 data.setWatchingStatus(eSearchWord.getWatchingStatus());
                 data.setCountFound(countMatchingFound(userId, eSearchWord.getSearch_id()));
