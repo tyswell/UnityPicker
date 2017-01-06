@@ -6,6 +6,7 @@ import com.eightunity.unitypicker.model.server.search.InactiveSearching;
 import com.eightunity.unitypicker.model.server.search.Searching;
 import com.eightunity.unitypicker.model.server.user.LoginReceive;
 import com.eightunity.unitypicker.model.server.user.LoginResponse;
+import com.eightunity.unitypicker.model.server.user.LogoutReceive;
 
 import retrofit2.Call;
 import retrofit2.http.Body;
@@ -27,5 +28,8 @@ public interface ApiService {
 
     @POST("searchingservice/inactivesearch")
     Call<Boolean> deleteSearching(@Body InactiveSearching deleteSearching);
+
+    @POST("userservice/logout")
+    Call<Boolean> logout(@Body LogoutReceive logoutReceive);
 
 }

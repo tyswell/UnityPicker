@@ -14,15 +14,24 @@ import com.bumptech.glide.DrawableTypeRequest;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.eightunity.unitypicker.MainActivity;
 import com.eightunity.unitypicker.R;
 import com.eightunity.unitypicker.authenticator.LoginActivity;
 import com.eightunity.unitypicker.model.account.User;
+import com.eightunity.unitypicker.model.search.Search;
+import com.eightunity.unitypicker.model.server.search.AddSearchingResponse;
+import com.eightunity.unitypicker.model.server.user.LogoutReceive;
+import com.eightunity.unitypicker.service.ApiService;
+import com.eightunity.unitypicker.service.CallBackAdaptor;
+import com.eightunity.unitypicker.service.ServiceAdaptor;
 import com.eightunity.unitypicker.ui.AuthenticaterActivity;
 import com.eightunity.unitypicker.ui.BaseActivity;
 import com.facebook.login.LoginManager;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 import de.hdodenhof.circleimageview.CircleImageView;
+import retrofit2.Call;
 
 /**
  * Created by chokechaic on 8/26/2016.
@@ -64,12 +73,36 @@ public class ProfileFragment extends Fragment {
         logoutBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ((AuthenticaterActivity)getActivity()).logout();
-                Intent intent = new Intent(getContext(), LoginActivity.class);
-                startActivity(intent);
-                getActivity().finish();
+//                logoutService();
+                logoutUI();
             }
         });
+    }
+
+    private void logoutService() {
+        new ServiceAdaptor(getActivity()) {
+            @Override
+            public void callService(FirebaseUser fUser, String tokenId, ApiService service) {
+                LogoutReceive receive = new LogoutReceive();
+                receive.setTokenId(tokenId);
+                Call<Boolean> call = service.logout(receive);
+                call.enqueue(new CallBackAdaptor<Boolean>(getActivity()) {
+                    @Override
+                    public void onSuccess(Boolean response) {
+                        Log.d(TAG, "SUCCESS LOGOUT ="+response);
+
+                        logoutUI();
+                    }
+                });
+            }
+        };
+    }
+
+    private void logoutUI() {
+        ((AuthenticaterActivity)getActivity()).logout();
+        Intent intent = new Intent(getContext(), LoginActivity.class);
+        startActivity(intent);
+        getActivity().finish();
     }
 
     private void callWSMytask() {
