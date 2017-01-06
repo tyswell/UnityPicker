@@ -1,5 +1,6 @@
 package com.eightunity.unitypicker.search;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -8,6 +9,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
@@ -146,6 +148,7 @@ public class SearchFragment extends Fragment {
     }
 
     private void addSearchServiceTemp(final Searching search) {
+        hide_keyboard();
         Search searchDao = new Search();
         Random rn = new Random();
         searchDao.setSearchId(rn.nextInt());
@@ -159,6 +162,7 @@ public class SearchFragment extends Fragment {
     }
 
     private void addSearchServiceX(final Searching search) {
+        hide_keyboard();
         new ServiceAdaptor(getActivity()) {
             @Override
             public void callService(FirebaseUser fUser, String tokenId, ApiService service) {
@@ -189,5 +193,8 @@ public class SearchFragment extends Fragment {
         ((BaseActivity)getActivity()).hideLoading();
     }
 
-
+    private void hide_keyboard() {
+        InputMethodManager imm = (InputMethodManager)getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(getActivity().getCurrentFocus().getWindowToken(), 0);
+    }
 }

@@ -261,7 +261,12 @@ public class MatchFragment extends Fragment implements MatchAdapter.OnItemClickL
         List<BaseRecyclerViewType> itemList = new ArrayList<>();
         itemList.add(MatchAdapterConverter.getMatchHeaderItem(match, getResources()));
         itemList.add(MatchAdapterConverter.getMatchCountItem(match, getResources()));
-        itemList.addAll(MatchAdapterConverter.getMatchItem(match.getMatchDetails()));
+        if (match.getCountFound() > 0) {
+            itemList.addAll(MatchAdapterConverter.getMatchItem(match.getMatchDetails()));
+        } else {
+            itemList.add(MatchAdapterConverter.getMatchNoItem());
+        }
+
         return itemList;
     }
 
