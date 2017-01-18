@@ -2,6 +2,8 @@
     <string name="app_name">Pick Piece</string>
     <string name="facebook_app_id">503896036486906</string>
 
+    <string name="search_hint">search...</string>
+
     <string name="search_footer">Search</string>
     <string name="profile_footer">Profile</string>
     <string name="notification_footer">Notification</string>
