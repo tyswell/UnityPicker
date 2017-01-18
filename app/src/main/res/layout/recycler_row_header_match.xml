@@ -64,7 +64,7 @@
         android:text="@string/stop_watching"/>
     <Button
         android:id="@+id/deleteWatchingBtn"
-        android:textColor="#06A3C4"
+        android:textColor="#DA5F6A"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/stopWatchBtn"
