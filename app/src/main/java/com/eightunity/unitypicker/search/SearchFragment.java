@@ -58,6 +58,13 @@ public class SearchFragment extends Fragment {
 
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        searchText.setText("");
+    }
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -85,7 +92,7 @@ public class SearchFragment extends Fragment {
         for(int i = 0; i < searchType.length; i++) {
             RadioButton button = new RadioButton(getContext());
             button.setText(searchType[i]);
-            button.setTextColor(ContextCompat.getColor(getContext(), R.color.click));
+//            button.setTextColor(ContextCompat.getColor(getContext(), R.color.click));
             RadioGroup.LayoutParams params
                     = new RadioGroup.LayoutParams(getContext(), null);
             params.setMargins(0, 5, 0, 0);
@@ -100,13 +107,6 @@ public class SearchFragment extends Fragment {
         searchTypeRadioGroup.check(firstButton.getId());
     }
 
-    /*
-        private void configSpinner(Spinner searchTypeSpinner) {
-            String[] searchTypeDatas = getResources().getStringArray(R.array.search_type);
-            searchTypeAdapter = new SearchTypeAdapter(this.getContext(), Arrays.asList(searchTypeDatas));
-            searchTypeSpinner.setAdapter(searchTypeAdapter);
-        }
-    */
     private View.OnClickListener searchOnClickListener () {
         return new View.OnClickListener() {
             @Override
