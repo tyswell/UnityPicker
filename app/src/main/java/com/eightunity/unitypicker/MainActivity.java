@@ -47,6 +47,7 @@ public class MainActivity extends BaseActivity implements WatchFragment.OnHeadli
 
         toolbar = (Toolbar)findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
 
         tabLayout = (TabLayout) findViewById(R.id.tabs);
 
